@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/app_router.dart';
 
 void main() async{
-  await dotenv.load(fileName: 'key.env');
+  await dotenv.load(fileName: './key.env',);
   runApp(const ProviderScope(child: MyApp()));
 }
 
