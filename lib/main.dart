@@ -4,21 +4,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app_router.dart';
 
-void main() async{
-  await dotenv.load(fileName: './key.env',);
+void main() async {
+  await dotenv.load(
+    fileName: './key.env',
+  );
   runApp(const ProviderScope(child: MyApp()));
 }
-
 
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context,ref) {
+  Widget build(BuildContext context, ref) {
     final appRouter = AppRouter(ref);
     return MaterialApp.router(
       title: 'Glow',
-      routerConfig:appRouter.config(),
+      routerConfig: appRouter.config(),
+      theme: ThemeData(fontFamily: 'Tajawal'),
     );
   }
 }
