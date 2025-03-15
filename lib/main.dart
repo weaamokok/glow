@@ -20,7 +20,30 @@ class MyApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Glow',
       routerConfig: appRouter.config(),
-      theme: ThemeData(fontFamily: 'Tajawal'),
+      theme: ThemeData(
+          colorScheme: ColorScheme(
+              brightness: Brightness.light,
+              primary: Color(0xff4C7B8B),
+              onPrimary: Color(0xff282828),
+              secondary: Color(0xff4C7B8B),
+              onSecondary: Colors.white,
+              error: Color(0xD5A80A0A),
+              onError: Colors.white,
+              surface: Colors.white,
+              onSurface: Color(0xff282828)),
+          fontFamily: 'Tajawal',
+          inputDecorationTheme: InputDecorationTheme(
+              hintStyle:
+                  TextStyle(color: Color(0xff4C7B8B).withValues(alpha: .7)),
+              contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 12),
+              focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                      color: Color(0xff4C7B8B).withValues(alpha: .7)),
+                  borderRadius: BorderRadius.circular(12)),
+              enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                      color: Color(0xff4C7B8B).withValues(alpha: .7)),
+                  borderRadius: BorderRadius.circular(12)))),
     );
   }
 }

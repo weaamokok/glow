@@ -8,8 +8,9 @@ final indexBottomNavbarProvider = StateProvider<int>((ref) {
 });
 final model = Provider(
   (ref) => GenerativeModel(
-      model: 'gemini-1.5-pro', apiKey: dotenv.env['API_KEY']??''),
+      model: 'gemini-1.5-pro', apiKey: dotenv.env['API_KEY'] ?? ''),
 );
+final content = [Content.multi([])];
 
 final isFirstRunProvider = Provider(
   (ref) async {

@@ -5,26 +5,27 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:glow/feature/prompt_creator/image_picker_step.dart';
+import 'package:glow/feature/prompt_creator/personal_info_step.dart';
 import 'package:glow/feature/prompt_creator/prompt_creator_deps.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+@RoutePage()
 class PromptCreatorStepperScreen extends HookConsumerWidget {
   const PromptCreatorStepperScreen({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
-    final stepIndex = useState(0);
-    final promptImages =
-        useState<List<File?>>(List.filled(UserImagesTypes.values.length, null));
+    final stepIndex = useState(1);
+    final images = ref.watch(PromptCreatorDeps.promptImagesProvider);
     List<Widget> steps = [
-      ImagePickerStep(
-        promptImages: promptImages,
-      ), //image picker
-      Container(), //personal info
+      ImagePickerStep(), //image picker
+      PersonalInfoStep(), //personal info
+      Container(), //goals and life style
       Container(), //goals and life style
     ];
-    final stepsProgress = useState(stepIndex.value + 1 / steps.length);
+
     return Container(
+        color: Colors.white,
         padding: EdgeInsetsDirectional.only(end: 10, top: 16),
         width: double.infinity,
         child: Column(
@@ -37,7 +38,8 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
               margin: EdgeInsets.symmetric(horizontal: 28, vertical: 20),
               width: double.infinity,
               child: LinearProgressIndicator(
-                value: stepsProgress.value,
+                value: (stepIndex.value + 1) / steps.length,
+                trackGap: 12,
                 minHeight: 10,
                 borderRadius: BorderRadius.circular(15),
                 valueColor: AlwaysStoppedAnimation(Color(0xffEFB036)),
@@ -47,7 +49,7 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
             SizedBox(
               height: 14,
             ),
-            steps[stepIndex.value],
+            steps[stepIndex.value.toInt()],
             Expanded(
               child: Align(
                 alignment: Alignment.bottomCenter,
@@ -60,7 +62,12 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
                         switch (stepIndex.value) {
                           case 0:
                             ref.read(PromptCreatorDeps.addPromptImagesProvider(
-                                promptImages.value));
+                                images.value));
+                            stepIndex.value = 1;
+                          case 1:
+                            stepIndex.value = 2;
+                          case 2:
+                            stepIndex.value = 3;
                         }
                       },
                       style: ButtonStyle(
@@ -106,6 +113,7 @@ class ImagePickerContainer extends StatelessWidget {
   const ImagePickerContainer(
       {super.key,
       required this.width,
+      this.height,
       this.image,
       this.text,
       required this.icon,
@@ -113,6 +121,7 @@ class ImagePickerContainer extends StatelessWidget {
       this.margin});
 
   final double width;
+  final double? height;
   final File? image;
   final String? text;
   final EdgeInsets? margin;
@@ -134,6 +143,7 @@ class ImagePickerContainer extends StatelessWidget {
           strokeWidth: 1,
           child: Container(
             width: width,
+            height: height,
             decoration: BoxDecoration(
                 color: Color(0xff3B6790).withValues(alpha: .2),
                 shape: BoxShape.rectangle,
