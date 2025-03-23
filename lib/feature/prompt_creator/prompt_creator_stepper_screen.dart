@@ -17,6 +17,8 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final stepIndex = useState(1);
     final images = ref.watch(PromptCreatorDeps.promptImagesProvider);
+    final personalInfo =
+        ref.watch(PromptCreatorDeps.promptPersonalInfoProvider);
     List<Widget> steps = [
       ImagePickerStep(), //image picker
       PersonalInfoStep(), //personal info
@@ -65,6 +67,10 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
                                 images.value));
                             stepIndex.value = 1;
                           case 1:
+                            ref.read(
+                                PromptCreatorDeps.addPromptPersonalInfoProvider(
+                                    personalInfo.value));
+
                             stepIndex.value = 2;
                           case 2:
                             stepIndex.value = 3;

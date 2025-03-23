@@ -1,13 +1,70 @@
 import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:glow/feature/prompt_creator/prompt_creator_deps.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 class PersonalInfoStep extends HookConsumerWidget {
-  const PersonalInfoStep({Key? key}) : super(key: key);
+  const PersonalInfoStep({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
+    final promptPersonalInfo =
+        ref.read(PromptCreatorDeps.promptPersonalInfoProvider);
+    final workTextFieldController = useTextEditingController();
+    final birthDateTextFieldController = useTextEditingController();
+    final genderTextFieldController = useTextEditingController();
+    final activityTextFieldController = useTextEditingController();
+    final workoutScheduleTextFieldController = useTextEditingController();
+    final hobbiesTextFieldController = useTextEditingController();
+    final selectedOption = useValueNotifier<Gender>(Gender.male);
+
+    // Function to format the date as yyyy-MM-dd
+    String formatDate(DateTime date) {
+      return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    }
+
+    // // Function to validate all fields
+    // bool validateFields() {
+    //   if (workTextFieldController.text.isEmpty) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(content: Text('Please enter your job')),
+    //     );
+    //     return false;
+    //   }
+    //   if (birthDateTextFieldController.text.isEmpty) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(content: Text('Please select your birth date')),
+    //     );
+    //     return false;
+    //   }
+    //   if (genderTextFieldController.text.isEmpty) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(content: Text('Please select your gender')),
+    //     );
+    //     return false;
+    //   }
+    //   if (activityTextFieldController.text.isEmpty) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(content: Text('Please select your daily activity')),
+    //     );
+    //     return false;
+    //   }
+    //   if (workoutScheduleTextFieldController.text.isEmpty) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(content: Text('Please select your workout schedule')),
+    //     );
+    //     return false;
+    //   }
+    //   if (hobbiesTextFieldController.text.isEmpty) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(content: Text('Please enter your hobbies')),
+    //     );
+    //     return false;
+    //   }
+    //   return true;
+    // }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
@@ -16,33 +73,32 @@ class PersonalInfoStep extends HookConsumerWidget {
           SizedBox(
               height: 46,
               child: TextFormField(
+                controller: workTextFieldController,
                 decoration: InputDecoration(
                   hintText: 'What do you do for living..?',
                 ),
+                onChanged: (value) {
+                  promptPersonalInfo.value.job =
+                      workTextFieldController.value.text;
+                },
               )),
           SizedBox(
               height: 46,
               child: TextFormField(
+                controller: birthDateTextFieldController,
                 readOnly: true,
-                onTap: () {
-                  showDatePicker(
+                onTap: () async {
+                  final date = await showDatePicker(
                     context: context,
                     firstDate: DateTime(1920),
                     lastDate: DateTime.now(),
-
-                    // builder: (context, widget) {
-                    //   return Container(
-                    //       width: 200,
-                    //       height: 300,
-                    //       padding: EdgeInsets.symmetric(
-                    //           horizontal: 50, vertical: 70),
-                    //       child: DateTi
-                    //       // SfDateRangePicker(
-                    //       //   view: DateRangePickerView.year,
-                    //       // )
-                    //       );
-                    //    },
                   );
+                  if (date != null) {
+                    birthDateTextFieldController.value =
+                        TextEditingValue(text: formatDate(date));
+                    promptPersonalInfo.value.birthDate =
+                        birthDateTextFieldController.value.text;
+                  }
                 },
                 decoration: InputDecoration(
                     hintText: 'birth date',
@@ -54,11 +110,12 @@ class PersonalInfoStep extends HookConsumerWidget {
           SizedBox(
               height: 46,
               child: TextFormField(
+                controller: genderTextFieldController,
+                readOnly: true,
                 onTap: () {
                   showAdaptiveDialog(
                     context: context,
                     builder: (context) {
-                      Gender selectedOption = Gender.male;
                       return Dialog(
                         backgroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
@@ -72,16 +129,40 @@ class PersonalInfoStep extends HookConsumerWidget {
                                   title: const Text('male'),
                                   leading: Radio<Gender>(
                                     value: Gender.male,
-                                    groupValue: selectedOption,
-                                    onChanged: (value) {},
+                                    groupValue: selectedOption.value,
+                                    onChanged: (value) {
+                                      if (value == null) return;
+                                      selectedOption.value = value;
+                                      genderTextFieldController.value =
+                                          TextEditingValue(
+                                              text: value
+                                                  .toString()
+                                                  .split('.')
+                                                  .last);
+                                      promptPersonalInfo.value.gender =
+                                          value.toString().split('.').last;
+                                      Navigator.pop(context);
+                                    },
                                   ),
                                 ),
                                 ListTile(
                                   title: const Text('female'),
                                   leading: Radio<Gender>(
                                     value: Gender.female,
-                                    groupValue: selectedOption,
-                                    onChanged: (value) {},
+                                    groupValue: selectedOption.value,
+                                    onChanged: (value) {
+                                      if (value == null) return;
+                                      selectedOption.value = value;
+                                      genderTextFieldController.value =
+                                          TextEditingValue(
+                                              text: value
+                                                  .toString()
+                                                  .split('.')
+                                                  .last);
+                                      promptPersonalInfo.value.gender =
+                                          value.toString().split('.').last;
+                                      Navigator.pop(context);
+                                    },
                                   ),
                                 ),
                               ],
@@ -99,6 +180,8 @@ class PersonalInfoStep extends HookConsumerWidget {
           SizedBox(
               height: 46,
               child: TextFormField(
+                controller: activityTextFieldController,
+                readOnly: true,
                 onTap: () {
                   showAdaptiveDialog(
                     context: context,
@@ -119,7 +202,15 @@ class PersonalInfoStep extends HookConsumerWidget {
                                         leading: Radio<String>(
                                           value: e,
                                           groupValue: selectedActivity,
-                                          onChanged: (value) {},
+                                          onChanged: (value) {
+                                            if (value == null) return;
+                                            selectedActivity = value;
+                                            activityTextFieldController.value =
+                                                TextEditingValue(text: value);
+                                            promptPersonalInfo.value.activity =
+                                                value;
+                                            Navigator.pop(context);
+                                          },
                                         ),
                                       ),
                                     )
@@ -137,11 +228,13 @@ class PersonalInfoStep extends HookConsumerWidget {
           SizedBox(
               height: 46,
               child: TextFormField(
+                controller: workoutScheduleTextFieldController,
+                readOnly: true,
                 onTap: () {
                   showAdaptiveDialog(
                     context: context,
                     builder: (context) {
-                      String selectedActivity = activityType.first;
+                      String selectedSchedule = workOutSchedule.first;
                       return Dialog(
                         backgroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
@@ -156,8 +249,17 @@ class PersonalInfoStep extends HookConsumerWidget {
                                         title: Text(e),
                                         leading: Radio<String>(
                                           value: e,
-                                          groupValue: selectedActivity,
-                                          onChanged: (value) {},
+                                          groupValue: selectedSchedule,
+                                          onChanged: (value) {
+                                            if (value == null) return;
+                                            selectedSchedule = value;
+                                            workoutScheduleTextFieldController
+                                                    .value =
+                                                TextEditingValue(text: value);
+                                            promptPersonalInfo
+                                                .value.workoutSchedule = value;
+                                            Navigator.pop(context);
+                                          },
                                         ),
                                       ),
                                     )
@@ -172,6 +274,19 @@ class PersonalInfoStep extends HookConsumerWidget {
                   hintText: 'how often do you workout?',
                 ),
               )),
+          SizedBox(
+              height: 46,
+              child: TextFormField(
+                controller: hobbiesTextFieldController,
+                decoration: InputDecoration(
+                  hintText: 'what do you do in your free time?',
+                ),
+                onChanged: (value) {
+                  promptPersonalInfo.value.hobbies =
+                      hobbiesTextFieldController.value.text;
+                },
+              )),
+          const SizedBox(height: 20),
         ],
       ),
     );
