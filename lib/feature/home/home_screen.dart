@@ -1,19 +1,17 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:glow/app/app_router.gr.dart';
 import 'package:glow/feature/main/main_deps.dart';
 
 import '../prompt_creator/prompt_creator_stepper_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
     ref.read(isFirstRunProvider).then(
-      (value) {
-        showModalBottomSheet(
+      (value) async {
+        await showModalBottomSheet(
           context: context,
           shape: LinearBorder(),
           isScrollControlled: true,

@@ -3,7 +3,6 @@ import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glow/feature/home/home_screen.dart';
-import 'package:glow/feature/prompt_creator/prompt_creator_stepper_screen.dart';
 
 import 'main_deps.dart';
 
@@ -30,12 +29,12 @@ class MainScreen extends ConsumerWidget {
               icon: Icon(EneftyIcons.user_outline), label: 'Setting'),
         ],
       ),
-      body: Screens[indexBottomNavbar],
+      body: screens[indexBottomNavbar],
     );
   }
 }
 
-final Screens = [
+final screens = [
   const HomeScreen(),
   const Center(
     child: Text('Hello From Favorite Screen'),
