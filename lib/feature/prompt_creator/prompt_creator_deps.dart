@@ -14,7 +14,6 @@ class PromptCreatorDeps {
     (ref, arg) async {
       //add image to local
       var store = StoreRef.main();
-      print('images -$arg');
       final imagesAsUnit8List = arg.map(
         (e) {
           return e?.readAsBytesSync();
@@ -27,12 +26,9 @@ class PromptCreatorDeps {
             )
             .put(await LocalDB.db, imagesAsUnit8List)
             .then(
-          (value) {
-            print('images added ');
-          },
-        );
+              (value) {},
+            );
       } catch (e) {
-        print('error adding images-->$e');
         return false;
       }
       return true;
@@ -43,7 +39,6 @@ class PromptCreatorDeps {
     (ref, arg) async {
       //add image to local
       var store = StoreRef.main();
-      print('info -$arg');
       // final personalInfo = arg.map(
       //   (e) => e?.value.text,
       // );
@@ -54,12 +49,9 @@ class PromptCreatorDeps {
             )
             .put(await LocalDB.db, arg.toMap())
             .then(
-          (value) {
-            print('user info added ');
-          },
-        );
+              (value) {},
+            );
       } catch (e) {
-        print('error adding images-->$e');
         return false;
       }
       return true;
@@ -72,11 +64,9 @@ class PromptCreatorDeps {
       return useState(0);
     },
   );
-  static final promptImagesProvider = ChangeNotifierProvider(
-    (ref) {
-      return useState<List<File?>>(
-          List.filled(UserImagesTypes.values.length, null, growable: true));
-    },
+  static final promptImagesProvider =
+      StateNotifierProvider<PromptImagesNotifier, List<File?>>(
+    (ref) => PromptImagesNotifier(),
   );
   static final promptPersonalInfoProvider = ChangeNotifierProvider.autoDispose(
     (ref) {
@@ -91,6 +81,15 @@ class PromptCreatorDeps {
       return useState(0.0);
     },
   );
+}
+
+class PromptImagesNotifier extends StateNotifier<List<File?>> {
+  PromptImagesNotifier()
+      : super(List.filled(UserImagesTypes.values.length, null));
+
+  void updateImage(int index, File? file) {
+    state = List<File?>.from(state)..[index] = file;
+  }
 }
 
 class UserPersonalInfo {
@@ -134,13 +133,13 @@ class UserPersonalInfo {
 
   @override
   String toString() {
-    return 'UserPersonalInfo{' +
-        ' job: $job,' +
-        ' gender: $gender,' +
-        ' activity: $activity,' +
-        ' workoutSchedule: $workoutSchedule,' +
-        ' birthDate: $birthDate,' +
-        ' hobbies: $hobbies,' +
+    return 'UserPersonalInfo{'
+        ' job: $job,'
+        ' gender: $gender,'
+        ' activity: $activity,'
+        ' workoutSchedule: $workoutSchedule,'
+        ' birthDate: $birthDate,'
+        ' hobbies: $hobbies,'
         '}';
   }
 
@@ -164,12 +163,12 @@ class UserPersonalInfo {
 
   Map<String, dynamic> toMap() {
     return {
-      'job': this.job,
-      'gender': this.gender,
-      'activity': this.activity,
-      'workoutSchedule': this.workoutSchedule,
-      'birthDate': this.birthDate,
-      'hobbies': this.hobbies,
+      'job': job,
+      'gender': gender,
+      'activity': activity,
+      'workoutSchedule': workoutSchedule,
+      'birthDate': birthDate,
+      'hobbies': hobbies,
     };
   }
 

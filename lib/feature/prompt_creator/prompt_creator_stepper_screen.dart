@@ -5,6 +5,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:glow/feature/prompt_creator/image_picker_step.dart';
+import 'package:glow/feature/prompt_creator/personal_goals_step.dart';
 import 'package:glow/feature/prompt_creator/personal_info_step.dart';
 import 'package:glow/feature/prompt_creator/prompt_creator_deps.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -15,14 +16,14 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final stepIndex = useState(1);
+    final stepIndex = useState(0);
     final images = ref.watch(PromptCreatorDeps.promptImagesProvider);
     final personalInfo =
         ref.watch(PromptCreatorDeps.promptPersonalInfoProvider);
     List<Widget> steps = [
       ImagePickerStep(), //image picker
       PersonalInfoStep(), //personal info
-      Container(), //goals and life style
+      PersonalGoalsStep(), //goals and life style
       Container(), //goals and life style
     ];
 
@@ -64,7 +65,7 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
                         switch (stepIndex.value) {
                           case 0:
                             ref.read(PromptCreatorDeps.addPromptImagesProvider(
-                                images.value));
+                                images));
                             stepIndex.value = 1;
                           case 1:
                             ref.read(
@@ -155,9 +156,12 @@ class ImagePickerContainer extends StatelessWidget {
                 shape: BoxShape.rectangle,
                 borderRadius: BorderRadius.circular(15)),
             child: image != null
-                ? Image.file(
-                    image!,
-                    fit: BoxFit.cover,
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Image.file(
+                      image!,
+                      fit: BoxFit.cover,
+                    ),
                   )
                 : Center(
                     child: Column(
