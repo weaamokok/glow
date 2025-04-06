@@ -24,7 +24,7 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
       ImagePickerStep(), //image picker
       PersonalInfoStep(), //personal info
       PersonalGoalsStep(), //goals and life style
-      Container(), //goals and life style
+      //goals and life style
     ];
 
     return Container(
@@ -61,20 +61,19 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
                     margin: EdgeInsets.symmetric(horizontal: 18, vertical: 18),
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         switch (stepIndex.value) {
                           case 0:
                             ref.read(PromptCreatorDeps.addPromptImagesProvider(
                                 images));
                             stepIndex.value = 1;
                           case 1:
+                            stepIndex.value = 2;
+                          case 2:
                             ref.read(
                                 PromptCreatorDeps.addPromptPersonalInfoProvider(
                                     personalInfo.value));
-
-                            stepIndex.value = 2;
-                          case 2:
-                            stepIndex.value = 3;
+                            ref.read(PromptCreatorDeps.promptProvider);
                         }
                       },
                       style: ButtonStyle(
@@ -86,13 +85,14 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
                         ),
                       ),
                       child: Text(
-                        'continue',
+                        stepIndex.value == 2 ? 'confirm' : 'continue',
                         style:
                             TextStyle(color: Color(0xff282828), fontSize: 15),
                       ),
                     )),
               ),
             ),
+            //todo : add loading to confirm/ alter the response to get a type to be displayed
             SizedBox(
               height: 10,
             ),

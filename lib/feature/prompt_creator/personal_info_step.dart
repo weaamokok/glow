@@ -91,7 +91,7 @@ class PersonalInfoStep extends HookConsumerWidget {
                   final date = await showDatePicker(
                     context: context,
                     firstDate: DateTime(1920),
-                    lastDate: DateTime.now(),
+                    lastDate: DateTime(2017),
                   );
                   if (date != null) {
                     birthDateTextFieldController.value =
