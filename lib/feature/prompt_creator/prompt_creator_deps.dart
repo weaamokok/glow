@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data' show Uint8List;
 
@@ -46,8 +47,6 @@ class PromptCreatorDeps {
       //   (e) => e?.value.text,
       // );
       try {
-        print('pre  ${arg}');
-
         await store
             .record(
               DbKeys.userPersonalInfo,
@@ -55,10 +54,10 @@ class PromptCreatorDeps {
             .put(await LocalDB.db, arg.toMap())
             .then(
           (value) {
-            print('ew ${arg}');
+            // print('ew ${arg}');
           },
         );
-        print('post   ${arg}');
+        // print('post   ${arg}');
       } catch (e) {
         print('error $e');
         return false;
@@ -78,63 +77,12 @@ class PromptCreatorDeps {
       );
     },
   );
-  static final promptProvider = StateProvider(
-    (ref) async {
-      var store = StoreRef.main();
-      try {
-        // Get stored images
-        final storedImages = await store
-            .record(DbKeys.userImages)
-            .get(await LocalDB.db) as List<dynamic>?;
-
-        if (storedImages == null || storedImages.isEmpty) {
-          throw Exception("No images found in local storage");
-        }
-
-        // Safely convert each element to Uint8List
-        final imageParts = <DataPart>[];
-        for (final item in storedImages) {
-          if (item is List<int>) {
-            imageParts.add(DataPart('image/jpeg', Uint8List.fromList(item)));
-          } else if (item is Uint8List) {
-            imageParts.add(DataPart('image/jpeg', item));
-          }
-          // Add other type checks if needed
-        }
-
-        // Get personal info
-        final promptInfoMap = await store
-            .record(DbKeys.userPersonalInfo)
-            .get(await LocalDB.db) as Map<String, dynamic>;
-        final promptInfo = UserPersonalInfo.fromMap(promptInfoMap);
-
-        final prompt =
-            '''give a detailed routine/schedule to the person in the photo to give them a glow-up, I need you to specify the things that they need to work on, and then give me what their schedule would look like every day,
-                   make the schedule realistic based on the info about the person do not give any unhealthy, harmful unrealistic actions, and no plastic surgeries, consider the following info about that person:
-                  gender: ${promptInfo.gender}
-                  birthDate : ${promptInfo.birthDate}
-                 what they do as job: ${promptInfo.job}
-                 their work schedule: ${promptInfo.workoutSchedule}
-             how often they workout: ${promptInfo.activity}
-              hobbies : ${promptInfo.hobbies}
-              addition notes: ${promptInfo.notes}
-              ''';
-        final content = [
-          Content.multi([
-            TextPart(prompt),
-            ...imageParts,
-          ])
-        ];
-
-        var response = await ref.read(modelProvider).generateContent(content);
-        print('response --${response.text}');
-        return response.text;
-      } catch (e) {
-        print('error $e');
-        rethrow;
-      }
-    },
-  );
+  static final promptProvider =
+      StateNotifierProvider<PromptNotifier, FutureOr<AsyncValue<String?>>>(
+          (ref) {
+    //  PromptNotifier.submitPrompt(ref: ref);
+    return PromptNotifier();
+  });
 
   static final promptCreatorStepProvider = ChangeNotifierProvider.autoDispose(
     (ref) {
@@ -148,12 +96,9 @@ class PromptCreatorDeps {
       StateNotifierProvider<PromptImagesNotifier, List<File?>>(
     (ref) => PromptImagesNotifier(),
   );
-  static final promptPersonalInfoProvider = ChangeNotifierProvider.autoDispose(
-    (ref) {
-      ref.keepAlive();
-
-      return useState<UserPersonalInfo>(UserPersonalInfo());
-    },
+  static final promptPersonalInfoProvider =
+      StateNotifierProvider<PromptPersonalInfoNotifier, UserPersonalInfo>(
+    (ref) => PromptPersonalInfoNotifier(),
   );
 
   static final promptProgressProvider = ChangeNotifierProvider(
@@ -169,6 +114,42 @@ class PromptImagesNotifier extends StateNotifier<List<File?>> {
 
   void updateImage(int index, File? file) {
     state = List<File?>.from(state)..[index] = file;
+  }
+}
+
+class PromptPersonalInfoNotifier extends StateNotifier<UserPersonalInfo> {
+  PromptPersonalInfoNotifier() : super(UserPersonalInfo());
+
+  void updateActivity(String activity) {
+    state = state.copyWith(activity: activity);
+  }
+
+  void updateHobbies(String hobbies) {
+    state = state.copyWith(hobbies: hobbies);
+  }
+
+  void updateNotes(String notes) {
+    state = state.copyWith(notes: notes);
+  }
+
+  void updateWorkoutSchedule(String workoutSchedule) {
+    state = state.copyWith(workoutSchedule: workoutSchedule);
+  }
+
+  void updateGender(String gender) {
+    state = state.copyWith(gender: gender);
+  }
+
+  void updateGoals(String goals) {
+    state = state.copyWith(goals: goals);
+  }
+
+  void updateJob(String job) {
+    state = state.copyWith(job: job);
+  }
+
+  void updateBirthDate(String birthDate) {
+    state = state.copyWith(birthDate: birthDate);
   }
 }
 
@@ -270,14 +251,114 @@ class UserPersonalInfo {
 
   factory UserPersonalInfo.fromMap(Map<String, dynamic> map) {
     return UserPersonalInfo(
-      job: map['job'] as String,
-      gender: map['gender'] as String,
-      activity: map['activity'] as String,
-      workoutSchedule: map['workoutSchedule'] as String,
-      birthDate: map['birthDate'] as String,
-      hobbies: map['hobbies'] as String,
-      goals: map['goals'] as String,
-      notes: map['notes'] as String,
+      job: map['job'] as String?,
+      gender: map['gender'] as String?,
+      activity: map['activity'] as String?,
+      workoutSchedule: map['workoutSchedule'] as String?,
+      birthDate: map['birthDate'] as String?,
+      hobbies: map['hobbies'] as String?,
+      goals: map['goals'] as String?,
+      notes: map['notes'] as String?,
     );
+  }
+}
+
+class PromptNotifier extends StateNotifier<FutureOr<AsyncValue<String?>>> {
+  PromptNotifier() : super(const AsyncLoading());
+
+  FutureOr<AsyncValue<String?>> submitPrompt({required WidgetRef ref}) async {
+    AsyncValue<String?> state = AsyncValue.loading();
+    var store = StoreRef.main();
+    try {
+      // Get stored images
+      final storedImages = (await store
+              .record(DbKeys.userImages)
+              .get(await LocalDB.db) as List<dynamic>?)
+          ?.toList();
+
+      if (storedImages == null || storedImages.isEmpty) {
+        throw Exception("No images found in local storage");
+      }
+
+      // Safely convert each element to Uint8List
+      final imageParts = <DataPart>[];
+      print('stored images $storedImages');
+      for (final item in storedImages) {
+        print('item type ${item.runtimeType}');
+
+        // Handle ImmutableList<Object?> case
+        if (item is List<Object?>) {
+          try {
+            // Convert List<Object?> to List<int>
+            final List<int> bytes = item.cast<int>();
+            imageParts.add(DataPart('image/jpg', Uint8List.fromList(bytes)));
+            print('Successfully converted ImmutableList<Object?> to Uint8List');
+          } catch (e) {
+            print('Failed to cast item to List<int>: $e');
+            continue; // Skip invalid entries
+          }
+        } else if (item is Uint8List) {
+          print('Item is already Uint8List');
+          imageParts.add(DataPart('image/jpg', item));
+        } else {
+          print('Unsupported type: ${item.runtimeType}');
+        }
+      }
+      // Get personal info
+      final promptInfoMap = await store
+          .record(DbKeys.userPersonalInfo)
+          .get(await LocalDB.db) as Map<String, dynamic>;
+      final promptInfo = UserPersonalInfo.fromMap(promptInfoMap);
+      final testPromptInfo = UserPersonalInfo(
+        job: 'doctor',
+        gender: 'female',
+        activity: ' mostly standing',
+        workoutSchedule: '3 days a week or less',
+        birthDate: '1998-01-01',
+        hobbies: 'nothing',
+        goals: 'to be prettier',
+        notes: '..',
+      );
+
+      final prompt =
+          '''return a detailed routine/schedule to the person in the photo to give them a glow-up in JSON in the following structure :
+            {
+"area_of_focus": [
+"id": "1",
+"title": "Physical Health & Fitness",
+actions:
+["id":"","title":"","time_range":"","repeated":false,]
+],
+}
+            , I need you to specify the things that they need to work on, and then give me what their schedule would look like every day,
+                   make the schedule realistic based on the info about the person do not give any unhealthy, harmful unrealistic actions, and no plastic surgeries, consider the following info about that person:
+                  gender: ${testPromptInfo.gender ?? ''}
+                  birthDate : ${testPromptInfo.birthDate ?? ''}
+                 what they do as job: ${testPromptInfo.job ?? ''}
+                 their work schedule: ${testPromptInfo.workoutSchedule ?? ''}
+             how often they workout: ${testPromptInfo.activity ?? ''}
+              hobbies : ${testPromptInfo.hobbies ?? ''}
+              addition notes: ${testPromptInfo.notes ?? ''}
+
+              ''';
+      final content = [
+        Content.multi([
+          TextPart(prompt),
+          ...imageParts,
+        ])
+      ];
+      print('--prompt image part ${imageParts}');
+      final response =
+          await ref.read(PromptCreatorDeps.modelProvider).generateContent(
+                content,
+              );
+      print('response --${response.text}');
+      state = AsyncValue<String?>.data(response.text);
+      return state;
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.empty);
+      print('error $e');
+      return state;
+    }
   }
 }

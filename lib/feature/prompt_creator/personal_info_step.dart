@@ -10,7 +10,7 @@ class PersonalInfoStep extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final promptPersonalInfo =
-        ref.read(PromptCreatorDeps.promptPersonalInfoProvider);
+        ref.read(PromptCreatorDeps.promptPersonalInfoProvider.notifier);
     final workTextFieldController = useTextEditingController();
     final birthDateTextFieldController = useTextEditingController();
     final genderTextFieldController = useTextEditingController();
@@ -18,6 +18,8 @@ class PersonalInfoStep extends HookConsumerWidget {
     final workoutScheduleTextFieldController = useTextEditingController();
     final hobbiesTextFieldController = useTextEditingController();
     final selectedOption = useValueNotifier<Gender>(Gender.male);
+    final selectedActivity = useValueNotifier<String>(activityType.first);
+    final selectedSchedule = useValueNotifier<String>(workOutSchedule.first);
 
     // Function to format the date as yyyy-MM-dd
     String formatDate(DateTime date) {
@@ -78,8 +80,8 @@ class PersonalInfoStep extends HookConsumerWidget {
                   hintText: 'What do you do for living..?',
                 ),
                 onChanged: (value) {
-                  promptPersonalInfo.value.job =
-                      workTextFieldController.value.text;
+                  promptPersonalInfo
+                      .updateJob(workTextFieldController.value.text);
                 },
               )),
           SizedBox(
@@ -96,8 +98,8 @@ class PersonalInfoStep extends HookConsumerWidget {
                   if (date != null) {
                     birthDateTextFieldController.value =
                         TextEditingValue(text: formatDate(date));
-                    promptPersonalInfo.value.birthDate =
-                        birthDateTextFieldController.value.text;
+                    promptPersonalInfo.updateBirthDate(
+                        birthDateTextFieldController.value.text);
                   }
                 },
                 decoration: InputDecoration(
@@ -139,8 +141,8 @@ class PersonalInfoStep extends HookConsumerWidget {
                                                   .toString()
                                                   .split('.')
                                                   .last);
-                                      promptPersonalInfo.value.gender =
-                                          value.toString().split('.').last;
+                                      promptPersonalInfo.updateGender(
+                                          value.toString().split('.').last);
                                       Navigator.pop(context);
                                     },
                                   ),
@@ -159,8 +161,8 @@ class PersonalInfoStep extends HookConsumerWidget {
                                                   .toString()
                                                   .split('.')
                                                   .last);
-                                      promptPersonalInfo.value.gender =
-                                          value.toString().split('.').last;
+                                      promptPersonalInfo.updateGender(
+                                          value.toString().split('.').last);
                                       Navigator.pop(context);
                                     },
                                   ),
@@ -186,7 +188,7 @@ class PersonalInfoStep extends HookConsumerWidget {
                   showAdaptiveDialog(
                     context: context,
                     builder: (context) {
-                      String selectedActivity = activityType.first;
+                      //  String selectedActivity = activityType.first;
                       return Dialog(
                         backgroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
@@ -201,14 +203,14 @@ class PersonalInfoStep extends HookConsumerWidget {
                                         title: Text(e),
                                         leading: Radio<String>(
                                           value: e,
-                                          groupValue: selectedActivity,
+                                          groupValue: selectedActivity.value,
                                           onChanged: (value) {
                                             if (value == null) return;
-                                            selectedActivity = value;
+                                            selectedActivity.value = value;
                                             activityTextFieldController.value =
                                                 TextEditingValue(text: value);
-                                            promptPersonalInfo.value.activity =
-                                                value;
+                                            promptPersonalInfo
+                                                .updateActivity(value);
                                             Navigator.pop(context);
                                           },
                                         ),
@@ -234,7 +236,6 @@ class PersonalInfoStep extends HookConsumerWidget {
                   showAdaptiveDialog(
                     context: context,
                     builder: (context) {
-                      String selectedSchedule = workOutSchedule.first;
                       return Dialog(
                         backgroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
@@ -249,15 +250,15 @@ class PersonalInfoStep extends HookConsumerWidget {
                                         title: Text(e),
                                         leading: Radio<String>(
                                           value: e,
-                                          groupValue: selectedSchedule,
+                                          groupValue: selectedSchedule.value,
                                           onChanged: (value) {
                                             if (value == null) return;
-                                            selectedSchedule = value;
+                                            selectedSchedule.value = value;
                                             workoutScheduleTextFieldController
                                                     .value =
                                                 TextEditingValue(text: value);
                                             promptPersonalInfo
-                                                .value.workoutSchedule = value;
+                                                .updateWorkoutSchedule(value);
                                             Navigator.pop(context);
                                           },
                                         ),
@@ -282,8 +283,8 @@ class PersonalInfoStep extends HookConsumerWidget {
                   hintText: 'what do you do in your free time?',
                 ),
                 onChanged: (value) {
-                  promptPersonalInfo.value.hobbies =
-                      hobbiesTextFieldController.value.text;
+                  promptPersonalInfo
+                      .updateHobbies(hobbiesTextFieldController.value.text);
                 },
               )),
           const SizedBox(height: 20),

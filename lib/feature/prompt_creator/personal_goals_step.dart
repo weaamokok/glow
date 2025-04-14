@@ -9,7 +9,7 @@ class PersonalGoalsStep extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final promptPersonalInfo =
-        ref.read(PromptCreatorDeps.promptPersonalInfoProvider);
+        ref.read(PromptCreatorDeps.promptPersonalInfoProvider.notifier);
     final goalsTextFieldController = useTextEditingController();
     final notesTextFieldController = useTextEditingController();
 
@@ -26,8 +26,8 @@ class PersonalGoalsStep extends HookConsumerWidget {
                   hintText: "what's your goal from this glow up",
                 ),
                 onChanged: (value) {
-                  promptPersonalInfo.value.goals =
-                      goalsTextFieldController.value.text;
+                  promptPersonalInfo
+                      .updateGoals(goalsTextFieldController.value.text);
                 },
               )),
           SizedBox(
@@ -38,8 +38,8 @@ class PersonalGoalsStep extends HookConsumerWidget {
                   hintText: "Any notes to take in consideration",
                 ),
                 onChanged: (value) {
-                  promptPersonalInfo.value.notes =
-                      notesTextFieldController.value.text;
+                  promptPersonalInfo
+                      .updateNotes(notesTextFieldController.value.text);
                 },
               )),
         ],

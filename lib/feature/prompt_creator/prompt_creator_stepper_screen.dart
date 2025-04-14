@@ -10,6 +10,7 @@ import 'package:glow/feature/prompt_creator/personal_info_step.dart';
 import 'package:glow/feature/prompt_creator/prompt_creator_deps.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+//todo add form validation
 @RoutePage()
 class PromptCreatorStepperScreen extends HookConsumerWidget {
   const PromptCreatorStepperScreen({super.key});
@@ -17,6 +18,7 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final stepIndex = useState(0);
+    final promptCreator = ref.watch(PromptCreatorDeps.promptProvider.notifier);
     final images = ref.watch(PromptCreatorDeps.promptImagesProvider);
     final personalInfo =
         ref.watch(PromptCreatorDeps.promptPersonalInfoProvider);
@@ -26,78 +28,106 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
       PersonalGoalsStep(), //goals and life style
       //goals and life style
     ];
+    final promptCreationState = useState(AsyncValue<String?>.data(null));
 
-    return Container(
-        color: Colors.white,
-        padding: EdgeInsetsDirectional.only(end: 10, top: 16),
-        width: double.infinity,
-        child: Column(
-          children: [
-            CloseButton(),
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 28, vertical: 20),
-              width: double.infinity,
-              child: LinearProgressIndicator(
-                value: (stepIndex.value + 1) / steps.length,
-                trackGap: 12,
-                minHeight: 10,
-                borderRadius: BorderRadius.circular(15),
-                valueColor: AlwaysStoppedAnimation(Color(0xffEFB036)),
-                backgroundColor: Color(0xff4C7B8B),
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: Container(
+          color: Colors.white,
+          padding: EdgeInsetsDirectional.only(end: 10, top: 16),
+          width: double.infinity,
+          child: Column(
+            children: [
+              CloseButton(),
+              SizedBox(
+                height: 10,
               ),
-            ),
-            SizedBox(
-              height: 14,
-            ),
-            steps[stepIndex.value.toInt()],
-            Expanded(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                    height: 44,
-                    margin: EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        switch (stepIndex.value) {
-                          case 0:
-                            ref.read(PromptCreatorDeps.addPromptImagesProvider(
-                                images));
-                            stepIndex.value = 1;
-                          case 1:
-                            stepIndex.value = 2;
-                          case 2:
-                            ref.read(
-                                PromptCreatorDeps.addPromptPersonalInfoProvider(
-                                    personalInfo.value));
-                            ref.read(PromptCreatorDeps.promptProvider);
-                        }
-                      },
-                      style: ButtonStyle(
-                        elevation: WidgetStatePropertyAll(0),
-                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10))),
-                        backgroundColor: WidgetStatePropertyAll(
-                          Color(0xffEFB036),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 28, vertical: 20),
+                width: double.infinity,
+                child: LinearProgressIndicator(
+                  value: (stepIndex.value + 1) / steps.length,
+                  trackGap: 12,
+                  minHeight: 10,
+                  borderRadius: BorderRadius.circular(15),
+                  valueColor: AlwaysStoppedAnimation(Color(0xffEFB036)),
+                  backgroundColor: Color(0xff4C7B8B),
+                ),
+              ),
+              SizedBox(
+                height: 14,
+              ),
+              steps[stepIndex.value.toInt()],
+              Expanded(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                      height: 44,
+                      margin:
+                          EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          switch (stepIndex.value) {
+                            case 0:
+                              print('images -$images');
+                              final canProceed = images.any(
+                                (element) => element != null,
+                              );
+                              if (canProceed) {
+                                ref.read(
+                                    PromptCreatorDeps.addPromptImagesProvider(
+                                        images));
+                                stepIndex.value = 1;
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    content: Text(
+                                        'we need at least one image to give you accurate results')));
+                              }
+
+                            case 1:
+                              print('personal info -${personalInfo}');
+                              stepIndex.value = 2;
+                            case 2:
+                              promptCreationState.value = AsyncValue.loading();
+                              print('--> ${promptCreationState.value}');
+                              ref.read(PromptCreatorDeps
+                                  .addPromptPersonalInfoProvider(personalInfo));
+                              promptCreationState.value =
+                                  await promptCreator.submitPrompt(ref: ref);
+                              print('value ${promptCreationState.value}');
+                          }
+                        },
+                        style: ButtonStyle(
+                          elevation: WidgetStatePropertyAll(0),
+                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10))),
+                          backgroundColor: WidgetStatePropertyAll(
+                            Color(0xffEFB036),
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        stepIndex.value == 2 ? 'confirm' : 'continue',
-                        style:
-                            TextStyle(color: Color(0xff282828), fontSize: 15),
-                      ),
-                    )),
+                        child: promptCreationState.value ==
+                                AsyncValue<String?>.loading()
+                            ? CircularProgressIndicator.adaptive()
+                            : Text(
+                                stepIndex.value == 2 ? 'confirm' : 'continue',
+                                style: TextStyle(
+                                    color: Color(0xff282828), fontSize: 15),
+                              ),
+                      )),
+                ),
               ),
-            ),
-            //todo : add loading to confirm/ alter the response to get a type to be displayed
-            SizedBox(
-              height: 10,
-            ),
-          ],
-        ));
+              //todo : add loading to confirm/ alter the response to get a type to be displayed
+              SizedBox(
+                height: 10,
+              ),
+            ],
+          )),
+    );
   }
 }
 
