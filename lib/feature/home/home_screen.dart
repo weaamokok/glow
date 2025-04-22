@@ -11,16 +11,18 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     ref.read(isFirstRunProvider).then(
       (value) async {
-        await showModalBottomSheet(
-          context: context,
-          shape: LinearBorder(),
-          isScrollControlled: true,
-          useRootNavigator: true,
-          constraints: BoxConstraints.expand(),
-          builder: (context) {
-            return PromptCreatorStepperScreen();
-          },
-        );
+        if (context.mounted) {
+          await showModalBottomSheet(
+            context: context,
+            shape: LinearBorder(),
+            isScrollControlled: true,
+            useRootNavigator: true,
+            constraints: BoxConstraints.expand(),
+            builder: (context) {
+              return PromptCreatorStepperScreen();
+            },
+          );
+        }
       },
     );
     return const SingleChildScrollView();

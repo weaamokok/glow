@@ -4,11 +4,13 @@ import 'package:auto_route/auto_route.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:glow/domain/glow.dart';
 import 'package:glow/feature/prompt_creator/image_picker_step.dart';
 import 'package:glow/feature/prompt_creator/personal_goals_step.dart';
 import 'package:glow/feature/prompt_creator/personal_info_step.dart';
 import 'package:glow/feature/prompt_creator/prompt_creator_deps.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 //todo add form validation
 @RoutePage()
@@ -28,105 +30,141 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
       PersonalGoalsStep(), //goals and life style
       //goals and life style
     ];
-    final promptCreationState = useState(AsyncValue<String?>.data(null));
+    final promptCreationState = useState(AsyncValue<GlowResponse?>.data(null));
+    print('--state ${promptCreationState.value}');
+//when we receive data we pop our route
+    if (promptCreationState.value.value != null) {
+      context.router.popUntilRoot();
+    }
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Container(
-          color: Colors.white,
-          padding: EdgeInsetsDirectional.only(end: 10, top: 16),
-          width: double.infinity,
-          child: Column(
-            children: [
-              CloseButton(),
-              SizedBox(
-                height: 10,
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 28, vertical: 20),
-                width: double.infinity,
-                child: LinearProgressIndicator(
-                  value: (stepIndex.value + 1) / steps.length,
-                  trackGap: 12,
-                  minHeight: 10,
-                  borderRadius: BorderRadius.circular(15),
-                  valueColor: AlwaysStoppedAnimation(Color(0xffEFB036)),
-                  backgroundColor: Color(0xff4C7B8B),
-                ),
-              ),
-              SizedBox(
-                height: 14,
-              ),
-              steps[stepIndex.value.toInt()],
-              Expanded(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                      height: 44,
-                      margin:
-                          EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          switch (stepIndex.value) {
-                            case 0:
-                              print('images -$images');
-                              final canProceed = images.any(
-                                (element) => element != null,
-                              );
-                              if (canProceed) {
-                                ref.read(
-                                    PromptCreatorDeps.addPromptImagesProvider(
-                                        images));
-                                stepIndex.value = 1;
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                    behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10)),
-                                    content: Text(
-                                        'we need at least one image to give you accurate results')));
-                              }
+      body: Stack(
+        children: [
+          Container(
+              color: Colors.white,
+              padding: EdgeInsetsDirectional.only(end: 10, top: 16),
+              width: double.infinity,
+              child: Column(
+                children: [
+                  CloseButton(),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 28, vertical: 20),
+                    width: double.infinity,
+                    child: LinearProgressIndicator(
+                      value: (stepIndex.value + 1) / steps.length,
+                      trackGap: 12,
+                      minHeight: 10,
+                      borderRadius: BorderRadius.circular(15),
+                      valueColor: AlwaysStoppedAnimation(Color(0xffEFB036)),
+                      backgroundColor: Color(0xff4C7B8B),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 14,
+                  ),
+                  steps[stepIndex.value.toInt()],
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                          height: 44,
+                          margin: EdgeInsets.symmetric(
+                              horizontal: 18, vertical: 18),
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              switch (stepIndex.value) {
+                                case 0:
+                                  final canProceed = images.any(
+                                    (element) => element != null,
+                                  );
+                                  if (canProceed) {
+                                    ref.read(PromptCreatorDeps
+                                        .addPromptImagesProvider(images));
+                                    stepIndex.value = 1;
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            behavior: SnackBarBehavior.floating,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10)),
+                                            content: Text(
+                                                'we need at least one image to give you accurate results')));
+                                  }
 
-                            case 1:
-                              print('personal info -${personalInfo}');
-                              stepIndex.value = 2;
-                            case 2:
-                              promptCreationState.value = AsyncValue.loading();
-                              print('--> ${promptCreationState.value}');
-                              ref.read(PromptCreatorDeps
-                                  .addPromptPersonalInfoProvider(personalInfo));
-                              promptCreationState.value =
-                                  await promptCreator.submitPrompt(ref: ref);
-                              print('value ${promptCreationState.value}');
-                          }
-                        },
-                        style: ButtonStyle(
-                          elevation: WidgetStatePropertyAll(0),
-                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10))),
-                          backgroundColor: WidgetStatePropertyAll(
-                            Color(0xffEFB036),
-                          ),
-                        ),
-                        child: promptCreationState.value ==
-                                AsyncValue<String?>.loading()
-                            ? CircularProgressIndicator.adaptive()
-                            : Text(
-                                stepIndex.value == 2 ? 'confirm' : 'continue',
-                                style: TextStyle(
-                                    color: Color(0xff282828), fontSize: 15),
+                                case 1:
+                                  stepIndex.value = 2;
+                                case 2:
+                                  promptCreationState.value =
+                                      AsyncValue.loading();
+                                  ref.read(PromptCreatorDeps
+                                      .addPromptPersonalInfoProvider(
+                                          personalInfo));
+                                  promptCreationState.value =
+                                      await promptCreator.submitPrompt(
+                                          ref: ref);
+                              }
+                            },
+                            style: ButtonStyle(
+                              elevation: WidgetStatePropertyAll(0),
+                              shape: WidgetStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10))),
+                              backgroundColor: WidgetStatePropertyAll(
+                                Color(0xffEFB036),
                               ),
-                      )),
+                            ),
+                            child: Text(
+                              stepIndex.value == 2 ? 'confirm' : 'continue',
+                              style: TextStyle(
+                                  color: Color(0xff282828), fontSize: 15),
+                            ),
+                          )),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                ],
+              )),
+          if (promptCreationState.value == AsyncValue<GlowResponse?>.loading())
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: Colors.grey.withValues(alpha: .7),
+              child: Center(
+                child: IntrinsicHeight(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15)),
+                    child: Column(
+                      spacing: 10,
+                      children: [
+                        LoadingAnimationWidget.halfTriangleDot(
+                            color: Color(0xffEFB036), size: 100),
+                        Text(
+                          'Crafting your ultimate glow-up plan\nget ready to shine!✨',
+                          style: TextStyle(
+                            color: Color(0xff23486A),
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
+                        )
+                      ],
+                    ),
+                  ),
                 ),
               ),
-              //todo : add loading to confirm/ alter the response to get a type to be displayed
-              SizedBox(
-                height: 10,
-              ),
-            ],
-          )),
+            ),
+        ],
+      ),
     );
   }
 }

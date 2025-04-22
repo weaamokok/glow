@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data' show Uint8List;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glow/app/db_keys.dart';
+import 'package:glow/domain/glow.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:sembast/sembast.dart';
 
@@ -30,9 +32,13 @@ class PromptCreatorDeps {
             )
             .put(await LocalDB.db, imagesAsUnit8List)
             .then(
-              (value) {},
-            );
+          (value) {
+            debugPrint('image added successfully!');
+          },
+        );
       } catch (e) {
+        debugPrint('failed to add image: $e');
+
         return false;
       }
       return true;
@@ -43,9 +49,7 @@ class PromptCreatorDeps {
     (ref, arg) async {
       //add image to local
       var store = StoreRef.main();
-      // final personalInfo = arg.map(
-      //   (e) => e?.value.text,
-      // );
+
       try {
         await store
             .record(
@@ -54,12 +58,12 @@ class PromptCreatorDeps {
             .put(await LocalDB.db, arg.toMap())
             .then(
           (value) {
-            // print('ew ${arg}');
+            debugPrint('user info added successfully');
           },
         );
         // print('post   ${arg}');
       } catch (e) {
-        print('error $e');
+        debugPrint('failed to add user info: $e');
         return false;
       }
       return true;
@@ -72,9 +76,12 @@ class PromptCreatorDeps {
       );
 
       return GenerativeModel(
-        model: 'gemini-2.0-flash',
-        apiKey: apiKey,
-      );
+          model: 'gemini-2.0-flash',
+          apiKey: apiKey,
+          generationConfig: GenerationConfig(
+            candidateCount: 8,
+            responseMimeType: 'application/json',
+          ));
     },
   );
   static final promptProvider =
@@ -266,8 +273,9 @@ class UserPersonalInfo {
 class PromptNotifier extends StateNotifier<FutureOr<AsyncValue<String?>>> {
   PromptNotifier() : super(const AsyncLoading());
 
-  FutureOr<AsyncValue<String?>> submitPrompt({required WidgetRef ref}) async {
-    AsyncValue<String?> state = AsyncValue.loading();
+  FutureOr<AsyncValue<GlowResponse?>> submitPrompt(
+      {required WidgetRef ref}) async {
+    AsyncValue<GlowResponse?> state = AsyncValue.loading();
     var store = StoreRef.main();
     try {
       // Get stored images
@@ -282,26 +290,21 @@ class PromptNotifier extends StateNotifier<FutureOr<AsyncValue<String?>>> {
 
       // Safely convert each element to Uint8List
       final imageParts = <DataPart>[];
-      print('stored images $storedImages');
       for (final item in storedImages) {
-        print('item type ${item.runtimeType}');
-
         // Handle ImmutableList<Object?> case
         if (item is List<Object?>) {
           try {
             // Convert List<Object?> to List<int>
             final List<int> bytes = item.cast<int>();
             imageParts.add(DataPart('image/jpg', Uint8List.fromList(bytes)));
-            print('Successfully converted ImmutableList<Object?> to Uint8List');
           } catch (e) {
-            print('Failed to cast item to List<int>: $e');
+            debugPrint('failed to convert images: $e');
             continue; // Skip invalid entries
           }
         } else if (item is Uint8List) {
-          print('Item is already Uint8List');
           imageParts.add(DataPart('image/jpg', item));
         } else {
-          print('Unsupported type: ${item.runtimeType}');
+          debugPrint('Unsupported type: ${item.runtimeType}');
         }
       }
       // Get personal info
@@ -309,55 +312,101 @@ class PromptNotifier extends StateNotifier<FutureOr<AsyncValue<String?>>> {
           .record(DbKeys.userPersonalInfo)
           .get(await LocalDB.db) as Map<String, dynamic>;
       final promptInfo = UserPersonalInfo.fromMap(promptInfoMap);
-      final testPromptInfo = UserPersonalInfo(
-        job: 'doctor',
-        gender: 'female',
-        activity: ' mostly standing',
-        workoutSchedule: '3 days a week or less',
-        birthDate: '1998-01-01',
-        hobbies: 'nothing',
-        goals: 'to be prettier',
-        notes: '..',
-      );
+      // final testPromptInfo = UserPersonalInfo(
+      //   job: 'doctor',
+      //   gender: 'female',
+      //   activity: ' mostly standing',
+      //   workoutSchedule: '3 days a week or less',
+      //   birthDate: '1998-01-01',
+      //   hobbies: 'nothing',
+      //   goals: 'to be prettier',
+      //   notes: '..',
+      // );
 
-      final prompt =
-          '''return a detailed routine/schedule to the person in the photo to give them a glow-up in JSON in the following structure :
-            {
-"area_of_focus": [
-"id": "1",
-"title": "Physical Health & Fitness",
-actions:
-["id":"","title":"","time_range":"","repeated":false,]
-],
+      final prompt = '''
+Generate a detailed, personalized glow-up routine in JSON format for the person in the photo, considering their individual characteristics and lifestyle. The routine should be healthy, realistic, and sustainable. Follow this structure:
+
+{
+  "area_of_focus": [
+    {
+      "id": "1",
+      "title": "Physical Health & Fitness",
+      "description": "Specific improvement goals for this area",
+      "actions": [
+        {
+          "id": "1",
+          "title": "Action title",
+          "description": "Detailed instructions",
+          "time_range": "Morning/Afternoon/Evening or specific time if important",
+          "duration": "X minutes/hours",
+          "frequency": "Daily/Weekly/etc.",
+          "repeated": true/false,
+          "tips": "Additional helpful advice"
+        }
+      ]
+    }
+  ],
+  "general_advice": "Overall recommendations for the glow-up journey"
 }
-            , I need you to specify the things that they need to work on, and then give me what their schedule would look like every day,
-                   make the schedule realistic based on the info about the person do not give any unhealthy, harmful unrealistic actions, and no plastic surgeries, consider the following info about that person:
-                  gender: ${testPromptInfo.gender ?? ''}
-                  birthDate : ${testPromptInfo.birthDate ?? ''}
-                 what they do as job: ${testPromptInfo.job ?? ''}
-                 their work schedule: ${testPromptInfo.workoutSchedule ?? ''}
-             how often they workout: ${testPromptInfo.activity ?? ''}
-              hobbies : ${testPromptInfo.hobbies ?? ''}
-              addition notes: ${testPromptInfo.notes ?? ''}
 
-              ''';
+Key requirements:
+1. Create a holistic plan covering these areas (adjust based on individual needs):
+   - Physical health & fitness
+   - Skincare & grooming
+   - Fashion & personal style
+   - Mental wellbeing
+   - Social skills & confidence
+   - Hobby development
+
+2. Personalization factors to consider:
+   - Current age: ${promptInfo.birthDate ?? ''} (calculate age)
+   - Gender: ${promptInfo.gender ?? ''}
+   - Occupation: ${promptInfo.job ?? ''} (consider work demands and dress code)
+   - Workout schedule: ${promptInfo.workoutSchedule ?? ''}
+   - Current activity level: ${promptInfo.activity ?? ''}
+   - Hobbies: ${promptInfo.hobbies ?? ''} (incorporate where possible)
+   - Additional notes: ${promptInfo.notes ?? ''}
+   - Additional notes: ${promptInfo.notes ?? ''}
+
+3. Guidelines:
+   - All suggestions must be healthy and safe
+   - No unrealistic time commitments (max 1-2 new habits per week)
+   - Gradual progression in difficulty
+   - Budget-friendly options where possible
+   - Include rest days and recovery time
+   - Suggest measurable goals
+   - Account for their existing schedule
+   - Provide alternatives for different energy levels
+
+4. Output notes:
+   - Include estimated time commitments for each action
+   - Specify whether actions are repeated or one-time
+   - Add priority levels if certain actions are more important
+   - Provide seasonal considerations if relevant
+   - Include preparation steps where needed
+
+The schedule should be practical enough to implement immediately while allowing flexibility for unexpected events. Focus on sustainable changes rather than quick fixes.
+''';
+
       final content = [
         Content.multi([
           TextPart(prompt),
           ...imageParts,
         ])
       ];
-      print('--prompt image part ${imageParts}');
       final response =
           await ref.read(PromptCreatorDeps.modelProvider).generateContent(
                 content,
               );
-      print('response --${response.text}');
-      state = AsyncValue<String?>.data(response.text);
+
+      debugPrint('response type${response.text ?? ''}');
+
+      final glowResponse = GlowResponse.fromJson(response.text ?? '');
+      state = AsyncValue<GlowResponse?>.data(glowResponse);
       return state;
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.empty);
-      print('error $e');
+      debugPrint('Error in prompt response: $e');
       return state;
     }
   }
