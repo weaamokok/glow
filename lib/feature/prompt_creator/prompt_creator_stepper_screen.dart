@@ -30,7 +30,7 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
       PersonalGoalsStep(), //goals and life style
       //goals and life style
     ];
-    final promptCreationState = useState(AsyncValue<GlowResponse?>.data(null));
+    final promptCreationState = useState(AsyncValue<GlowSchedule?>.data(null));
     print('--state ${promptCreationState.value}');
 //when we receive data we pop our route
     if (promptCreationState.value.value != null) {
@@ -132,7 +132,7 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
                   ),
                 ],
               )),
-          if (promptCreationState.value == AsyncValue<GlowResponse?>.loading())
+          if (promptCreationState.value == AsyncValue<GlowSchedule?>.loading())
             Container(
               width: double.infinity,
               height: double.infinity,

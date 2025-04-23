@@ -12,6 +12,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:sembast/sembast.dart';
 
 import '../../app/local_db.dart';
+import '../../domain/user_info.dart';
 import 'image_picker_step.dart';
 
 class PromptCreatorDeps {
@@ -43,7 +44,32 @@ class PromptCreatorDeps {
       }
       return true;
     },
-  );
+  ); //to local storage class/provider
+  static final saveGlowScheduleProvider =
+      StateProviderFamily<Future<bool>, GlowSchedule>(
+    (ref, arg) async {
+      //add image to local
+      var store = StoreRef.main();
+
+      try {
+        await store
+            .record(
+              DbKeys.glowSchedule,
+            )
+            .put(await LocalDB.db, arg.toMap())
+            .then(
+          (value) {
+            debugPrint('glow schedule added successfully');
+          },
+        );
+        // print('post   ${arg}');
+      } catch (e) {
+        debugPrint('failed to add glow schedule: $e');
+        return false;
+      }
+      return true;
+    },
+  ); //to local storage class/provider
   static final addPromptPersonalInfoProvider =
       StateProviderFamily<Future<bool>, UserPersonalInfo>(
     (ref, arg) async {
@@ -68,7 +94,7 @@ class PromptCreatorDeps {
       }
       return true;
     },
-  );
+  ); //to local storage class/provider
   static final modelProvider = Provider<GenerativeModel>(
     (ref) {
       final apiKey = dotenv.get(
@@ -160,122 +186,12 @@ class PromptPersonalInfoNotifier extends StateNotifier<UserPersonalInfo> {
   }
 }
 
-class UserPersonalInfo {
-  String? job;
-  String? gender;
-  String? activity;
-  String? workoutSchedule;
-  String? birthDate;
-  String? hobbies;
-  String? goals;
-  String? notes;
-
-//<editor-fold desc="Data Methods">
-  UserPersonalInfo({
-    this.job,
-    this.gender,
-    this.activity,
-    this.workoutSchedule,
-    this.birthDate,
-    this.hobbies,
-    this.goals,
-    this.notes,
-  });
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is UserPersonalInfo &&
-          runtimeType == other.runtimeType &&
-          job == other.job &&
-          gender == other.gender &&
-          activity == other.activity &&
-          workoutSchedule == other.workoutSchedule &&
-          birthDate == other.birthDate &&
-          hobbies == other.hobbies &&
-          goals == other.goals &&
-          notes == other.notes);
-
-  @override
-  int get hashCode =>
-      job.hashCode ^
-      gender.hashCode ^
-      activity.hashCode ^
-      workoutSchedule.hashCode ^
-      birthDate.hashCode ^
-      hobbies.hashCode ^
-      goals.hashCode ^
-      notes.hashCode;
-
-  @override
-  String toString() {
-    return 'UserPersonalInfo{'
-        ' job: $job,'
-        ' gender: $gender,'
-        ' activity: $activity,'
-        ' workoutSchedule: $workoutSchedule,'
-        ' birthDate: $birthDate,'
-        ' hobbies: $hobbies,'
-        ' goals: $goals,'
-        ' notes: $notes,'
-        '}';
-  }
-
-  UserPersonalInfo copyWith({
-    String? job,
-    String? gender,
-    String? activity,
-    String? workoutSchedule,
-    String? birthDate,
-    String? hobbies,
-    String? goals,
-    String? notes,
-  }) {
-    return UserPersonalInfo(
-      job: job ?? this.job,
-      gender: gender ?? this.gender,
-      activity: activity ?? this.activity,
-      workoutSchedule: workoutSchedule ?? this.workoutSchedule,
-      birthDate: birthDate ?? this.birthDate,
-      hobbies: hobbies ?? this.hobbies,
-      goals: goals ?? this.goals,
-      notes: notes ?? this.notes,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'job': job,
-      'gender': gender,
-      'activity': activity,
-      'workoutSchedule': workoutSchedule,
-      'birthDate': birthDate,
-      'hobbies': hobbies,
-      'goals': goals,
-      'notes': notes,
-    };
-  }
-
-  factory UserPersonalInfo.fromMap(Map<String, dynamic> map) {
-    return UserPersonalInfo(
-      job: map['job'] as String?,
-      gender: map['gender'] as String?,
-      activity: map['activity'] as String?,
-      workoutSchedule: map['workoutSchedule'] as String?,
-      birthDate: map['birthDate'] as String?,
-      hobbies: map['hobbies'] as String?,
-      goals: map['goals'] as String?,
-      notes: map['notes'] as String?,
-    );
-  }
-}
-
 class PromptNotifier extends StateNotifier<FutureOr<AsyncValue<String?>>> {
   PromptNotifier() : super(const AsyncLoading());
 
-  FutureOr<AsyncValue<GlowResponse?>> submitPrompt(
+  FutureOr<AsyncValue<GlowSchedule?>> submitPrompt(
       {required WidgetRef ref}) async {
-    AsyncValue<GlowResponse?> state = AsyncValue.loading();
+    AsyncValue<GlowSchedule?> state = AsyncValue.loading();
     var store = StoreRef.main();
     try {
       // Get stored images
@@ -312,16 +228,16 @@ class PromptNotifier extends StateNotifier<FutureOr<AsyncValue<String?>>> {
           .record(DbKeys.userPersonalInfo)
           .get(await LocalDB.db) as Map<String, dynamic>;
       final promptInfo = UserPersonalInfo.fromMap(promptInfoMap);
-      // final testPromptInfo = UserPersonalInfo(
-      //   job: 'doctor',
-      //   gender: 'female',
-      //   activity: ' mostly standing',
-      //   workoutSchedule: '3 days a week or less',
-      //   birthDate: '1998-01-01',
-      //   hobbies: 'nothing',
-      //   goals: 'to be prettier',
-      //   notes: '..',
-      // );
+      final testPromptInfo = UserPersonalInfo(
+        job: 'doctor',
+        gender: 'female',
+        activity: ' mostly standing',
+        workoutSchedule: '3 days a week or less',
+        birthDate: '1998-01-01',
+        hobbies: 'nothing',
+        goals: 'to be prettier',
+        notes: '..',
+      );
 
       final prompt = '''
 Generate a detailed, personalized glow-up routine in JSON format for the person in the photo, considering their individual characteristics and lifestyle. The routine should be healthy, realistic, and sustainable. Follow this structure:
@@ -359,14 +275,14 @@ Key requirements:
    - Hobby development
 
 2. Personalization factors to consider:
-   - Current age: ${promptInfo.birthDate ?? ''} (calculate age)
-   - Gender: ${promptInfo.gender ?? ''}
-   - Occupation: ${promptInfo.job ?? ''} (consider work demands and dress code)
-   - Workout schedule: ${promptInfo.workoutSchedule ?? ''}
-   - Current activity level: ${promptInfo.activity ?? ''}
-   - Hobbies: ${promptInfo.hobbies ?? ''} (incorporate where possible)
-   - Additional notes: ${promptInfo.notes ?? ''}
-   - Additional notes: ${promptInfo.notes ?? ''}
+   - Current age: ${testPromptInfo.birthDate ?? ''} (calculate age)
+   - Gender: ${testPromptInfo.gender ?? ''}
+   - Occupation: ${testPromptInfo.job ?? ''} (consider work demands and dress code)
+   - Workout schedule: ${testPromptInfo.workoutSchedule ?? ''}
+   - Current activity level: ${testPromptInfo.activity ?? ''}
+   - Hobbies: ${testPromptInfo.hobbies ?? ''} (incorporate where possible)
+   - Additional notes: ${testPromptInfo.notes ?? ''}
+   - Additional notes: ${testPromptInfo.notes ?? ''}
 
 3. Guidelines:
    - All suggestions must be healthy and safe
@@ -401,8 +317,10 @@ The schedule should be practical enough to implement immediately while allowing 
 
       debugPrint('response type${response.text ?? ''}');
 
-      final glowResponse = GlowResponse.fromJson(response.text ?? '');
-      state = AsyncValue<GlowResponse?>.data(glowResponse);
+      final glowResponse = GlowSchedule.fromJson(response.text ?? '');
+      ref.read(PromptCreatorDeps.saveGlowScheduleProvider(glowResponse));
+      print('area of focus ${glowResponse.areaOfFocus?.length}');
+      state = AsyncValue<GlowSchedule?>.data(glowResponse);
       return state;
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.empty);

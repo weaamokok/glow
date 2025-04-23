@@ -5,8 +5,8 @@ import 'package:flutter/foundation.dart';
 
 import 'package:glow/domain/area.dart';
 
-class GlowResponse {
-  GlowResponse({
+class GlowSchedule {
+  GlowSchedule({
     this.areaOfFocus,
     this.generalAdvice,
   });
@@ -14,11 +14,11 @@ class GlowResponse {
   final List<AreaOfFocus>? areaOfFocus;
   final String? generalAdvice;
 
-  GlowResponse copyWith({
+  GlowSchedule copyWith({
     List<AreaOfFocus>? areaOfFocus,
     String? generalAdvice,
   }) {
-    return GlowResponse(
+    return GlowSchedule(
       areaOfFocus: areaOfFocus ?? this.areaOfFocus,
       generalAdvice: generalAdvice ?? this.generalAdvice,
     );
@@ -30,27 +30,28 @@ class GlowResponse {
       'general_advice': generalAdvice,
     };
   }
-factory GlowResponse.fromMap(Map<String, dynamic> map) {
-  return GlowResponse(
-    areaOfFocus: map['area_of_focus'] != null
-        ? List<AreaOfFocus>.from(
-            (map['area_of_focus'] as List<dynamic>).map<AreaOfFocus>(
-              (x) => AreaOfFocus.fromMap(x as Map<String, dynamic>),
-            ),
-          )
-        : null,
-    generalAdvice: map['general_advice'] != null
-        ? map['general_advice'] as String
-        : null,
-  );
-}
+
+  factory GlowSchedule.fromMap(Map<String, dynamic> map) {
+    return GlowSchedule(
+      areaOfFocus: map['area_of_focus'] != null
+          ? List<AreaOfFocus>.from(
+              (map['area_of_focus'] as List<dynamic>).map<AreaOfFocus>(
+                (x) => AreaOfFocus.fromMap(x as Map<String, dynamic>),
+              ),
+            )
+          : null,
+      generalAdvice: map['general_advice'] != null
+          ? map['general_advice'] as String
+          : null,
+    );
+  }
 
   @override
   String toString() =>
       'GlowResponse(area_of_focus: $areaOfFocus, general_advice: $generalAdvice)';
 
   @override
-  bool operator ==(covariant GlowResponse other) {
+  bool operator ==(covariant GlowSchedule other) {
     if (identical(this, other)) return true;
 
     return listEquals(other.areaOfFocus, areaOfFocus) &&
@@ -62,8 +63,8 @@ factory GlowResponse.fromMap(Map<String, dynamic> map) {
 
   String toJson() => json.encode(toMap());
 
-  factory GlowResponse.fromJson(String source) =>
-      GlowResponse.fromMap(json.decode(
+  factory GlowSchedule.fromJson(String source) =>
+      GlowSchedule.fromMap(json.decode(
         source,
         reviver: (key, value) => value,
       ) as Map<String, dynamic>);

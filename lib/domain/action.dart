@@ -7,8 +7,11 @@ class GAction {
     this.title,
     this.description,
     this.timeRange,
+    this.duration,
+    this.frequency,
     this.repeated,
     this.setReminder,
+    this.tips,
   });
 
   final String? id;
@@ -17,6 +20,9 @@ class GAction {
   final String? timeRange;
   final bool? repeated;
   final bool? setReminder;
+  final String? duration;
+  final String? frequency;
+  final String? tips;
 
   GAction copyWith({
     String? id,
@@ -51,13 +57,14 @@ class GAction {
     return GAction(
       id: map['id'] != null ? map['id'] as String : null,
       title: map['title'] != null ? map['title'] as String : null,
-      description: map['description'] != null ? map['description'] as String : null,
+      description:
+          map['description'] != null ? map['description'] as String : null,
       timeRange: map['time_range'] != null ? map['time_range'] as String : null,
       repeated: map['repeated'] != null ? map['repeated'] as bool : null,
-      setReminder: map['set_reminder'] != null ? map['set_reminder'] as bool : null,
+      setReminder:
+          map['set_reminder'] != null ? map['set_reminder'] as bool : null,
     );
   }
-
 
   @override
   String toString() {
@@ -88,5 +95,6 @@ class GAction {
 
   String toJson() => json.encode(toMap());
 
-  factory GAction.fromJson(String source) => GAction.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory GAction.fromJson(String source) =>
+      GAction.fromMap(json.decode(source) as Map<String, dynamic>);
 }
