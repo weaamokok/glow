@@ -10,6 +10,7 @@ import '../../app/local_db.dart';
 class LocalStorageNotifier extends StateNotifier<void> {
   LocalStorageNotifier() : super(());
   var store = StoreRef.main();
+
   Future<bool> saveUserImages({required List<File?> images}) async {
     //add image to local
 
@@ -36,7 +37,9 @@ class LocalStorageNotifier extends StateNotifier<void> {
     }
     return true;
   }
-  Future<List<File?>> getUserImages()async{
-    store.
+
+  Future<List<File?>?> getUserImages() async {
+    return await store.record(DbKeys.userImages).get(await LocalDB.db)
+        as List<File?>;
   }
 }

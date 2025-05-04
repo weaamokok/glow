@@ -240,69 +240,96 @@ class PromptNotifier extends StateNotifier<FutureOr<AsyncValue<String?>>> {
       );
 
       final prompt = '''
-Generate a detailed, personalized glow-up routine in JSON format for the person in the photo, considering their individual characteristics and lifestyle. The routine should be healthy, realistic, and sustainable. Follow this structure:
+Generate a personalized glow-up routine in JSON format optimized for calendar/schedule display. Follow these requirements:
 
+1. **Structure Requirements:**
 {
-  "area_of_focus": [
+  "daily_schedule": [
     {
-      "id": "1",
-      "title": "Physical Health & Fitness",
-      "description": "Specific improvement goals for this area",
+      "time_slot": "Morning/Afternoon/Evening/Night",
+      "start_time": "HH:MM", // Estimated ideal time
       "actions": [
         {
-          "id": "1",
-          "title": "Action title",
-          "description": "Detailed instructions",
-          "time_range": "Morning/Afternoon/Evening or specific time if important",
-          "duration": "X minutes/hours",
-          "frequency": "Daily/Weekly/etc.",
-          "repeated": true/false,
-          "tips": "Additional helpful advice"
+          "id": "unique-id",
+          "title": "Action name",
+          "duration": X, // Minutes
+          "category": "Physical|Skincare|Mental|etc.",
+          "frequency": ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], // Days
+          "recurring": true/false,
+          "priority": "High/Medium/Low",
+          "description": "Step-by-step instructions",
+          "prep_needed": true/false,
+          "location": "Home/Gym/Office/etc."
         }
       ]
     }
   ],
-  "general_advice": "Overall recommendations for the glow-up journey"
+  "weekly_goals": [
+    {
+      "id": "unique-id",
+      "title": "Goal name",
+      "type": "Social|Fitness|Skill|etc.",
+      "frequency": "Weekly/Bi-weekly",
+      "best_day": "Monday-Friday",
+      "duration": X, // Minutes
+      "time_of_day": "Morning/Afternoon/Evening"
+    }
+  ],
+  "preparation_list": [
+    {
+      "id": "unique-id",
+      "task": "Item to acquire/prepare",
+      "category": "Shopping/Research/Setup",
+      "deadline": "YYYY-MM-DD",
+      "urgency": "High/Medium/Low"
+    }
+  ],
+  "progress_milestones": [
+    {
+      "id": "unique-id",
+      "title": "Milestone name",
+      "target_date": "YYYY-MM-DD",
+      "success_metrics": ["metric1", "metric2"]
+    }
+  ]
 }
 
-Key requirements:
-1. Create a holistic plan covering these areas (adjust based on individual needs):
-   - Physical health & fitness
-   - Skincare & grooming
-   - Fashion & personal style
-   - Mental wellbeing
-   - Social skills & confidence
-   - Hobby development
+2. **Key Personalization Factors:**
+- Age: ${testPromptInfo.birthDate}
+- Occupation: ${testPromptInfo.job} (consider commute/working hours)
+- Current fitness schedule: ${testPromptInfo.workoutSchedule}
+- Style preferences/note to consider: ${testPromptInfo.notes}
+- hobbies: ${testPromptInfo.hobbies}
+- personal goal: ${testPromptInfo.goals}
+- gender: ${testPromptInfo.gender}
+- Available time slots: {calculate_free_time_based_on_job}
+- Budget: {estimate_based_on_occupation}
 
-2. Personalization factors to consider:
-   - Current age: ${testPromptInfo.birthDate ?? ''} (calculate age)
-   - Gender: ${testPromptInfo.gender ?? ''}
-   - Occupation: ${testPromptInfo.job ?? ''} (consider work demands and dress code)
-   - Workout schedule: ${testPromptInfo.workoutSchedule ?? ''}
-   - Current activity level: ${testPromptInfo.activity ?? ''}
-   - Hobbies: ${testPromptInfo.hobbies ?? ''} (incorporate where possible)
-   - Additional notes: ${testPromptInfo.notes ?? ''}
-   - Additional notes: ${testPromptInfo.notes ?? ''}
+3. **Scheduling Rules:**
+- Never schedule more than 2 new habits per week
+- Minimum 30 minutes buffer between work-related and self-care activities
+- Morning routines max 45 minutes
+- Evening routines max 1 hour
+- Weekly goals should align with days off work when possible
+- Include progressive overload for fitness goals
 
-3. Guidelines:
-   - All suggestions must be healthy and safe
-   - No unrealistic time commitments (max 1-2 new habits per week)
-   - Gradual progression in difficulty
-   - Budget-friendly options where possible
-   - Include rest days and recovery time
-   - Suggest measurable goals
-   - Account for their existing schedule
-   - Provide alternatives for different energy levels
+4. **Output Requirements:**
+- All time slots must have concrete start times add related emoji to time_slot
+- Duration in whole minutes only
+- Include location requirements
+- Specify needed preparation items
+- Add progress checkpoints
+- Flag conflicts with typical work hours
+- Include alternate actions for bad days
 
-4. Output notes:
-   - Include estimated time commitments for each action
-   - Specify whether actions are repeated or one-time
-   - Add priority levels if certain actions are more important
-   - Provide seasonal considerations if relevant
-   - Include preparation steps where needed
+5. **Special Instructions:**
+- Assume user wakes up at {calculate_wakeup_time_based_on_job}
+- Prioritize home-based activities for first 2 weeks
+- Suggest specific YouTube workout videos when relevant
+- Recommend exact product names for skincare don't recommend product from companies that support israel, recommend korean skin care but not from COSRX company
+- Include 5-minute buffer between consecutive tasks
 
-The schedule should be practical enough to implement immediately while allowing flexibility for unexpected events. Focus on sustainable changes rather than quick fixes.
-''';
+Focus on creating a time-bound, executable schedule rather than general advice. The output should be ready for direct import into a digital calendar.''';
 
       final content = [
         Content.multi([
@@ -319,7 +346,7 @@ The schedule should be practical enough to implement immediately while allowing 
 
       final glowResponse = GlowSchedule.fromJson(response.text ?? '');
       ref.read(PromptCreatorDeps.saveGlowScheduleProvider(glowResponse));
-      print('area of focus ${glowResponse.areaOfFocus?.length}');
+  
       state = AsyncValue<GlowSchedule?>.data(glowResponse);
       return state;
     } catch (e) {

@@ -12,6 +12,8 @@ import 'package:glow/feature/prompt_creator/prompt_creator_deps.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
+import '../calendar/calendar_deps.dart';
+
 //todo add form validation
 @RoutePage()
 class PromptCreatorStepperScreen extends HookConsumerWidget {
@@ -31,11 +33,24 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
       //goals and life style
     ];
     final promptCreationState = useState(AsyncValue<GlowSchedule?>.data(null));
-    print('--state ${promptCreationState.value}');
+    final result = promptCreationState.value;
+    result.map(
+      data: (data) {
+        ref.refresh(CalendarDeps.scheduleProvider.notifier);
+
+        context.router.popUntilRoot();
+      },
+      error: (error) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            content: Text('something went wrong: ${error.error} ')));
+      },
+      loading: (loading) {},
+    );
 //when we receive data we pop our route
-    if (promptCreationState.value.value != null) {
-      context.router.popUntilRoot();
-    }
+    if (result.value != null) {}
 
     return Scaffold(
       resizeToAvoidBottomInset: false,

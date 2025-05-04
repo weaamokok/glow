@@ -10,7 +10,3 @@ final model = Provider(
       model: 'gemini-1.5-pro', apiKey: dotenv.env['API_KEY'] ?? ''),
 );
 final content = [Content.multi([])];
-
-final isFirstRunProvider = Provider(
-  (ref) async {},
-);

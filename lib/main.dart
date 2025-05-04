@@ -31,7 +31,7 @@ class MyApp extends ConsumerWidget {
               onError: Colors.white,
               surface: Colors.white,
               onSurface: Color(0xff282828)),
-          fontFamily: 'Tajawal',
+          fontFamily: 'Roboto',
           inputDecorationTheme: InputDecorationTheme(
               hintStyle:
                   TextStyle(color: Color(0xff4C7B8B).withValues(alpha: .7)),

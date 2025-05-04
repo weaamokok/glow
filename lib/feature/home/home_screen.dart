@@ -1,30 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:glow/feature/main/main_deps.dart';
 
-import '../prompt_creator/prompt_creator_stepper_screen.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends HookConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
-    ref.read(isFirstRunProvider).then(
-      (value) async {
-        if (context.mounted) {
-          await showModalBottomSheet(
-            context: context,
-            shape: LinearBorder(),
-            isScrollControlled: true,
-            useRootNavigator: true,
-            constraints: BoxConstraints.expand(),
-            builder: (context) {
-              return PromptCreatorStepperScreen();
-            },
-          );
-        }
-      },
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10),
+        color: Color(0xffB399D4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SafeArea(
+              child: Text(
+                'GLOWR',
+                style: TextStyle(fontFamily: 'Lilita', fontSize: 25),
+              ),
+            ),
+            Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(DateFormat.MMMMEEEEd().format(DateTime.now())),
+                    Text(greeting())
+                  ],
+                )
+              ],
+            )
+          ],
+        ),
+      ),
     );
-    return const SingleChildScrollView();
   }
+}
+
+String greeting() {
+  var hour = DateTime.now().hour;
+  if (hour < 12) {
+    return 'Morning';
+  }
+  if (hour < 17) {
+    return 'Afternoon';
+  }
+  return 'Evening'; //make a list and choose randomly//ask ai to generate greetings
 }
