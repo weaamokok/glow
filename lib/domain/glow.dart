@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:glow/helper/helper_functions.dart';
 
 class GlowSchedule {
   GlowSchedule({
@@ -94,7 +95,7 @@ class GlowSchedule {
 }
 
 class DailyTimeSlot {
-  final String? timeSlot;
+  final Slot? timeSlot;
   final String? startTime;
   final List<ScheduleAction>? actions;
 
@@ -105,7 +106,7 @@ class DailyTimeSlot {
   });
 
   DailyTimeSlot copyWith({
-    String? timeSlot,
+    Slot? timeSlot,
     String? startTime,
     List<ScheduleAction>? actions,
   }) {
@@ -126,7 +127,10 @@ class DailyTimeSlot {
 
   factory DailyTimeSlot.fromMap(Map<String, dynamic> map) {
     return DailyTimeSlot(
-      timeSlot: map['time_slot'] as String,
+      timeSlot: map['time_slot'] != null
+          ? TimeSlotExtension.fromJson(
+              removeEmojis(map['time_slot']).toString().toLowerCase())
+          : null,
       startTime: map['start_time'] as String,
       actions: map['actions'] != null
           ? List<ScheduleAction>.from(
@@ -542,5 +546,31 @@ class ProgressMilestone {
         title.hashCode ^
         targetDate.hashCode ^
         successMetrics.hashCode;
+  }
+}
+
+enum Slot {
+  morning,
+  evening,
+  night,
+  afternoon,
+  undefined;
+}
+
+extension TimeSlotExtension on Slot {
+  String toJson() {
+    return toString().split('.').last;
+  }
+
+  static Slot fromJson(String raw) {
+    final clean = raw.replaceAll(RegExp(r'[^a-zA-Z]'), '').toLowerCase();
+
+    return switch (clean) {
+      'morning' => Slot.morning,
+      'afternoon' => Slot.afternoon,
+      'evening' => Slot.evening,
+      'night' => Slot.night,
+      _ => Slot.undefined,
+    };
   }
 }

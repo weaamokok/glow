@@ -95,7 +95,8 @@ class CalendarScreen extends HookConsumerWidget {
                                               spacing: 10,
                                               children: [
                                                 Text(
-                                                  dailyTime.timeSlot ?? '',
+                                                  dailyTime.timeSlot?.name ??
+                                                      '',
                                                   style: TextStyle(
                                                       color: Colors.grey),
                                                 ),

@@ -224,10 +224,6 @@ class PromptNotifier extends StateNotifier<FutureOr<AsyncValue<String?>>> {
         }
       }
       // Get personal info
-      final promptInfoMap = await store
-          .record(DbKeys.userPersonalInfo)
-          .get(await LocalDB.db) as Map<String, dynamic>;
-      final promptInfo = UserPersonalInfo.fromMap(promptInfoMap);
       final testPromptInfo = UserPersonalInfo(
         job: 'doctor',
         gender: 'female',
@@ -256,7 +252,7 @@ Generate a personalized glow-up routine in JSON format optimized for calendar/sc
           "category": "Physical|Skincare|Mental|etc.",
           "frequency": ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], // Days
           "recurring": true/false,
-          "priority": "High/Medium/Low",
+          "priority": "High/Medium/Low",//add an arrow emoji to describe priority
           "description": "Step-by-step instructions",
           "prep_needed": true/false,
           "location": "Home/Gym/Office/etc."
@@ -346,7 +342,7 @@ Focus on creating a time-bound, executable schedule rather than general advice. 
 
       final glowResponse = GlowSchedule.fromJson(response.text ?? '');
       ref.read(PromptCreatorDeps.saveGlowScheduleProvider(glowResponse));
-  
+
       state = AsyncValue<GlowSchedule?>.data(glowResponse);
       return state;
     } catch (e) {
