@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glow/feature/calendar/calendar_screen.dart';
 import 'package:glow/feature/home/home_screen.dart';
+import 'package:intl/intl.dart';
 
+import '../home/home_deps.dart';
 import 'main_deps.dart';
 
 @RoutePage()
@@ -16,7 +18,126 @@ class MainScreen extends ConsumerWidget {
     final indexBottomNavbar = ref.watch(indexBottomNavbarProvider);
 
     return Scaffold(
-      backgroundColor: Color(0xfff6f5f5),
+      appBar: AppBar(
+        actions: [
+          Container(
+              margin: EdgeInsetsDirectional.only(end: 18),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(color: Color(0xff282828), width: 1.5)),
+              child: Icon(
+                Icons.add,
+                weight: 2,
+              ))
+        ],
+        title: Padding(
+          padding: const EdgeInsetsDirectional.only(start: 4.0),
+          child: Text(
+            'Glowr',
+            style: TextStyle(fontFamily: 'Lilita', fontSize: 28),
+          ),
+        ),
+        bottom: indexBottomNavbar == 0
+            ? PreferredSize(
+                preferredSize: Size.fromHeight(60),
+                child: Padding(
+                  padding: EdgeInsetsDirectional.only(start: 22),
+                  child: GlowBubble(
+                    text: ref.read(HomeDeps.greetingProvider),
+                    label: DateFormat.MMMMEEEEd().format(DateTime.now()),
+                  ),
+                ))
+            : null,
+      ),
+      bottomSheet: indexBottomNavbar == 0
+          ? Container(
+              padding: EdgeInsets.only(left: 20, right: 20, top: 24),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(50),
+                  ),
+                  border: Border.all(color: Color(0xff282828))),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(start: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Your Progress',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Almost there, Keep going..✨ ',
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 12),
+                            ),
+                            Text(
+                              '40% ',
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 4,
+                  ),
+                  Container(
+                    //make progress bar dynamic
+                    width: double.infinity, // Outer container takes full width
+                    height: 36, // Fixed height for the progress bar track
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xff282828)),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: FractionallySizedBox(
+                      alignment: AlignmentDirectional.centerStart,
+                      // Start progress from the left
+                      widthFactor: 0.5,
+                      // Replace `0.5` with your progress value (e.g., 0.7 for 70%)
+                      child: Container(
+                        margin: const EdgeInsets.all(4), // Inner margin
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Color(0xff282828)),
+                          color: Color(0xffA2D7D8), // Progress bar color
+                          borderRadius: BorderRadius.circular(
+                              16), // Slightly smaller radius than outer
+                        ),
+                        height:
+                            28, // Inner height: outer height (36) - margin (4*2) = 28
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 14,
+                  ),
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(start: 8.0),
+                    child: GlowBubble(
+                      text:
+                          'You don’t have to be perfect. Just\n be better than you were yesterday.',
+                      label: 'remember 📜',
+                      //make this dynamic or prepare punch of motivational quotes to display from
+                      backgroundColor: Color(0xffD19F95),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  )
+                ],
+              ))
+          : null,
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
         currentIndex: indexBottomNavbar,
@@ -45,3 +166,42 @@ final screens = [
     child: Text('Hello From Settings Screen'),
   ),
 ];
+
+class GlowBubble extends StatelessWidget {
+  const GlowBubble(
+      {required this.text, this.label, this.backgroundColor, super.key});
+
+  final String? label;
+  final String text;
+  final Color? backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: AlignmentDirectional.topStart,
+      child: Container(
+        padding: EdgeInsets.all(14),
+        decoration: BoxDecoration(
+            color: backgroundColor ?? Color(0xffB399D4),
+            borderRadius: BorderRadiusDirectional.only(
+              bottomEnd: Radius.circular(15),
+              bottomStart: Radius.circular(15),
+              topEnd: Radius.circular(15),
+            )),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              label ?? '',
+              style: TextStyle(color: Colors.white.withValues(alpha: .67)),
+            ),
+            Text(text,
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.w600)),
+          ],
+        ),
+      ),
+    );
+  }
+}

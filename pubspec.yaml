@@ -86,9 +86,14 @@ flutter:
     - family: Roboto
       fonts:
         - asset: assets/fonts/Roboto-Regular.ttf
+        - asset: assets/fonts/Roboto-Medium.ttf
+          weight: 300
         - asset: assets/fonts/Roboto-Black.ttf
+          weight: 600
         - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 500
         - asset: assets/fonts/Roboto-ExtraBold.ttf
+          weight: 700
         - asset: assets/fonts/Roboto_Condensed-Light.ttf
         - asset: assets/fonts/Roboto_Condensed-Medium.ttf
         - asset: assets/fonts/Roboto_Condensed-Regular.ttf

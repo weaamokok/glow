@@ -11,24 +11,7 @@ class CalendarScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final glowSchedule = ref.watch(CalendarDeps.scheduleProvider).then(
-      (value) async {
-        if (context.mounted && value == null) {
-          await showModalBottomSheet(
-            context: context,
-            shape: LinearBorder(),
-            isScrollControlled: true,
-            useRootNavigator: true,
-            constraints: BoxConstraints.expand(),
-            builder: (context) {
-              return PromptCreatorStepperScreen();
-            },
-          );
-        } else {
-          return value;
-        }
-      },
-    );
+    final glowSchedule = ref.watch(CalendarDeps.scheduleProvider);
 
     final selectedDay = useState(DateTime.now());
 

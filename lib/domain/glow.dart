@@ -119,7 +119,7 @@ class DailyTimeSlot {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'time_slot': timeSlot,
+      'time_slot': timeSlot?.toJson(),
       'start_time': startTime,
       'actions': actions?.map((x) => x.toMap()).toList(),
     };

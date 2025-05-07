@@ -19,3 +19,13 @@ DateTime getDateTimeWithTime(String timeString) {
     return DateTime(now.year, now.month, now.day, now.hour, now.minute);
   }
 }
+
+extension FirstWhereOrNullExtension<T> on Iterable<T> {
+  /// Returns the first element that satisfies [test], or `null` if none.
+  T? firstWhereOrNull(bool Function(T) test) {
+    for (final element in this) {
+      if (test(element)) return element;
+    }
+    return null;
+  }
+}

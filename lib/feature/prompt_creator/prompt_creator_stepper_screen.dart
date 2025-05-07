@@ -34,11 +34,12 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
     ];
     final promptCreationState = useState(AsyncValue<GlowSchedule?>.data(null));
     final result = promptCreationState.value;
+    print('result -- $result');
     result.map(
       data: (data) {
-        ref.refresh(CalendarDeps.scheduleProvider.notifier);
-
-        context.router.popUntilRoot();
+        if (data.value != null) {
+          context.router.popUntilRoot();
+        }
       },
       error: (error) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -47,7 +48,9 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             content: Text('something went wrong: ${error.error} ')));
       },
-      loading: (loading) {},
+      loading: (loading) {
+        return;
+      },
     );
 //when we receive data we pop our route
     if (result.value != null) {}

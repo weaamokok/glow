@@ -252,7 +252,7 @@ Generate a personalized glow-up routine in JSON format optimized for calendar/sc
           "category": "Physical|Skincare|Mental|etc.",
           "frequency": ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], // Days
           "recurring": true/false,
-          "priority": "High/Medium/Low",//add an arrow emoji to describe priority
+          "priority": "High/Medium/Low",
           "description": "Step-by-step instructions",
           "prep_needed": true/false,
           "location": "Home/Gym/Office/etc."
