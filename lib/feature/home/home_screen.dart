@@ -14,7 +14,7 @@ class HomeScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     ref.watch(CalendarDeps.scheduleProvider).then(
-      (value) async {
+          (value) async {
         print('--$value ${context.mounted}');
         if (context.mounted && value == null) {
           print('here');
@@ -47,7 +47,10 @@ class HomeScreen extends HookConsumerWidget {
               padding: const EdgeInsetsDirectional.only(start: 6, bottom: 2),
               child: Text(
                 'Next in your Schedule.. ⏭️',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17
+
+
+                ),
               ),
             ),
             FutureBuilder(
@@ -58,23 +61,28 @@ class HomeScreen extends HookConsumerWidget {
                 List<DailyTimeSlot> dailySchedule =
                     snapshot.data?.dailySchedule ?? [];
                 print(dailySchedule.where(
-                  (element) => element.timeSlot == Slot.night,
+                      (element) => element.timeSlot == Slot.night,
                 ));
                 final currentSlot =
-                    getcurrentSlot(dailySchedule: dailySchedule);
+                getcurrentSlot(dailySchedule: dailySchedule);
                 print('current slot $currentSlot');
-                if (dailySchedule.isEmpty) return SizedBox();
+                if (dailySchedule.isEmpty)
+                  return Column(
+                    children: [Text('no items')],
+                  );
                 final nextActions = dailySchedule.firstWhereOrNull(
-                  (element) => element.timeSlot == currentSlot,
+                      (element) => element.timeSlot == currentSlot,
                 );
                 final actions = nextActions?.actions ?? [];
+                print('current actions r --?  $actions');
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisAlignment: MainAxisAlignment.center,
                   spacing: 2,
                   children: actions
                       .map(
-                        (e) => Card(
+                        (e) =>
+                        Card(
                           margin: EdgeInsets.all(0),
                           elevation: 0,
                           shape: RoundedRectangleBorder(
@@ -93,7 +101,7 @@ class HomeScreen extends HookConsumerWidget {
                                     spacing: 2,
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         e.category ?? '',
@@ -102,7 +110,7 @@ class HomeScreen extends HookConsumerWidget {
                                       ),
                                       Row(
                                         mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                        MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
                                             e.title ?? '',
@@ -118,11 +126,11 @@ class HomeScreen extends HookConsumerWidget {
                                       ),
                                       Row(
                                         mainAxisAlignment:
-                                            MainAxisAlignment.start,
+                                        MainAxisAlignment.start,
                                         children: [
                                           Row(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                            MainAxisAlignment.spaceBetween,
                                             children: [
                                               Icon(
                                                 EneftyIcons.timer_2_outline,
@@ -146,9 +154,9 @@ class HomeScreen extends HookConsumerWidget {
                                           ),
                                           Row(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                            MainAxisAlignment.spaceBetween,
                                             crossAxisAlignment:
-                                                CrossAxisAlignment.center,
+                                            CrossAxisAlignment.center,
                                             children: [
                                               Icon(EneftyIcons.location_outline,
                                                   size: 16,
@@ -173,7 +181,7 @@ class HomeScreen extends HookConsumerWidget {
                                     decoration: BoxDecoration(
                                         color: Color(0xffFF8C61),
                                         borderRadius:
-                                            BorderRadius.circular(10)),
+                                        BorderRadius.circular(10)),
                                     child: Center(
                                       child: Text(
                                         e.priority ?? '',
@@ -187,7 +195,7 @@ class HomeScreen extends HookConsumerWidget {
                             ),
                           ),
                         ),
-                      )
+                  )
                       .toList(),
                 );
               },

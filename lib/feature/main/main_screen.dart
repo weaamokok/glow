@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,15 +50,22 @@ class MainScreen extends ConsumerWidget {
                 ))
             : null,
       ),
+      bottomNavigationBar: BottomNavBar(indexBottomNavbar: indexBottomNavbar),
       bottomSheet: indexBottomNavbar == 0
-          ? Container(
-              padding: EdgeInsets.only(left: 20, right: 20, top: 24),
+          ? AnimatedContainer(
+              curve: Curves.easeInToLinear,
+              duration: kThemeAnimationDuration,
+              transformAlignment: AlignmentDirectional.bottomCenter,
+              padding: EdgeInsets.only(left: 16, right: 16, top: 24),
               width: double.infinity,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.vertical(
                     top: Radius.circular(50),
                   ),
-                  border: Border.all(color: Color(0xff282828))),
+                  border: Border(
+                      right: BorderSide(color: Color(0xff282828)),
+                      top: BorderSide(color: Color(0xff282828)),
+                      left: BorderSide(color: Color(0xff282828)))),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,26 +142,11 @@ class MainScreen extends ConsumerWidget {
                   ),
                   SizedBox(
                     height: 10,
-                  )
+                  ),
                 ],
-              ))
+              ),
+            )
           : null,
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        currentIndex: indexBottomNavbar,
-        selectedItemColor: Color(0xffEFB036),
-        onTap: (value) => ref
-            .read(indexBottomNavbarProvider.notifier)
-            .update((state) => value),
-        items: const [
-          BottomNavigationBarItem(
-              icon: Icon(EneftyIcons.home_2_outline), label: 'Home'),
-          BottomNavigationBarItem(
-              icon: Icon(EneftyIcons.calendar_2_outline), label: 'schedule'),
-          BottomNavigationBarItem(
-              icon: Icon(EneftyIcons.user_outline), label: 'Setting'),
-        ],
-      ),
       body: screens[indexBottomNavbar],
     );
   }
@@ -200,6 +193,73 @@ class GlowBubble extends StatelessWidget {
                 style: TextStyle(
                     color: Colors.white, fontWeight: FontWeight.w600)),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+List<DotNavigationBarItem> _items = [
+  DotNavigationBarItem(
+    icon: const Icon(EneftyIcons.home_2_outline),
+    // selectedColor: Colors.black,
+  ),
+  DotNavigationBarItem(
+    icon: const Icon(EneftyIcons.calendar_2_outline),
+    // selectedColor: Colors.black,
+  ),
+  DotNavigationBarItem(
+    icon: const Icon(EneftyIcons.user_outline),
+    // selectedColor: Colors.black,
+  ),
+];
+
+class BottomNavBar extends ConsumerWidget {
+  const BottomNavBar({super.key, required this.indexBottomNavbar});
+
+  final int indexBottomNavbar;
+
+  @override
+  Widget build(BuildContext context, ref) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+          border: indexBottomNavbar == 0
+              ? Border(
+                  right: BorderSide(color: Color(0xff282828)),
+                  left: BorderSide(color: Color(0xff282828)))
+              : null),
+      child: Container(
+        decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(width: 1, color: Color(0xff282828)),
+            borderRadius: BorderRadius.circular(
+              40,
+            )),
+        margin: const EdgeInsets.only(
+          bottom: 20,
+        ),
+        height: 75,
+        child: DotNavigationBar(
+          // splashColor: Colors.black,
+          unselectedItemColor:
+              Theme.of(context).bottomNavigationBarTheme.unselectedItemColor,
+          selectedItemColor:
+              Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
+
+          backgroundColor: Colors.transparent,
+          borderRadius: 30,
+          margin: const EdgeInsets.symmetric(horizontal: 15),
+          paddingR: const EdgeInsets.only(bottom: 0, top: 0),
+          itemPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+          enableFloatingNavBar: false,
+          marginR: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+          currentIndex: indexBottomNavbar,
+          onTap: (value) => ref
+              .read(indexBottomNavbarProvider.notifier)
+              .update((state) => value),
+          dotIndicatorColor: Color(0xffEFB036),
+          items: _items,
         ),
       ),
     );
