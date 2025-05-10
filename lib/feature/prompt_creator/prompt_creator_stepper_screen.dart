@@ -12,8 +12,6 @@ import 'package:glow/feature/prompt_creator/prompt_creator_deps.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-import '../calendar/calendar_deps.dart';
-
 //todo add form validation
 @RoutePage()
 class PromptCreatorStepperScreen extends HookConsumerWidget {

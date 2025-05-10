@@ -256,6 +256,7 @@ Generate a personalized glow-up routine in JSON format optimized for calendar/sc
           "description": "Step-by-step instructions",
           "prep_needed": true/false,
           "location": "Home/Gym/Office/etc."
+          "status":"todo/in_progress/completed",//by default it's todo
         }
       ]
     }

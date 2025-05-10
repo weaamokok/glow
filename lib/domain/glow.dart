@@ -174,6 +174,7 @@ class ScheduleAction {
     required this.recurring,
     required this.priority,
     required this.description,
+    this.status = ActionStatus.todo,
     this.prepNeeded = false,
     this.location,
   });
@@ -188,6 +189,7 @@ class ScheduleAction {
   final String? description;
   final bool? prepNeeded;
   final String? location;
+  final ActionStatus? status;
 
   ScheduleAction copyWith({
     String? id,
@@ -200,6 +202,7 @@ class ScheduleAction {
     String? description,
     bool? prepNeeded,
     String? location,
+    ActionStatus? status,
   }) {
     return ScheduleAction(
       id: id ?? this.id,
@@ -212,6 +215,7 @@ class ScheduleAction {
       description: description ?? this.description,
       prepNeeded: prepNeeded ?? this.prepNeeded,
       location: location ?? this.location,
+      status: status ?? this.status,
     );
   }
 
@@ -227,25 +231,28 @@ class ScheduleAction {
       'description': description,
       'prep_needed': prepNeeded,
       'location': location,
+      'status': status?.toJson(),
     };
   }
 
   factory ScheduleAction.fromMap(Map<String, dynamic> map) {
     return ScheduleAction(
-      id: map['id'] as String,
-      title: map['title'] as String,
-      duration: map['duration'] as int,
-      category: map['category'] as String,
-      frequency: map['frequency'] != null
-          ? List<String>.from(map['frequency']
-              as List<dynamic>) // Cast dynamic list to String list
-          : null,
-      recurring: map['recurring'] as bool,
-      priority: map['priority'] as String,
-      description: map['description'] as String,
-      prepNeeded: map['prep_needed'] as bool,
-      location: map['location'] != null ? map['location'] as String : null,
-    );
+        id: map['id'] as String,
+        title: map['title'] as String,
+        duration: map['duration'] as int,
+        category: map['category'] as String,
+        frequency: map['frequency'] != null
+            ? List<String>.from(map['frequency']
+                as List<dynamic>) // Cast dynamic list to String list
+            : null,
+        recurring: map['recurring'] as bool,
+        priority: map['priority'] as String,
+        description: map['description'] as String,
+        prepNeeded: map['prep_needed'] as bool,
+        location: map['location'] != null ? map['location'] as String : null,
+        status: map['status'] != null
+            ? ActionStatusExtension.fromJson(map['status'])
+            : null);
   }
 
   String toJson() => json.encode(toMap());
@@ -255,7 +262,7 @@ class ScheduleAction {
 
   @override
   String toString() {
-    return 'ScheduleAction(id: $id, title: $title, duration: $duration, category: $category, frequency: $frequency, recurring: $recurring, priority: $priority, description: $description, prep_needed: $prepNeeded, location: $location)';
+    return 'ScheduleAction(id: $id, title: $title, duration: $duration, category: $category, frequency: $frequency, recurring: $recurring, priority: $priority, description: $description, prep_needed: $prepNeeded, location: $location, status: $status)';
   }
 
   @override
@@ -271,7 +278,8 @@ class ScheduleAction {
         other.priority == priority &&
         other.description == description &&
         other.prepNeeded == prepNeeded &&
-        other.location == location;
+        other.location == location &&
+        other.status == status;
   }
 
   @override
@@ -285,7 +293,8 @@ class ScheduleAction {
         priority.hashCode ^
         description.hashCode ^
         prepNeeded.hashCode ^
-        location.hashCode;
+        location.hashCode ^
+        status.hashCode;
   }
 }
 
@@ -557,6 +566,13 @@ enum Slot {
   undefined;
 }
 
+enum ActionStatus {
+  todo,
+  inProgress,
+  completed,
+  undefined;
+}
+
 extension TimeSlotExtension on Slot {
   String toJson() {
     return toString().split('.').last;
@@ -571,6 +587,23 @@ extension TimeSlotExtension on Slot {
       'evening' => Slot.evening,
       'night' => Slot.night,
       _ => Slot.undefined,
+    };
+  }
+}
+
+extension ActionStatusExtension on ActionStatus {
+  String toJson() {
+    return toString().split('.').last;
+  }
+
+  static ActionStatus fromJson(String raw) {
+    final clean = raw.replaceAll(RegExp(r'[^a-zA-Z]'), '').toLowerCase();
+
+    return switch (clean) {
+      'todo' => ActionStatus.todo,
+      'in_progress' => ActionStatus.inProgress,
+      'completed' => ActionStatus.completed,
+      _ => ActionStatus.undefined,
     };
   }
 }

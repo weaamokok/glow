@@ -3,7 +3,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../prompt_creator/prompt_creator_stepper_screen.dart';
 import 'calendar_deps.dart';
 
 class CalendarScreen extends HookConsumerWidget {
