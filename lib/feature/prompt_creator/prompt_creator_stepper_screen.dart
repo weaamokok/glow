@@ -32,7 +32,6 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
     ];
     final promptCreationState = useState(AsyncValue<GlowSchedule?>.data(null));
     final result = promptCreationState.value;
-    print('result -- $result');
     result.map(
       data: (data) {
         if (data.value != null) {
@@ -40,11 +39,13 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
         }
       },
       error: (error) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            content: Text('something went wrong: ${error.error} ')));
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              content: Text('something went wrong: ${error.error} ')));
+        });
       },
       loading: (loading) {
         return;

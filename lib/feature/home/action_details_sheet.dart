@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:glow/domain/glow.dart';
+import 'package:glow/feature/home/home_deps.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ActionDetailsSheet extends HookConsumerWidget {
-  const ActionDetailsSheet({Key? key, required this.action}) : super(key: key);
+  const ActionDetailsSheet(
+      {super.key, required this.instanceId, required this.action});
+
   final ScheduleAction action;
+  final String instanceId;
 
   @override
   Widget build(BuildContext context, ref) {
-    final actionStatus = useState(ActionStatus.todo);
+    final actionStatus = useState(action.instances
+        ?.firstWhere((element) => element.id == instanceId)
+        .status);
+    final prepNeeded = action.prepNeeded ?? false;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
@@ -39,27 +46,48 @@ class ActionDetailsSheet extends HookConsumerWidget {
           Align(
             alignment: AlignmentDirectional.centerEnd,
             child: IntrinsicWidth(
-              child: AnimatedContainer(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                duration: Duration(seconds: 2),
-                curve: Curves.fastEaseInToSlowEaseOut,
-                decoration: BoxDecoration(
-                    color: actionStatus.value == ActionStatus.todo
-                        ? Color(0xffFFD3B6)
-                        : Color(0xffA2D7D8),
-                    border: Border.all(color: Color(0xff282828)),
-                    borderRadius: BorderRadius.circular(12)),
-                child: Row(
-                  children: [
-                    Icon(Icons.check),
-                    if (actionStatus.value == ActionStatus.todo)
-                      InkWell(
-                          onTap: () {
-                            actionStatus.value = ActionStatus.completed;
-                            //todo update the state in local storage
-                          },
-                          child: Text('mark as Completed'))
-                  ],
+              child: InkWell(
+                onTap: () async {
+                  final response =
+                      await ref.read(HomeDeps.completeActionProvider((
+                    action.copyWith(
+                        instances: action.instances?.map((e) {
+                      if (e.id == instanceId) {
+                        return e.copyWith(
+                            status: actionStatus.value == ActionStatus.todo
+                                ? ActionStatus.completed
+                                : ActionStatus.todo);
+                      } else {
+                        return e;
+                      }
+                    }).toList()),
+                    instanceId
+                  )));
+                  response.maybeMap(
+                    orElse: () => actionStatus.value = ActionStatus.undefined,
+                    data: (data) => actionStatus.value = data.value,
+                    error: (error) => actionStatus.value = ActionStatus.todo,
+                  );
+                },
+                child: AnimatedContainer(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  duration: Duration(seconds: 2),
+                  curve: Curves.fastEaseInToSlowEaseOut,
+                  decoration: BoxDecoration(
+                      color: actionStatus.value == ActionStatus.todo
+                          ? Color(0xffFFD3B6)
+                          : Color(0xffA2D7D8),
+                      border: Border.all(color: Color(0xff282828)),
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Row(
+                    children: [
+                      actionStatus.value == ActionStatus.undefined
+                          ? CircularProgressIndicator.adaptive()
+                          : Icon(Icons.check),
+                      if (actionStatus.value == ActionStatus.todo)
+                        Text('mark as Completed')
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -92,6 +120,7 @@ class ActionDetailsSheet extends HookConsumerWidget {
               ]),
             ],
           ),
+          if (prepNeeded) Text("some preparations are needed here")
         ],
       ),
     );

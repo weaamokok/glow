@@ -13,6 +13,7 @@ import 'package:sembast/sembast.dart';
 
 import '../../app/local_db.dart';
 import '../../domain/user_info.dart';
+import '../../helper/helper_functions.dart';
 import 'image_picker_step.dart';
 
 class PromptCreatorDeps {
@@ -46,28 +47,29 @@ class PromptCreatorDeps {
     },
   ); //to local storage class/provider
   static final saveGlowScheduleProvider =
-      StateProviderFamily<Future<bool>, GlowSchedule>(
+      StateProviderFamily<Future<AsyncValue<GlowSchedule>>, GlowSchedule>(
     (ref, arg) async {
       //add image to local
       var store = StoreRef.main();
 
       try {
-        await store
+        final savedSchedule = await store
             .record(
               DbKeys.glowSchedule,
             )
-            .put(await LocalDB.db, arg.toMap())
+            .put(await LocalDB.db, arg.toMap(), merge: true)
             .then(
           (value) {
             debugPrint('glow schedule added successfully');
+            return value as Map<String, dynamic>;
           },
         );
-        // print('post   ${arg}');
+        return AsyncValue.data(GlowSchedule.fromMap(savedSchedule));
       } catch (e) {
         debugPrint('failed to add glow schedule: $e');
-        return false;
+        return AsyncValue.error('failed to add glow schedule: $e',
+            StackTrace.fromString(e.toString()));
       }
-      return true;
     },
   ); //to local storage class/provider
   static final addPromptPersonalInfoProvider =
@@ -250,13 +252,15 @@ Generate a personalized glow-up routine in JSON format optimized for calendar/sc
           "title": "Action name",
           "duration": X, // Minutes
           "category": "Physical|Skincare|Mental|etc.",
+          "startDate":"YYYY-MM-DD",
+          "endDate":"YYYY-MM-DD",
           "frequency": ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], // Days
           "recurring": true/false,
           "priority": "High/Medium/Low",
           "description": "Step-by-step instructions",
           "prep_needed": true/false,
-          "location": "Home/Gym/Office/etc."
-          "status":"todo/in_progress/completed",//by default it's todo
+          "location": "Home/Gym/Office/etc.",
+      
         }
       ]
     }
@@ -325,7 +329,8 @@ Generate a personalized glow-up routine in JSON format optimized for calendar/sc
 - Suggest specific YouTube workout videos when relevant
 - Recommend exact product names for skincare don't recommend product from companies that support israel, recommend korean skin care but not from COSRX company
 - Include 5-minute buffer between consecutive tasks
-
+-the actions starts from ${DateTime.now()} to 3 months add the start date and end date form actions accordingly
+-make sure the json response in correctly formatted 
 Focus on creating a time-bound, executable schedule rather than general advice. The output should be ready for direct import into a digital calendar.''';
 
       final content = [
@@ -339,11 +344,20 @@ Focus on creating a time-bound, executable schedule rather than general advice. 
                 content,
               );
 
-      debugPrint('response type${response.text ?? ''}');
-
+      debugPrint('response type${response.text.toString()}', wrapWidth: 100);
       final glowResponse = GlowSchedule.fromJson(response.text ?? '');
+      for (var slot in glowResponse.dailySchedule) {
+        slot.actions?.forEach((action) {
+          final instances = action.generateInstances();
+          slot.actions
+              ?.firstWhereOrNull(
+                (p0) => p0.id == action.id,
+              )
+              ?.instances
+              ?.addAll(instances);
+        });
+      }
       ref.read(PromptCreatorDeps.saveGlowScheduleProvider(glowResponse));
-
       state = AsyncValue<GlowSchedule?>.data(glowResponse);
       return state;
     } catch (e) {

@@ -1,8 +1,66 @@
 import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:glow/feature/calendar/calendar_deps.dart';
+import 'package:glow/feature/prompt_creator/prompt_creator_deps.dart';
+
+import '../../domain/glow.dart';
 
 class HomeDeps {
+  static final completeActionProvider = StateProviderFamily<
+      Future<AsyncValue<ActionStatus>>, (ScheduleAction, String)>(
+    (ref, arg) async {
+      try {
+        final schedule = ref.read(CalendarDeps.scheduleProvider);
+        if (!schedule.hasValue) {
+          return AsyncValue.error('No schedule found', StackTrace.current);
+        }
+
+        // Create a deep copy of the schedule with updated action
+        final updatedDailySchedules =
+            schedule.value?.dailySchedule.map((daily) {
+          final updatedActions = daily.actions?.map((action) {
+            return action.id == arg.$1.id
+                ? action.copyWith(instances: arg.$1.instances)
+                : action;
+          }).toList();
+          return updatedActions != null
+              ? daily.copyWith(actions: updatedActions)
+              : daily;
+        }).toList();
+
+        final updatedSchedule = schedule.value?.copyWith(
+          dailySchedule: updatedDailySchedules,
+        );
+        if (updatedSchedule == null) {
+          return AsyncValue.error('No schedule found', StackTrace.current);
+        }
+        // Save the updated schedule
+        final saveResult = await ref.read(
+          PromptCreatorDeps.saveGlowScheduleProvider(updatedSchedule),
+        );
+
+        // Handle the save result
+        return saveResult.when(
+          loading: () => AsyncValue.loading(),
+          data: (_) {
+            final updatedStatus = updatedDailySchedules
+                ?.expand((daily) => daily.actions ?? [])
+                .firstWhere((action) => action.id == arg.$1.id)
+                .instances
+                ?.firstWhere((instance) => instance.id == arg.$2)
+                .status;
+
+            ref.invalidate(CalendarDeps.scheduleProvider);
+            return AsyncValue.data(updatedStatus);
+          },
+          error: (error, stack) => AsyncValue.error(error, stack),
+        );
+      } catch (e, stack) {
+        return AsyncValue.error(e, stack);
+      }
+    },
+  ); //to
   static final greetingProvider = Provider(
     (ref) {
       var hour = DateTime.now().hour;

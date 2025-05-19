@@ -2,22 +2,43 @@ import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:glow/domain/glow.dart';
 
+import '../feature/home/action_details_sheet.dart';
+
 class ActionCard extends StatelessWidget {
-  const ActionCard({super.key, required this.action, required this.onTap});
+  const ActionCard({
+    super.key,
+    required this.instanceId,
+    required this.action,
+  });
 
   final ScheduleAction action;
-  final Function() onTap;
+  final String instanceId;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
+      onTap: () => showModalBottomSheet(
+        context: context,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+        ),
+        barrierColor: Color(0xff4A4A4A).withAlpha(70),
+        builder: (context) {
+          return ActionDetailsSheet(
+            action: action,
+            instanceId: instanceId,
+          );
+        },
+      ),
       child: Card(
         margin: EdgeInsets.all(0),
         elevation: 0,
         shape: RoundedRectangleBorder(
             side: BorderSide(
-              width: 1.5,
+              width: 1,
               color: Color(0xff282828),
             ),
             borderRadius: BorderRadius.circular(25)),
@@ -42,6 +63,15 @@ class ActionCard extends StatelessWidget {
                         Text(
                           action.title ?? '',
                           style: TextStyle(
+                              decoration: action.instances
+                                          ?.firstWhere(
+                                            (element) =>
+                                                element.id == instanceId,
+                                          )
+                                          .status ==
+                                      ActionStatus.completed
+                                  ? TextDecoration.lineThrough
+                                  : null,
                               fontSize: 14,
                               color: Color(0xff282828),
                               fontWeight: FontWeight.bold),

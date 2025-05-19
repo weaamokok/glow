@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:glow/domain/action_instance.dart';
 import 'package:glow/helper/helper_functions.dart';
 
 class GlowSchedule {
@@ -170,26 +171,30 @@ class ScheduleAction {
     required this.title,
     required this.duration,
     required this.category,
+    required this.startDate,
+    required this.endDate,
     required this.frequency,
     required this.recurring,
     required this.priority,
     required this.description,
-    this.status = ActionStatus.todo,
     this.prepNeeded = false,
     this.location,
+    this.instances,
   });
 
   final String id;
   final String? title;
   final int? duration;
   final String? category;
+  final DateTime startDate; // Schedule start
+  final DateTime endDate; // Schedule end
   final List<String>? frequency;
   final bool recurring;
   final String? priority;
   final String? description;
   final bool? prepNeeded;
   final String? location;
-  final ActionStatus? status;
+  final List<ActionInstance>? instances;
 
   ScheduleAction copyWith({
     String? id,
@@ -202,20 +207,24 @@ class ScheduleAction {
     String? description,
     bool? prepNeeded,
     String? location,
-    ActionStatus? status,
+    DateTime? startDate, // Schedule start
+    DateTime? endDate,
+    List<ActionInstance>? instances,
   }) {
     return ScheduleAction(
       id: id ?? this.id,
       title: title ?? this.title,
       duration: duration ?? this.duration,
       category: category ?? this.category,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
       frequency: frequency ?? this.frequency,
       recurring: recurring ?? this.recurring,
       priority: priority ?? this.priority,
       description: description ?? this.description,
       prepNeeded: prepNeeded ?? this.prepNeeded,
       location: location ?? this.location,
-      status: status ?? this.status,
+      instances: instances ?? this.instances,
     );
   }
 
@@ -225,13 +234,15 @@ class ScheduleAction {
       'title': title,
       'duration': duration,
       'category': category,
+      'startDate': startDate.toString(),
+      'endDate': endDate.toString(),
       'frequency': frequency,
       'recurring': recurring,
       'priority': priority,
       'description': description,
       'prep_needed': prepNeeded,
       'location': location,
-      'status': status?.toJson(),
+      'instances': instances?.map((i) => i.toMap()).toList(),
     };
   }
 
@@ -241,6 +252,8 @@ class ScheduleAction {
         title: map['title'] as String,
         duration: map['duration'] as int,
         category: map['category'] as String,
+        endDate: DateTime.parse(map['endDate'] as String),
+        startDate: DateTime.parse(map['startDate'] as String),
         frequency: map['frequency'] != null
             ? List<String>.from(map['frequency']
                 as List<dynamic>) // Cast dynamic list to String list
@@ -250,19 +263,33 @@ class ScheduleAction {
         description: map['description'] as String,
         prepNeeded: map['prep_needed'] as bool,
         location: map['location'] != null ? map['location'] as String : null,
-        status: map['status'] != null
-            ? ActionStatusExtension.fromJson(map['status'])
-            : null);
+        instances: map['instances'] != null
+            ? List<ActionInstance>.from(
+                (map['instances'] as List<dynamic>).map<ActionInstance>(
+                  (x) => ActionInstance.fromMap(x as Map<String, dynamic>),
+                ),
+              )
+            : []);
   }
 
   String toJson() => json.encode(toMap());
+
+  ActionInstance? datedInstance({DateTime? date}) =>
+      instances?.firstWhereOrNull(
+        (element) {
+          return getDateTimeWithNoTime((date ?? DateTime.now()).toString())
+                  .difference(getDateTimeWithNoTime(element.date.toString()))
+                  .inDays ==
+              0;
+        },
+      );
 
   factory ScheduleAction.fromJson(String source) =>
       ScheduleAction.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
-    return 'ScheduleAction(id: $id, title: $title, duration: $duration, category: $category, frequency: $frequency, recurring: $recurring, priority: $priority, description: $description, prep_needed: $prepNeeded, location: $location, status: $status)';
+    return 'ScheduleAction(id: $id, title: $title, duration: $duration, category: $category, startDate: $startDate, endDate: $endDate  frequency: $frequency, recurring: $recurring, priority: $priority, description: $description, prep_needed: $prepNeeded, location: $location, instances: $instances )';
   }
 
   @override
@@ -273,13 +300,15 @@ class ScheduleAction {
         other.title == title &&
         other.duration == duration &&
         other.category == category &&
+        other.endDate == endDate &&
+        other.startDate == startDate &&
         listEquals(other.frequency, frequency) &&
         other.recurring == recurring &&
         other.priority == priority &&
         other.description == description &&
         other.prepNeeded == prepNeeded &&
         other.location == location &&
-        other.status == status;
+        other.instances == instances;
   }
 
   @override
@@ -288,13 +317,44 @@ class ScheduleAction {
         title.hashCode ^
         duration.hashCode ^
         category.hashCode ^
+        startDate.hashCode ^
+        endDate.hashCode ^
         frequency.hashCode ^
         recurring.hashCode ^
         priority.hashCode ^
         description.hashCode ^
         prepNeeded.hashCode ^
         location.hashCode ^
-        status.hashCode;
+        instances.hashCode;
+  }
+
+  List<ActionInstance> generateInstances() {
+    final instances = <ActionInstance>[];
+    DateTime current = startDate;
+
+    while (current.isBefore(endDate)) {
+      if (frequency!.contains(_getWeekdayAbbreviation(current))) {
+        instances.add(ActionInstance(
+            id: '${id}_${current.toString()}',
+            date: current,
+            status: ActionStatus.todo));
+      }
+      current = current.add(const Duration(days: 1));
+    }
+
+    return instances;
+  }
+
+  String _getWeekdayAbbreviation(DateTime date) {
+    return const [
+      'Mon',
+      'Tue',
+      'Wed',
+      'Thu',
+      'Fri',
+      'Sat',
+      'Sun'
+    ][date.weekday - 1];
   }
 }
 
@@ -440,11 +500,12 @@ class PreparationItem {
   factory PreparationItem.fromMap(Map<String, dynamic> map) {
     return PreparationItem(
       id: map['id'] as String,
-      task: map['task'] as String,
-      category: map['category'] as String,
-      deadline: DateTime.tryParse(map['deadline']),
-      // Parse ISO string
-      urgency: map['urgency'] as String,
+      task: map['task'] != null ? map['task'] as String : null,
+      category: map['category'] != null ? map['category'] as String : null,
+      deadline: map['deadline'] != null
+          ? DateTime.tryParse(map['deadline'] as String)
+          : null,
+      urgency: map['urgency'] != null ? map['urgency'] as String : null,
     );
   }
 
@@ -517,9 +578,11 @@ class ProgressMilestone {
 
   factory ProgressMilestone.fromMap(Map<String, dynamic> map) {
     return ProgressMilestone(
-      id: map['id'] as String,
-      title: map['title'] as String,
-      targetDate: DateTime.tryParse(map['target_date']),
+      id: map['id'] != null ? map['id'] as String : null,
+      title: map['title'] != null ? map['title'] as String : null,
+      targetDate: map['target_date'] != null
+          ? DateTime.tryParse(map['target_date'] as String)
+          : null,
       // Parse ISO string
 
       successMetrics: map['success_metrics'] != null
@@ -600,9 +663,9 @@ extension ActionStatusExtension on ActionStatus {
     final clean = raw.replaceAll(RegExp(r'[^a-zA-Z]'), '').toLowerCase();
 
     return switch (clean) {
-      'todo' => ActionStatus.todo,
-      'in_progress' => ActionStatus.inProgress,
-      'completed' => ActionStatus.completed,
+      "todo" => ActionStatus.todo,
+      "in_progress" => ActionStatus.inProgress,
+      "completed" => ActionStatus.completed,
       _ => ActionStatus.undefined,
     };
   }

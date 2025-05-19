@@ -5,14 +5,14 @@ import 'package:glow/domain/glow.dart';
 import 'package:sembast/sembast.dart';
 
 class CalendarDeps {
-  static final scheduleProvider = StateProvider<Future<GlowSchedule?>>(
+  static final scheduleProvider = FutureProvider<GlowSchedule?>(
     (ref) async {
       final store = StoreRef.main();
       final schedule = await store
           .record(DbKeys.glowSchedule)
           .get(await LocalDB.db) as Map<String, dynamic>?;
-      if (schedule == null) return null;
 
+      if (schedule == null) return null;
       return GlowSchedule.fromMap(schedule);
     },
   );

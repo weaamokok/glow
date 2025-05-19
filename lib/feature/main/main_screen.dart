@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glow/feature/calendar/calendar_screen.dart';
 import 'package:glow/feature/home/home_screen.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../home/home_deps.dart';
@@ -17,7 +18,6 @@ class MainScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final indexBottomNavbar = ref.watch(indexBottomNavbarProvider);
-
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -56,7 +56,7 @@ class MainScreen extends ConsumerWidget {
               curve: Curves.easeInToLinear,
               duration: kThemeAnimationDuration,
               transformAlignment: AlignmentDirectional.bottomCenter,
-              padding: EdgeInsets.only(left: 16, right: 16, top: 24),
+              padding: EdgeInsets.only(left: 30, right: 30, top: 20),
               width: double.infinity,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.vertical(
@@ -75,23 +75,21 @@ class MainScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Your Progress',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          spacing: 2,
                           children: [
                             Text(
-                              'Almost there, Keep going..✨ ',
-                              style:
-                                  TextStyle(color: Colors.grey, fontSize: 12),
+                              '40%',
+                              style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
                             ),
                             Text(
-                              '40% ',
+                              'of your schedule is done, Keep going..✨ ',
                               style:
-                                  TextStyle(color: Colors.grey, fontSize: 16),
+                                  TextStyle(color: Colors.grey, fontSize: 13),
                             ),
                           ],
                         ),
@@ -104,7 +102,7 @@ class MainScreen extends ConsumerWidget {
                   Container(
                     //make progress bar dynamic
                     width: double.infinity, // Outer container takes full width
-                    height: 36, // Fixed height for the progress bar track
+                    height: 30, // Fixed height for the progress bar track
                     decoration: BoxDecoration(
                       border: Border.all(color: const Color(0xff282828)),
                       borderRadius: BorderRadius.circular(20),
@@ -125,19 +123,6 @@ class MainScreen extends ConsumerWidget {
                         height:
                             28, // Inner height: outer height (36) - margin (4*2) = 28
                       ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 14,
-                  ),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(start: 8.0),
-                    child: GlowBubble(
-                      text:
-                          'You don’t have to be perfect. Just\n be better than you were yesterday.',
-                      label: 'remember 📜',
-                      //make this dynamic or prepare punch of motivational quotes to display from
-                      backgroundColor: Color(0xffD19F95),
                     ),
                   ),
                   SizedBox(
@@ -224,6 +209,7 @@ class BottomNavBar extends ConsumerWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
+          color: Colors.transparent,
           border: indexBottomNavbar == 0
               ? Border(
                   right: BorderSide(color: Color(0xff282828)),
@@ -239,7 +225,7 @@ class BottomNavBar extends ConsumerWidget {
         margin: const EdgeInsets.only(
           bottom: 20,
         ),
-        height: 75,
+        height: 60,
         child: DotNavigationBar(
           // splashColor: Colors.black,
           unselectedItemColor:
@@ -251,7 +237,7 @@ class BottomNavBar extends ConsumerWidget {
           borderRadius: 30,
           margin: const EdgeInsets.symmetric(horizontal: 15),
           paddingR: const EdgeInsets.only(bottom: 0, top: 0),
-          itemPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+          itemPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
           enableFloatingNavBar: false,
           marginR: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
           currentIndex: indexBottomNavbar,

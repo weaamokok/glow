@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:glow/domain/glow.dart';
-import 'package:glow/feature/home/action_details_sheet.dart';
 import 'package:glow/ui/action_card.dart';
-
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
 import '../../helper/helper_functions.dart';
 import '../calendar/calendar_deps.dart';
 import '../prompt_creator/prompt_creator_stepper_screen.dart';
@@ -14,26 +11,21 @@ class HomeScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    ref.watch(CalendarDeps.scheduleProvider).then(
-      (value) async {
-        print('--$value ${context.mounted}');
-        if (context.mounted && value == null) {
-          print('here');
-          await showModalBottomSheet(
-            context: context,
-            shape: LinearBorder(),
-            isScrollControlled: true,
-            useRootNavigator: true,
-            constraints: BoxConstraints.expand(),
-            builder: (context) {
-              return PromptCreatorStepperScreen();
-            },
-          );
-        } else {
-          return value;
-        }
-      },
-    );
+    final schedule = ref.watch(CalendarDeps.scheduleProvider);
+    if (schedule.hasValue) {
+      if (context.mounted && schedule.value == null) {
+        Future.value(showModalBottomSheet(
+          context: context,
+          shape: LinearBorder(),
+          isScrollControlled: true,
+          useRootNavigator: true,
+          constraints: BoxConstraints.expand(),
+          builder: (context) {
+            return PromptCreatorStepperScreen();
+          },
+        ));
+      }
+    }
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 18.0),
@@ -51,48 +43,46 @@ class HomeScreen extends HookConsumerWidget {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
               ),
             ),
-            FutureBuilder(
-              future: ref.watch(CalendarDeps.scheduleProvider),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return SizedBox();
+            Consumer(
+              builder: (context, ref, widget) {
+                if (!schedule.hasValue) return SizedBox();
                 List<DailyTimeSlot> dailySchedule =
-                    snapshot.data?.dailySchedule ?? [];
-                print(dailySchedule.where(
-                  (element) => element.timeSlot == Slot.night,
-                ));
-                final currentSlot =
-                    getcurrentSlot(dailySchedule: dailySchedule);
-                print('current slot $currentSlot');
+                    schedule.value?.dailySchedule ?? [];
                 if (dailySchedule.isEmpty) {
                   return Column(
                     children: [Text('no items')],
                   );
                 }
+                final currentSlot =
+                    getcurrentSlot(dailySchedule: dailySchedule);
+
                 final nextActions = dailySchedule.firstWhereOrNull(
-                  (element) => element.timeSlot == currentSlot,
+                  (element) {
+                    return element.timeSlot == currentSlot;
+                  },
                 );
                 final actions = nextActions?.actions ?? [];
-                print('current actions -->  $actions');
+
+// Sort actions so completed ones come last
+                final sortedActions = [...actions]..sort((a, b) {
+                    if (a.datedInstance()?.status == ActionStatus.completed &&
+                        b.datedInstance()?.status == ActionStatus.completed) {
+                      return 0;
+                    }
+                    return a.datedInstance()?.status == ActionStatus.completed
+                        ? 1
+                        : -1;
+                  });
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisAlignment: MainAxisAlignment.center,
                   spacing: 2,
-                  children: actions
-                      .map((e) => ActionCard(
-                            action: e,
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30)),
-                                barrierColor: Color(0xff4A4A4A).withAlpha(70),
-                                builder: (context) {
-                                  return ActionDetailsSheet(action: e);
-                                },
-                              );
-                            },
-                          ))
-                      .toList(),
+                  children: sortedActions.map((e) {
+                    return ActionCard(
+                      action: e,
+                      instanceId: e.datedInstance()?.id ?? '',
+                    );
+                  }).toList(),
                 );
               },
             )
@@ -107,11 +97,8 @@ Slot getcurrentSlot({required List<DailyTimeSlot> dailySchedule}) {
   final currentTime = getDateTimeWithTime('');
   for (int i = 0; i < dailySchedule.length; i++) {
     if (i + 1 < dailySchedule.length) {
-      print(dailySchedule[i + 1].startTime);
       final slotStart = getDateTimeWithTime(dailySchedule[i].startTime ?? '');
       final slotEnd = getDateTimeWithTime(dailySchedule[i + 1].startTime ?? '');
-      print('current strt ->${currentTime.compareTo(slotStart)}');
-      print('current end ->${currentTime.compareTo(slotEnd)}');
       if (currentTime.compareTo(slotStart) == 1 &&
           currentTime.compareTo(slotEnd) == -1) {
         return dailySchedule[i].timeSlot ?? Slot.undefined;
