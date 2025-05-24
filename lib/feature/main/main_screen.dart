@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glow/feature/calendar/calendar_screen.dart';
 import 'package:glow/feature/home/home_screen.dart';
+import 'package:glow/feature/main/widget/glow_progress_widget.dart';
+import 'package:glow/feature/main/widget/weather_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -32,7 +34,9 @@ class MainScreen extends ConsumerWidget {
               ))
         ],
         title: Padding(
-          padding: const EdgeInsetsDirectional.only(start: 4.0),
+          padding: const EdgeInsetsDirectional.only(
+            start: 4.0,
+          ),
           child: Text(
             'Glowr',
             style: TextStyle(fontFamily: 'Lilita', fontSize: 28),
@@ -40,9 +44,9 @@ class MainScreen extends ConsumerWidget {
         ),
         bottom: indexBottomNavbar == 0
             ? PreferredSize(
-                preferredSize: Size.fromHeight(60),
+                preferredSize: Size.fromHeight(85),
                 child: Padding(
-                  padding: EdgeInsetsDirectional.only(start: 22),
+                  padding: EdgeInsetsDirectional.only(start: 22, end: 14),
                   child: GlowBubble(
                     text: ref.read(HomeDeps.greetingProvider),
                     label: DateFormat.MMMMEEEEd().format(DateTime.now()),
@@ -51,87 +55,7 @@ class MainScreen extends ConsumerWidget {
             : null,
       ),
       bottomNavigationBar: BottomNavBar(indexBottomNavbar: indexBottomNavbar),
-      bottomSheet: indexBottomNavbar == 0
-          ? AnimatedContainer(
-              curve: Curves.easeInToLinear,
-              duration: kThemeAnimationDuration,
-              transformAlignment: AlignmentDirectional.bottomCenter,
-              padding: EdgeInsets.only(left: 30, right: 30, top: 20),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(50),
-                  ),
-                  border: Border(
-                      right: BorderSide(color: Color(0xff282828)),
-                      top: BorderSide(color: Color(0xff282828)),
-                      left: BorderSide(color: Color(0xff282828)))),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(start: 8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          spacing: 2,
-                          children: [
-                            Text(
-                              '40%',
-                              style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              'of your schedule is done, Keep going..✨ ',
-                              style:
-                                  TextStyle(color: Colors.grey, fontSize: 13),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 4,
-                  ),
-                  Container(
-                    //make progress bar dynamic
-                    width: double.infinity, // Outer container takes full width
-                    height: 30, // Fixed height for the progress bar track
-                    decoration: BoxDecoration(
-                      border: Border.all(color: const Color(0xff282828)),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: FractionallySizedBox(
-                      alignment: AlignmentDirectional.centerStart,
-                      // Start progress from the left
-                      widthFactor: 0.5,
-                      // Replace `0.5` with your progress value (e.g., 0.7 for 70%)
-                      child: Container(
-                        margin: const EdgeInsets.all(4), // Inner margin
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Color(0xff282828)),
-                          color: Color(0xffA2D7D8), // Progress bar color
-                          borderRadius: BorderRadius.circular(
-                              16), // Slightly smaller radius than outer
-                        ),
-                        height:
-                            28, // Inner height: outer height (36) - margin (4*2) = 28
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                ],
-              ),
-            )
-          : null,
+      bottomSheet: indexBottomNavbar == 0 ? GlowProgressWidget() : null,
       body: screens[indexBottomNavbar],
     );
   }
@@ -166,17 +90,31 @@ class GlowBubble extends StatelessWidget {
               bottomStart: Radius.circular(15),
               topEnd: Radius.circular(15),
             )),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Row(
           children: [
-            Text(
-              label ?? '',
-              style: TextStyle(color: Colors.white.withValues(alpha: .67)),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    label ?? '',
+                    style:
+                        TextStyle(color: Colors.white.withValues(alpha: .67)),
+                  ),
+                  Text(text,
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w600)),
+                ],
+              ),
             ),
-            Text(text,
-                style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w600)),
+            SizedBox(
+              height: 50,
+              child: VerticalDivider(
+                color: Colors.white.withAlpha(80),
+              ),
+            ),
+            Flexible(child: WeatherSummaryWidget())
           ],
         ),
       ),
@@ -232,7 +170,6 @@ class BottomNavBar extends ConsumerWidget {
               Theme.of(context).bottomNavigationBarTheme.unselectedItemColor,
           selectedItemColor:
               Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
-
           backgroundColor: Colors.transparent,
           borderRadius: 30,
           margin: const EdgeInsets.symmetric(horizontal: 15),

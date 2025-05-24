@@ -12,6 +12,7 @@ class HomeScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final schedule = ref.watch(CalendarDeps.scheduleProvider);
+    print('shedule ${schedule.value?.progressMilestones}');
     if (schedule.hasValue) {
       if (context.mounted && schedule.value == null) {
         Future.value(showModalBottomSheet(
@@ -74,16 +75,21 @@ class HomeScreen extends HookConsumerWidget {
                         : -1;
                   });
                 return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 2,
-                  children: sortedActions.map((e) {
-                    return ActionCard(
-                      action: e,
-                      instanceId: e.datedInstance()?.id ?? '',
-                    );
-                  }).toList(),
-                );
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: 2,
+                    children: [
+                      if (sortedActions.isNotEmpty)
+                        ...sortedActions.map((e) {
+                          if (e.datedInstance() == null) {
+                            return SizedBox.shrink();
+                          }
+                          return ActionCard(
+                            action: e,
+                            instanceId: e.datedInstance()?.id ?? '',
+                          );
+                        }),
+                    ]);
               },
             )
           ],

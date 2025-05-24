@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:glow/domain/glow.dart';
 import 'package:glow/feature/home/home_deps.dart';
+import 'package:glow/helper/helper_functions.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ActionDetailsSheet extends HookConsumerWidget {
@@ -14,8 +15,8 @@ class ActionDetailsSheet extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final actionStatus = useState(action.instances
-        ?.firstWhere((element) => element.id == instanceId)
-        .status);
+        ?.firstWhereOrNull((element) => element.id == instanceId)
+        ?.status);
     final prepNeeded = action.prepNeeded ?? false;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16),

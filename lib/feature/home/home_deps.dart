@@ -1,6 +1,8 @@
 import 'dart:math';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:glow/domain/weather.dart';
 import 'package:glow/feature/calendar/calendar_deps.dart';
 import 'package:glow/feature/prompt_creator/prompt_creator_deps.dart';
 
@@ -60,7 +62,27 @@ class HomeDeps {
         return AsyncValue.error(e, stack);
       }
     },
-  ); //to
+  );
+  static final weatherProvider = FutureProviderFamily<WeatherResponse?, Coord>(
+    (ref, arg) async {
+      try {
+        final dio = Dio();
+        final response = await dio
+            .get(
+              'https://api.openweathermap.org/data/2.5/weather?lat=32.8985675&lon=13.2292141&units=metric&appid=2b9775e044c23e8dfa57eec0d27c6626',
+            )
+            .whenComplete(
+              () => print('request was sent'),
+            );
+        print('response ${response.data}');
+        final weatherData = response.data;
+        return WeatherResponse.fromJson(weatherData as Map<String, dynamic>);
+      } catch (e) {
+        print('something went wrong $e');
+        return null;
+      }
+    },
+  );
   static final greetingProvider = Provider(
     (ref) {
       var hour = DateTime.now().hour;
@@ -221,7 +243,7 @@ class HomeDeps {
         "Evening meditation: Breathe out today, in tomorrow 🌬️",
         "Final glow note: You’re worth the care 💌",
         "Tonight’s secret: Pillowcase magic (satin approved) 🌛",
-        "Evening astronomy: You’re the brightest constellation 🌌",
+        "Evening affirmation: You’re the brightest constellation 🌌",
         "Night owl? Let’s glow mindfully 🦉🧴",
         "Evening equation: Cleanse + Moisturize = 😴➡️😍",
         "Tuck today’s wins under your pillow 💤🏅",

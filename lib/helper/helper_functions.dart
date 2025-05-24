@@ -60,3 +60,38 @@ List<DateTime?> currentWeek() {
     },
   );
 }
+
+String getEmojiFromIconId(String? iconId) {
+  switch (iconId) {
+    case '01d':
+      return '☀️'; // Clear sky day
+    case '01n':
+      return '🌙'; // Clear sky night
+    case '02d':
+    case '02n':
+      return '⛅'; // Few clouds
+    case '03d':
+    case '03n':
+      return '☁️'; // Scattered clouds
+    case '04d':
+    case '04n':
+      return '🌥️'; // Broken clouds
+    case '09d':
+    case '09n':
+      return '🌧️'; // Shower rain
+    case '10d':
+    case '10n':
+      return '🌦️'; // Rain
+    case '11d':
+    case '11n':
+      return '⛈️'; // Thunderstorm
+    case '13d':
+    case '13n':
+      return '❄️'; // Snow
+    case '50d':
+    case '50n':
+      return '🌫️'; // Mist
+    default:
+      return '❓'; // Unknown
+  }
+}

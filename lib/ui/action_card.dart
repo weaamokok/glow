@@ -1,6 +1,7 @@
 import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:glow/domain/glow.dart';
+import 'package:glow/helper/helper_functions.dart';
 
 import '../feature/home/action_details_sheet.dart';
 
@@ -16,6 +17,12 @@ class ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentActionInstance = action.instances
+        ?.firstWhereOrNull(
+          (element) => element.id == instanceId,
+        )
+        ?.status;
+    print('current instance $currentActionInstance');
     return InkWell(
       onTap: () => showModalBottomSheet(
         context: context,
@@ -63,12 +70,7 @@ class ActionCard extends StatelessWidget {
                         Text(
                           action.title ?? '',
                           style: TextStyle(
-                              decoration: action.instances
-                                          ?.firstWhere(
-                                            (element) =>
-                                                element.id == instanceId,
-                                          )
-                                          .status ==
+                              decoration: currentActionInstance ==
                                       ActionStatus.completed
                                   ? TextDecoration.lineThrough
                                   : null,
