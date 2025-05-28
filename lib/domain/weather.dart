@@ -31,6 +31,15 @@ class WeatherResponse extends Equatable {
     this.cod,
   });
 
+  factory WeatherResponse.mock() {
+    return WeatherResponse(
+        main: Main(
+          temp: 989,
+        ),
+        name: 'jhkl',
+        weather: [Weather(description: 'jhijhkj')]);
+  }
+
   factory WeatherResponse.fromJson(Map<String, dynamic> json) {
     return WeatherResponse(
       coord: json['coord'] != null ? Coord.fromJson(json['coord']) : null,

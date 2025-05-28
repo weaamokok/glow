@@ -2,11 +2,13 @@ import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:glow/domain/weather.dart';
 import 'package:glow/feature/calendar/calendar_deps.dart';
 import 'package:glow/feature/prompt_creator/prompt_creator_deps.dart';
 
 import '../../domain/glow.dart';
+import '../../helper/location_manager.dart';
 
 class HomeDeps {
   static final completeActionProvider = StateProviderFamily<
@@ -63,13 +65,38 @@ class HomeDeps {
       }
     },
   );
-  static final weatherProvider = FutureProviderFamily<WeatherResponse?, Coord>(
-    (ref, arg) async {
+  static final checkPermission = Provider(
+    (ref) async {
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever ||
+          permission == LocationPermission.unableToDetermine) {
+        Geolocator.requestPermission();
+      }
+    },
+  );
+  static final currentLocation = FutureProvider<Coord>(
+    (ref) async {
+      await ref.read(checkPermission);
+      final currentPosition = await Geolocator.getCurrentPosition();
+
+      return Coord(
+          lat: currentPosition.latitude, lon: currentPosition.longitude);
+    },
+  );
+  static final weatherProvider = FutureProvider<WeatherResponse?>(
+    (
+      ref,
+    ) async {
       try {
         final dio = Dio();
+        final userLocation =
+            await ref.watch(LocationHandler.getCurtrentLocation);
+        print('user location $userLocation');
+        print('find data');
         final response = await dio
             .get(
-              'https://api.openweathermap.org/data/2.5/weather?lat=32.8985675&lon=13.2292141&units=metric&appid=2b9775e044c23e8dfa57eec0d27c6626',
+              'https://api.openweathermap.org/data/2.5/weather?lat=${userLocation.latitude}&lon=${userLocation.longitude}&units=metric&appid=2b9775e044c23e8dfa57eec0d27c6626',
             )
             .whenComplete(
               () => print('request was sent'),
@@ -79,6 +106,7 @@ class HomeDeps {
         return WeatherResponse.fromJson(weatherData as Map<String, dynamic>);
       } catch (e) {
         print('something went wrong $e');
+        AsyncError(e, StackTrace.fromString(e.toString()));
         return null;
       }
     },
