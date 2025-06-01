@@ -49,9 +49,12 @@ class ActionDetailsSheet extends HookConsumerWidget {
             child: IntrinsicWidth(
               child: InkWell(
                 onTap: () async {
-                  final response =
-                      await ref.read(HomeDeps.completeActionProvider((
-                    action.copyWith(
+                  final actionController = // In your widget
+                      ref.read(HomeDeps.actionControllerProvider.notifier);
+
+// Update action status
+                  final response = await actionController.updateActionStatus(
+                    action: action.copyWith(
                         instances: action.instances?.map((e) {
                       if (e.id == instanceId) {
                         return e.copyWith(
@@ -62,8 +65,22 @@ class ActionDetailsSheet extends HookConsumerWidget {
                         return e;
                       }
                     }).toList()),
-                    instanceId
-                  )));
+                    instanceId: instanceId,
+                  );
+                  //     await ref.read(HomeDeps.completeActionProvider((
+                  //   action.copyWith(
+                  //       instances: action.instances?.map((e) {
+                  //     if (e.id == instanceId) {
+                  //       return e.copyWith(
+                  //           status: actionStatus.value == ActionStatus.todo
+                  //               ? ActionStatus.completed
+                  //               : ActionStatus.todo);
+                  //     } else {
+                  //       return e;
+                  //     }
+                  //   }).toList()),
+                  //   instanceId
+                  // )));
                   response.maybeMap(
                     orElse: () => actionStatus.value = ActionStatus.undefined,
                     data: (data) => actionStatus.value = data.value,

@@ -95,3 +95,5 @@ String getEmojiFromIconId(String? iconId) {
       return '❓'; // Unknown
   }
 }
+
+final weekDays = ["Mon", "Tues", "Wed", "Thur", "Fri", "Sat", "Sun"];

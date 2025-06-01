@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
@@ -11,60 +12,6 @@ import '../../domain/glow.dart';
 import '../../helper/location_manager.dart';
 
 class HomeDeps {
-  static final completeActionProvider = StateProviderFamily<
-      Future<AsyncValue<ActionStatus>>, (ScheduleAction, String)>(
-    (ref, arg) async {
-      try {
-        final schedule = ref.read(CalendarDeps.scheduleProvider);
-        if (!schedule.hasValue) {
-          return AsyncValue.error('No schedule found', StackTrace.current);
-        }
-
-        // Create a deep copy of the schedule with updated action
-        final updatedDailySchedules =
-            schedule.value?.dailySchedule.map((daily) {
-          final updatedActions = daily.actions?.map((action) {
-            return action.id == arg.$1.id
-                ? action.copyWith(instances: arg.$1.instances)
-                : action;
-          }).toList();
-          return updatedActions != null
-              ? daily.copyWith(actions: updatedActions)
-              : daily;
-        }).toList();
-
-        final updatedSchedule = schedule.value?.copyWith(
-          dailySchedule: updatedDailySchedules,
-        );
-        if (updatedSchedule == null) {
-          return AsyncValue.error('No schedule found', StackTrace.current);
-        }
-        // Save the updated schedule
-        final saveResult = await ref.read(
-          PromptCreatorDeps.saveGlowScheduleProvider(updatedSchedule),
-        );
-
-        // Handle the save result
-        return saveResult.when(
-          loading: () => AsyncValue.loading(),
-          data: (_) {
-            final updatedStatus = updatedDailySchedules
-                ?.expand((daily) => daily.actions ?? [])
-                .firstWhere((action) => action.id == arg.$1.id)
-                .instances
-                ?.firstWhere((instance) => instance.id == arg.$2)
-                .status;
-
-            ref.invalidate(CalendarDeps.scheduleProvider);
-            return AsyncValue.data(updatedStatus);
-          },
-          error: (error, stack) => AsyncValue.error(error, stack),
-        );
-      } catch (e, stack) {
-        return AsyncValue.error(e, stack);
-      }
-    },
-  );
   static final checkPermission = Provider(
     (ref) async {
       final permission = await Geolocator.checkPermission();
@@ -88,27 +35,19 @@ class HomeDeps {
     (
       ref,
     ) async {
-      try {
-        final dio = Dio();
-        final userLocation =
-            await ref.watch(LocationHandler.getCurtrentLocation);
-        print('user location $userLocation');
-        print('find data');
-        final response = await dio
-            .get(
-              'https://api.openweathermap.org/data/2.5/weather?lat=${userLocation.latitude}&lon=${userLocation.longitude}&units=metric&appid=2b9775e044c23e8dfa57eec0d27c6626',
-            )
-            .whenComplete(
-              () => print('request was sent'),
-            );
-        print('response ${response.data}');
-        final weatherData = response.data;
-        return WeatherResponse.fromJson(weatherData as Map<String, dynamic>);
-      } catch (e) {
-        print('something went wrong $e');
-        AsyncError(e, StackTrace.fromString(e.toString()));
-        return null;
-      }
+      final dio = Dio();
+      final userLocation = await ref.watch(LocationHandler.getCurtrentLocation);
+
+      final response = await dio
+          .get(
+            'https://api.openweathermap.org/data/2.5/weather?lat=${userLocation.latitude}&lon=${userLocation.longitude}&units=metric&appid=2b9775e044c23e8dfa57eec0d27c6626',
+          )
+          .whenComplete(
+            () => print('request was sent'),
+          );
+
+      final weatherData = response.data;
+      return WeatherResponse.fromJson(weatherData as Map<String, dynamic>);
     },
   );
   static final greetingProvider = Provider(
@@ -281,4 +220,155 @@ class HomeDeps {
       ][i]; //make a list and choose randomly//ask ai to generate greetings
     },
   );
+  static final actionControllerProvider =
+      StateNotifierProvider<ActionController, AsyncValue<void>>((ref) {
+    return ActionController(ref);
+  });
+}
+
+class ActionController extends StateNotifier<AsyncValue<void>> {
+  final Ref ref;
+
+  ActionController(this.ref) : super(const AsyncValue<void>.data(null));
+
+  Future<AsyncValue<ActionStatus>> updateActionStatus({
+    required ScheduleAction action,
+    required String instanceId,
+  }) async {
+    try {
+      final schedule = ref.read(CalendarDeps.scheduleProvider);
+      if (!schedule.hasValue) {
+        return AsyncValue.error('No schedule found', StackTrace.current);
+      }
+
+      // Create a deep copy of the schedule with updated action
+      final updatedDailySchedules = schedule.value?.dailySchedule.map((daily) {
+        final updatedActions = daily.actions?.map((e) {
+          return e.id == action.id
+              ? e.copyWith(instances: action.instances)
+              : e;
+        }).toList();
+        return updatedActions != null
+            ? daily.copyWith(actions: updatedActions)
+            : daily;
+      }).toList();
+
+      final updatedSchedule = schedule.value?.copyWith(
+        dailySchedule: updatedDailySchedules,
+      );
+      if (updatedSchedule == null) {
+        return AsyncValue.error('No schedule found', StackTrace.current);
+      }
+      // Save the updated schedule
+      final saveResult = await ref.read(
+        PromptCreatorDeps.saveGlowScheduleProvider(updatedSchedule),
+      );
+
+      // Handle the save result
+      return saveResult.when(
+        loading: () => AsyncValue.loading(),
+        data: (_) {
+          final updatedStatus = updatedDailySchedules
+              ?.expand((daily) => daily.actions ?? [])
+              .firstWhere((e) => e.id == action.id)
+              .instances
+              ?.firstWhere((instance) => instance.id == instanceId)
+              .status;
+
+          ref.invalidate(CalendarDeps.scheduleProvider);
+          return AsyncValue.data(updatedStatus);
+        },
+        error: (error, stack) => AsyncValue.error(error, stack),
+      );
+    } catch (e, stack) {
+      print('eror$e');
+      return AsyncValue.error(e, stack);
+    }
+  }
+
+  Future<AsyncValue<void>> deleteAction(
+      {required String actionId, required String instanceId}) async {
+    try {
+      final schedule = ref.read(CalendarDeps.scheduleProvider);
+      if (!schedule.hasValue) {
+        return AsyncValue.error('No schedule found', StackTrace.current);
+      }
+
+      // Create a deep copy of the schedule with updated action
+      final updatedDailySchedules = schedule.value?.dailySchedule.map((daily) {
+        final updatedActions = daily.actions?.map((action) {
+          return action.id == actionId
+              ? action.copyWith(
+                  instances: action.instances
+                      ?.where(
+                        (e) => e.id != instanceId,
+                      )
+                      .toList())
+              : action;
+        }).toList();
+        return updatedActions != null
+            ? daily.copyWith(actions: updatedActions)
+            : daily;
+      }).toList();
+
+      final updatedSchedule = schedule.value?.copyWith(
+        dailySchedule: updatedDailySchedules,
+      );
+      if (updatedSchedule == null) {
+        return AsyncValue.error('No schedule found', StackTrace.current);
+      }
+      final saveResult = await ref.read(
+        PromptCreatorDeps.saveGlowScheduleProvider(updatedSchedule),
+      );
+      // Handle the save result
+      return saveResult.when(
+        loading: () => AsyncValue.loading(),
+        data: (_) {
+          ref.invalidate(CalendarDeps.scheduleProvider);
+          return AsyncValue.data(null);
+        },
+        error: (error, stack) => AsyncValue.error(error, stack),
+      );
+    } catch (e, st) {
+      print('eror$e');
+
+      state = AsyncValue<void>.error(e, st);
+      rethrow;
+    }
+  }
+
+  Future<void> addAction({
+    required ScheduleAction newAction,
+    required DateTime targetDate,
+  }) async {
+    //   try {
+    //   state = const AsyncValue<void>.loading();
+    //
+    //   final scheduleAsync = ref.read(CalendarDeps.scheduleProvider);
+    //   if (!scheduleAsync.hasValue) {
+    //     throw Exception('Schedule not available');
+    //   }
+    //   final schedule = scheduleAsync.value!;
+    //
+    //   // Create updated schedule with new action added
+    //   final updatedSchedule = schedule.copyWith(
+    //     dailySchedule: schedule.dailySchedule.map((daily) {
+    //       if (daily. == targetDate) {
+    //         final existingActions = daily.actions ?? [];
+    //         return daily.copyWith(
+    //           actions: [...existingActions, newAction],
+    //         );
+    //       }
+    //       return daily;
+    //     }).toList(),
+    //   );
+    //
+    //   await _persistSchedule(updatedSchedule);
+    //   ref.invalidate(scheduleProvider);
+    //   state = const AsyncValue<void>.data(null);
+    // } catch (e, st) {
+    //   state = AsyncValue<void>.error(e, st);
+    //   rethrow;
+    // }
+  }
 }

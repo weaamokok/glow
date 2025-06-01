@@ -1,3 +1,5 @@
+import 'package:enefty_icons/enefty_icons.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glow/domain/weather.dart';
@@ -13,7 +15,33 @@ class WeatherSummaryWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final weather = ref.watch(HomeDeps.weatherProvider);
     print(weather);
-    if (weather.hasError) return SizedBox();
+    if (weather.hasError) {
+      return Column(
+        children: [
+          Icon(
+            EneftyIcons.cloud_lightning_outline,
+            color: Colors.white,
+          ),
+          RichText(
+            text: TextSpan(text: "weather forecast unavailable", children: [
+              TextSpan(
+                  text: "retry",
+                  recognizer: TapGestureRecognizer(supportedDevices: null)
+                    ..onTap = () {
+                      // Refresh provider here
+                      ref.invalidate(HomeDeps.weatherProvider);
+                    },
+                  onExit: (event) {
+                    print('hi');
+                  },
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.underline)),
+            ]),
+          ),
+        ],
+      );
+    }
     return Skeletonizer(
         containersColor: Colors.white.withValues(alpha: .67),
         effect: ShimmerEffect(
@@ -22,7 +50,9 @@ class WeatherSummaryWidget extends ConsumerWidget {
         textBoneBorderRadius:
             TextBoneBorderRadius(BorderRadius.all(Radius.circular(3))),
         enabled: weather.isLoading,
-        child: WeatherWidget(weatherResponse: weather.value));
+        child: !weather.isLoading && weather.value == null
+            ? SizedBox()
+            : WeatherWidget(weatherResponse: weather.value));
   }
 }
 

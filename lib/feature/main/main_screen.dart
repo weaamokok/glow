@@ -11,6 +11,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../home/home_deps.dart';
+import '../home/update_action_bottom_sheet.dart';
 import 'main_deps.dart';
 
 @RoutePage()
@@ -28,9 +29,14 @@ class MainScreen extends ConsumerWidget {
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(5),
                   border: Border.all(color: Color(0xff282828), width: 1.5)),
-              child: Icon(
-                Icons.add,
-                weight: 2,
+              child: InkWell(
+                child: Icon(
+                  Icons.add,
+                  weight: 2,
+                ),
+                onTap: () => showModalBottomSheet(
+                    context: context,
+                    builder: (context) => UpdateActionBottomSheet()),
               ))
         ],
         title: Padding(

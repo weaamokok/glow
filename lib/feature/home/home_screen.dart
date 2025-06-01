@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:glow/domain/glow.dart';
 import 'package:glow/ui/action_card.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -11,31 +12,35 @@ class HomeScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final schedule = ref.watch(CalendarDeps.scheduleProvider);
-    print('shedule ${schedule.value?.progressMilestones}');
-    if (schedule.hasValue) {
-      if (context.mounted && schedule.value == null) {
-        Future.value(showModalBottomSheet(
-          context: context,
-          shape: LinearBorder(),
-          isScrollControlled: true,
-          useRootNavigator: true,
-          constraints: BoxConstraints.expand(),
-          builder: (context) {
-            return PromptCreatorStepperScreen();
-          },
-        ));
+    final schedule = ref.read(CalendarDeps.scheduleProvider);
+    final hasShownPrompt = useState(false); // Track if we've shown the prompt
+    print('schedule $schedule');
+    // Use useEffect to handle showing the bottom sheet AFTER build completes
+    useEffect(() {
+      if (schedule.value == null && !hasShownPrompt.value && context.mounted) {
+        hasShownPrompt.value = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showModalBottomSheet(
+            context: context,
+            shape: const LinearBorder(),
+            isScrollControlled: true,
+            constraints: BoxConstraints.expand(),
+            builder: (context) => const PromptCreatorStepperScreen(),
+          );
+        });
       }
-    }
+      return null;
+    }, [schedule.value, hasShownPrompt.value]);
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 18.0),
         child: Column(
-          spacing: 10,
+          spacing: 5,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: 20,
+              height: 25,
             ),
             Padding(
               padding: const EdgeInsetsDirectional.only(start: 6, bottom: 2),
@@ -54,6 +59,7 @@ class HomeScreen extends HookConsumerWidget {
                     children: [Text('no items')],
                   );
                 }
+                print('daily sch ${dailySchedule}');
                 final currentSlot =
                     getcurrentSlot(dailySchedule: dailySchedule);
 
@@ -63,7 +69,7 @@ class HomeScreen extends HookConsumerWidget {
                   },
                 );
                 final actions = nextActions?.actions ?? [];
-
+                print('actions $currentSlot');
 // Sort actions so completed ones come last
                 final sortedActions = [...actions]..sort((a, b) {
                     if (a.datedInstance()?.status == ActionStatus.completed &&
@@ -74,6 +80,7 @@ class HomeScreen extends HookConsumerWidget {
                         ? 1
                         : -1;
                   });
+                print('sorted actions ${sortedActions}');
                 return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -84,7 +91,7 @@ class HomeScreen extends HookConsumerWidget {
                           if (e.datedInstance() == null) {
                             return SizedBox.shrink();
                           }
-                          return ActionCard(
+                          return ManageableActionCard(
                             action: e,
                             instanceId: e.datedInstance()?.id ?? '',
                           );

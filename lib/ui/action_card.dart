@@ -1,9 +1,12 @@
 import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_swipe_action_cell/core/cell.dart';
 import 'package:glow/domain/glow.dart';
 import 'package:glow/helper/helper_functions.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../feature/home/action_details_sheet.dart';
+import '../feature/home/home_deps.dart';
 
 class ActionCard extends StatelessWidget {
   const ActionCard({
@@ -43,14 +46,14 @@ class ActionCard extends StatelessWidget {
       child: Card(
         margin: EdgeInsets.all(0),
         elevation: 0,
-        shape: RoundedRectangleBorder(
-            side: BorderSide(
-              width: 1,
-              color: Color(0xff282828),
-            ),
-            borderRadius: BorderRadius.circular(25)),
+        // shape: RoundedRectangleBorder(
+        //     side: BorderSide(
+        //       width: 1,
+        //       color: Color(0xff282828),
+        //     ),
+        //     borderRadius: BorderRadius.circular(25)),
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(10.0),
           child: Row(
             children: [
               Expanded(
@@ -145,5 +148,49 @@ class ActionCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class ManageableActionCard extends ConsumerWidget {
+  const ManageableActionCard({
+    super.key,
+    required this.instanceId,
+    required this.action,
+  });
+
+  final ScheduleAction action;
+  final String instanceId;
+
+  @override
+  Widget build(BuildContext context, ref) {
+    return SwipeActionCell(
+        trailingActions: [
+          SwipeAction(
+              icon: Icon(
+                EneftyIcons.trash_outline,
+                color: Colors.white,
+                size: 20,
+              ),
+              onTap: (CompletionHandler handler) async {
+                final actionController = // In your widget
+                    ref.read(HomeDeps.actionControllerProvider.notifier);
+
+                await actionController.deleteAction(
+                    actionId: action.id, instanceId: instanceId);
+              },
+              color: Colors.red),
+          SwipeAction(
+              icon: Icon(
+                EneftyIcons.edit_2_outline,
+                size: 20,
+                color: Colors.white,
+              ),
+              onTap: (CompletionHandler handler) async {
+                //  ref.read();
+              },
+              color: Color(0xffEFB036)),
+        ],
+        key: Key(action.id),
+        child: ActionCard(instanceId: instanceId, action: action));
   }
 }

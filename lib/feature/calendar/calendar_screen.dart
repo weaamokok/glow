@@ -97,7 +97,7 @@ class CalendarScreen extends HookConsumerWidget {
 
                                               if (actionCurrentInstance !=
                                                   null) {
-                                                return ActionCard(
+                                                return ManageableActionCard(
                                                   instanceId:
                                                       actionCurrentInstance.id,
                                                   action: e,
