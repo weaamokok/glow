@@ -34,9 +34,11 @@ class MainScreen extends ConsumerWidget {
                   Icons.add,
                   weight: 2,
                 ),
-                onTap: () => showModalBottomSheet(
-                    context: context,
-                    builder: (context) => UpdateActionBottomSheet()),
+                onTap: () =>
+                    showModalBottomSheet(
+                        context: context,
+
+                        builder: (context) => UpdateActionBottomSheet()),
               ))
         ],
         title: Padding(
@@ -50,14 +52,14 @@ class MainScreen extends ConsumerWidget {
         ),
         bottom: indexBottomNavbar == 0
             ? PreferredSize(
-                preferredSize: Size.fromHeight(85),
-                child: Padding(
-                  padding: EdgeInsetsDirectional.only(start: 22, end: 14),
-                  child: GlowBubble(
-                    text: ref.read(HomeDeps.greetingProvider),
-                    label: DateFormat.MMMMEEEEd().format(DateTime.now()),
-                  ),
-                ))
+            preferredSize: Size.fromHeight(100),
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(start: 22, end: 14),
+              child: GlowBubble(
+                text: ref.read(HomeDeps.greetingProvider),
+                label: DateFormat.MMMMEEEEd().format(DateTime.now()),
+              ),
+            ))
             : null,
       ),
       bottomNavigationBar: BottomNavBar(indexBottomNavbar: indexBottomNavbar),
@@ -90,6 +92,7 @@ class GlowBubble extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(14),
         decoration: BoxDecoration(
+            border: Border.all(),
             color: backgroundColor ?? Color(0xffB399D4),
             borderRadius: BorderRadiusDirectional.only(
               bottomEnd: Radius.circular(15),
@@ -106,7 +109,7 @@ class GlowBubble extends StatelessWidget {
                   Text(
                     label ?? '',
                     style:
-                        TextStyle(color: Colors.white.withValues(alpha: .67)),
+                    TextStyle(color: Colors.white.withValues(alpha: .67)),
                   ),
                   Text(text,
                       style: TextStyle(
@@ -156,8 +159,8 @@ class BottomNavBar extends ConsumerWidget {
           color: Colors.transparent,
           border: indexBottomNavbar == 0
               ? Border(
-                  right: BorderSide(color: Color(0xff282828)),
-                  left: BorderSide(color: Color(0xff282828)))
+              right: BorderSide(color: Color(0xff282828)),
+              left: BorderSide(color: Color(0xff282828)))
               : null),
       child: Container(
         decoration: BoxDecoration(
@@ -173,9 +176,15 @@ class BottomNavBar extends ConsumerWidget {
         child: DotNavigationBar(
           // splashColor: Colors.black,
           unselectedItemColor:
-              Theme.of(context).bottomNavigationBarTheme.unselectedItemColor,
+          Theme
+              .of(context)
+              .bottomNavigationBarTheme
+              .unselectedItemColor,
           selectedItemColor:
-              Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
+          Theme
+              .of(context)
+              .bottomNavigationBarTheme
+              .selectedItemColor,
           backgroundColor: Colors.transparent,
           borderRadius: 30,
           margin: const EdgeInsets.symmetric(horizontal: 15),
@@ -184,9 +193,10 @@ class BottomNavBar extends ConsumerWidget {
           enableFloatingNavBar: false,
           marginR: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
           currentIndex: indexBottomNavbar,
-          onTap: (value) => ref
-              .read(indexBottomNavbarProvider.notifier)
-              .update((state) => value),
+          onTap: (value) =>
+              ref
+                  .read(indexBottomNavbarProvider.notifier)
+                  .update((state) => value),
           dotIndicatorColor: Color(0xffEFB036),
           items: _items,
         ),

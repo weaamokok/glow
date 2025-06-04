@@ -357,7 +357,7 @@ Focus on creating a time-bound, executable schedule rather than general advice. 
               ?.addAll(instances);
         });
       }
-      ref.invalidate(PromptCreatorDeps.saveGlowScheduleProvider(glowResponse));
+      ref.read(PromptCreatorDeps.saveGlowScheduleProvider(glowResponse));
       state = AsyncValue<GlowSchedule?>.data(glowResponse);
       return state;
     } catch (e) {

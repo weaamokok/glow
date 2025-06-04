@@ -33,17 +33,44 @@ class MyApp extends ConsumerWidget {
               onSurface: Color(0xff282828)),
           fontFamily: 'Roboto',
           inputDecorationTheme: InputDecorationTheme(
-              hintStyle:
-                  TextStyle(color: Color(0xff4C7B8B).withValues(alpha: .7)),
-              contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 12),
-              focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                      color: Color(0xff4C7B8B).withValues(alpha: .7)),
-                  borderRadius: BorderRadius.circular(12)),
-              enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                      color: Color(0xff4C7B8B).withValues(alpha: .7)),
-                  borderRadius: BorderRadius.circular(12)))),
+            labelStyle: TextStyle(color: Color(0xff282828).withAlpha(60)),
+            hintStyle:
+                TextStyle(color: Color(0xff323a3f).withValues(alpha: .7)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Color(0xff4C7B8B), width: 0.5),
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                  color: Color(0xff282828).withValues(alpha: .5), width: 0.4),
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            ///////-////////
+            // contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            // focusedBorder: UnderlineInputBorder(
+            //   borderSide: BorderSide(
+            //     color: Color(0xff282828).withAlpha(40),
+            //   ),
+            // ),
+            // enabledBorder: UnderlineInputBorder(
+            //   borderSide: BorderSide(
+            //     color: Color(0xff282828).withAlpha(40),
+            //   ),
+            // )
+            ///////////-/./////
+            // focusedBorder: OutlineInputBorder(
+            //     borderSide:
+            //         BorderSide(color: Color(0xff4C7B8B).withValues(alpha: .7)),
+            //     borderRadius: BorderRadius.circular(12)),
+            // enabledBorder: OutlineInputBorder(
+            //     borderSide:
+            //         BorderSide(color: Color(0xff4C7B8B).withValues(alpha: .7)),
+            //     borderRadius: BorderRadius.circular(12)),
+          )),
     );
   }
 }

@@ -12,13 +12,11 @@ class HomeScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final schedule = ref.read(CalendarDeps.scheduleProvider);
-    final hasShownPrompt = useState(false); // Track if we've shown the prompt
+    final schedule = ref.watch(CalendarDeps.scheduleProvider);
     print('schedule $schedule');
     // Use useEffect to handle showing the bottom sheet AFTER build completes
     useEffect(() {
-      if (schedule.value == null && !hasShownPrompt.value && context.mounted) {
-        hasShownPrompt.value = true;
+      if (schedule.value == null && context.mounted) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           showModalBottomSheet(
             context: context,
@@ -30,7 +28,9 @@ class HomeScreen extends HookConsumerWidget {
         });
       }
       return null;
-    }, [schedule.value, hasShownPrompt.value]);
+    }, [
+      schedule.value,
+    ]);
 
     return SingleChildScrollView(
       child: Padding(
@@ -40,7 +40,7 @@ class HomeScreen extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: 25,
+              height: 15,
             ),
             Padding(
               padding: const EdgeInsetsDirectional.only(start: 6, bottom: 2),
@@ -65,6 +65,8 @@ class HomeScreen extends HookConsumerWidget {
 
                 final nextActions = dailySchedule.firstWhereOrNull(
                   (element) {
+                    print(
+                        'element ${element.timeSlot} start time ${element.timeSlot}');
                     return element.timeSlot == currentSlot;
                   },
                 );
@@ -80,22 +82,19 @@ class HomeScreen extends HookConsumerWidget {
                         ? 1
                         : -1;
                   });
+
                 print('sorted actions ${sortedActions}');
                 return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisAlignment: MainAxisAlignment.center,
                     spacing: 2,
                     children: [
-                      if (sortedActions.isNotEmpty)
-                        ...sortedActions.map((e) {
-                          if (e.datedInstance() == null) {
-                            return SizedBox.shrink();
-                          }
-                          return ManageableActionCard(
-                            action: e,
-                            instanceId: e.datedInstance()?.id ?? '',
-                          );
-                        }),
+                      ...sortedActions.map((e) {
+                        return ManageableActionCard(
+                          action: e,
+                          instanceId: e.datedInstance()?.id ?? '',
+                        );
+                      }),
                     ]);
               },
             )

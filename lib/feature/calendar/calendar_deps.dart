@@ -11,7 +11,7 @@ class CalendarDeps {
       final schedule = await store
           .record(DbKeys.glowSchedule)
           .get(await LocalDB.db) as Map<String, dynamic>?;
-
+      print('in provider $schedule');
       if (schedule == null) return null;
       return GlowSchedule.fromMap(schedule);
     },

@@ -68,226 +68,209 @@ class PersonalInfoStep extends HookConsumerWidget {
     // }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      padding: const EdgeInsets.symmetric(horizontal: 28.0),
       child: Column(
-        spacing: 14,
+        spacing: 15,
         children: [
-          SizedBox(
-              height: 46,
-              child: TextFormField(
-                controller: workTextFieldController,
-                decoration: InputDecoration(
-                  hintText: 'What do you do for living..?',
-                ),
-                onChanged: (value) {
-                  promptPersonalInfo
-                      .updateJob(workTextFieldController.value.text);
-                },
-              )),
-          SizedBox(
-              height: 46,
-              child: TextFormField(
-                controller: birthDateTextFieldController,
-                readOnly: true,
-                onTap: () async {
-                  final date = await showDatePicker(
-                    context: context,
-                    firstDate: DateTime(1920),
-                    lastDate: DateTime(2017),
-                  );
-                  if (date != null) {
-                    birthDateTextFieldController.value =
-                        TextEditingValue(text: formatDate(date));
-                    promptPersonalInfo.updateBirthDate(
-                        birthDateTextFieldController.value.text);
-                  }
-                },
-                decoration: InputDecoration(
-                    hintText: 'birth date',
-                    suffixIcon: Icon(
-                      EneftyIcons.calendar_2_outline,
-                      color: Color(0xff4C7B8B).withValues(alpha: .7),
-                    )),
-              )),
-          SizedBox(
-              height: 46,
-              child: TextFormField(
-                controller: genderTextFieldController,
-                readOnly: true,
-                onTap: () {
-                  showAdaptiveDialog(
-                    context: context,
-                    builder: (context) {
-                      return Dialog(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15)),
-                        child: IntrinsicHeight(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Column(
-                              children: [
-                                ListTile(
-                                  title: const Text('male'),
-                                  leading: Radio<Gender>(
-                                    value: Gender.male,
-                                    groupValue: selectedOption.value,
-                                    onChanged: (value) {
-                                      if (value == null) return;
-                                      selectedOption.value = value;
-                                      genderTextFieldController.value =
-                                          TextEditingValue(
-                                              text: value
-                                                  .toString()
-                                                  .split('.')
-                                                  .last);
-                                      promptPersonalInfo.updateGender(
-                                          value.toString().split('.').last);
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                ),
-                                ListTile(
-                                  title: const Text('female'),
-                                  leading: Radio<Gender>(
-                                    value: Gender.female,
-                                    groupValue: selectedOption.value,
-                                    onChanged: (value) {
-                                      if (value == null) return;
-                                      selectedOption.value = value;
-                                      genderTextFieldController.value =
-                                          TextEditingValue(
-                                              text: value
-                                                  .toString()
-                                                  .split('.')
-                                                  .last);
-                                      promptPersonalInfo.updateGender(
-                                          value.toString().split('.').last);
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                ),
-                              ],
+          TextFormField(
+            controller: workTextFieldController,
+            decoration: InputDecoration(
+              // hintText: 'What do you do for living..?',
+              labelText: 'What do you do for living..?',
+            ),
+            onChanged: (value) {
+              promptPersonalInfo.updateJob(workTextFieldController.value.text);
+            },
+          ),
+          TextFormField(
+            controller: birthDateTextFieldController,
+            readOnly: true,
+            onTap: () async {
+              final date = await showDatePicker(
+                context: context,
+                firstDate: DateTime(1920),
+                lastDate: DateTime(2017),
+              );
+              if (date != null) {
+                birthDateTextFieldController.value =
+                    TextEditingValue(text: formatDate(date));
+                promptPersonalInfo
+                    .updateBirthDate(birthDateTextFieldController.value.text);
+              }
+            },
+            decoration: InputDecoration(
+                labelText: 'birth date',
+                suffixIcon: Icon(
+                  EneftyIcons.calendar_2_outline,
+                  color: Color(0xff4C7B8B).withValues(alpha: .7),
+                )),
+          ),
+          TextFormField(
+            controller: genderTextFieldController,
+            readOnly: true,
+            onTap: () {
+              showAdaptiveDialog(
+                context: context,
+                builder: (context) {
+                  return Dialog(
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                    child: IntrinsicHeight(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Column(
+                          children: [
+                            ListTile(
+                              title: const Text('male'),
+                              leading: Radio<Gender>(
+                                value: Gender.male,
+                                groupValue: selectedOption.value,
+                                onChanged: (value) {
+                                  if (value == null) return;
+                                  selectedOption.value = value;
+                                  genderTextFieldController.value =
+                                      TextEditingValue(
+                                          text:
+                                              value.toString().split('.').last);
+                                  promptPersonalInfo.updateGender(
+                                      value.toString().split('.').last);
+                                  Navigator.pop(context);
+                                },
+                              ),
                             ),
-                          ),
+                            ListTile(
+                              title: const Text('female'),
+                              leading: Radio<Gender>(
+                                value: Gender.female,
+                                groupValue: selectedOption.value,
+                                onChanged: (value) {
+                                  if (value == null) return;
+                                  selectedOption.value = value;
+                                  genderTextFieldController.value =
+                                      TextEditingValue(
+                                          text:
+                                              value.toString().split('.').last);
+                                  promptPersonalInfo.updateGender(
+                                      value.toString().split('.').last);
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                      );
-                    },
+                      ),
+                    ),
                   );
                 },
-                decoration: InputDecoration(
-                  hintText: 'gender',
-                ),
-              )),
-          SizedBox(
-              height: 46,
-              child: TextFormField(
-                controller: activityTextFieldController,
-                readOnly: true,
-                onTap: () {
-                  showAdaptiveDialog(
-                    context: context,
-                    builder: (context) {
-                      //  String selectedActivity = activityType.first;
-                      return Dialog(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15)),
-                        child: IntrinsicHeight(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Column(
-                                children: activityType
-                                    .map(
-                                      (e) => ListTile(
-                                        title: Text(e),
-                                        leading: Radio<String>(
-                                          value: e,
-                                          groupValue: selectedActivity.value,
-                                          onChanged: (value) {
-                                            if (value == null) return;
-                                            selectedActivity.value = value;
-                                            activityTextFieldController.value =
-                                                TextEditingValue(text: value);
-                                            promptPersonalInfo
-                                                .updateActivity(value);
-                                            Navigator.pop(context);
-                                          },
-                                        ),
-                                      ),
-                                    )
-                                    .toList()),
-                          ),
-                        ),
-                      );
-                    },
+              );
+            },
+            decoration: InputDecoration(
+              labelText: 'gender',
+            ),
+          ),
+          TextFormField(
+            controller: activityTextFieldController,
+            readOnly: true,
+            onTap: () {
+              showAdaptiveDialog(
+                context: context,
+                builder: (context) {
+                  //  String selectedActivity = activityType.first;
+                  return Dialog(
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                    child: IntrinsicHeight(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Column(
+                            children: activityType
+                                .map(
+                                  (e) => ListTile(
+                                    title: Text(e),
+                                    leading: Radio<String>(
+                                      value: e,
+                                      groupValue: selectedActivity.value,
+                                      onChanged: (value) {
+                                        if (value == null) return;
+                                        selectedActivity.value = value;
+                                        activityTextFieldController.value =
+                                            TextEditingValue(text: value);
+                                        promptPersonalInfo
+                                            .updateActivity(value);
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  ),
+                                )
+                                .toList()),
+                      ),
+                    ),
                   );
                 },
-                decoration: InputDecoration(
-                  hintText: 'how do you spend your day?',
-                ),
-              )),
-          SizedBox(
-              height: 46,
-              child: TextFormField(
-                controller: workoutScheduleTextFieldController,
-                readOnly: true,
-                onTap: () {
-                  showAdaptiveDialog(
-                    context: context,
-                    builder: (context) {
-                      return Dialog(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15)),
-                        child: IntrinsicHeight(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Column(
-                                children: workOutSchedule
-                                    .map(
-                                      (e) => ListTile(
-                                        title: Text(e),
-                                        leading: Radio<String>(
-                                          value: e,
-                                          groupValue: selectedSchedule.value,
-                                          onChanged: (value) {
-                                            if (value == null) return;
-                                            selectedSchedule.value = value;
-                                            workoutScheduleTextFieldController
-                                                    .value =
-                                                TextEditingValue(text: value);
-                                            promptPersonalInfo
-                                                .updateWorkoutSchedule(value);
-                                            Navigator.pop(context);
-                                          },
-                                        ),
-                                      ),
-                                    )
-                                    .toList()),
-                          ),
-                        ),
-                      );
-                    },
+              );
+            },
+            decoration: InputDecoration(
+              labelText: 'how do you spend your day?',
+            ),
+          ),
+          TextFormField(
+            controller: workoutScheduleTextFieldController,
+            readOnly: true,
+            onTap: () {
+              showAdaptiveDialog(
+                context: context,
+                builder: (context) {
+                  return Dialog(
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                    child: IntrinsicHeight(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Column(
+                            children: workOutSchedule
+                                .map(
+                                  (e) => ListTile(
+                                    title: Text(e),
+                                    leading: Radio<String>(
+                                      value: e,
+                                      groupValue: selectedSchedule.value,
+                                      onChanged: (value) {
+                                        if (value == null) return;
+                                        selectedSchedule.value = value;
+                                        workoutScheduleTextFieldController
+                                                .value =
+                                            TextEditingValue(text: value);
+                                        promptPersonalInfo
+                                            .updateWorkoutSchedule(value);
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  ),
+                                )
+                                .toList()),
+                      ),
+                    ),
                   );
                 },
-                decoration: InputDecoration(
-                  hintText: 'how often do you workout?',
-                ),
-              )),
-          SizedBox(
-              height: 46,
-              child: TextFormField(
-                controller: hobbiesTextFieldController,
-                decoration: InputDecoration(
-                  hintText: 'what do you do in your free time?',
-                ),
-                onChanged: (value) {
-                  promptPersonalInfo
-                      .updateHobbies(hobbiesTextFieldController.value.text);
-                },
-              )),
-          const SizedBox(height: 20),
+              );
+            },
+            decoration: InputDecoration(
+              labelText: 'how often do you workout?',
+            ),
+          ),
+          TextFormField(
+            controller: hobbiesTextFieldController,
+            decoration: InputDecoration(
+              labelText: 'what do you do in your free time?',
+            ),
+            onChanged: (value) {
+              promptPersonalInfo
+                  .updateHobbies(hobbiesTextFieldController.value.text);
+            },
+          ),
         ],
       ),
     );
