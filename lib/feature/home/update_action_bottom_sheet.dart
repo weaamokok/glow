@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:glow/domain/glow.dart';
 import 'package:glow/feature/home/home_deps.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../helper/helper_functions.dart';
+import '../prompt_creator/prompt_creator_deps.dart';
 
 class UpdateActionBottomSheet extends HookConsumerWidget {
   const UpdateActionBottomSheet({super.key});
@@ -45,23 +47,34 @@ class UpdateActionBottomSheet extends HookConsumerWidget {
                     color: Color(0xff282828).withValues(alpha: .5)),
               ),
               TextButton(
-                onPressed: () {
+                onPressed: () async {
+                  final action = ScheduleAction(
+                    id: '',
+                    title: titleController.value.text,
+                    duration: null,
+                    category: null,
+                    startDate: DateTime.now(),
+                    endDate: DateTime.now().add(Duration(days: 90)),
+                    frequency: selectedDays.value,
+                    recurring: selectedDays.value.isNotEmpty,
+                    priority: null,
+                    instances: [],
+                    description: descriptionController.value.text,
+                  );
+                  final prompt =
+                      'user added this action, can you fill the fields that wasnt been added by user based on the schedule that youve created and other actions added, here is the action : ${action.toJson()} , note: keep instances empty';
                   final actionController = // In your widget
                       ref.read(HomeDeps.actionControllerProvider.notifier);
-                  //
-                  // actionController.addAction(
-                  //     newAction: ScheduleAction(
-                  //         id: '',
-                  //         title: titleController.value.text,
-                  //         duration: null,
-                  //         category: category,
-                  //         startDate: DateTime.now(),
-                  //         endDate: endDate,
-                  //         frequency: selectedDays.value,
-                  //         recurring: selectedDays.value.isNotEmpty,
-                  //         priority: priority,
-                  //         description: descriptionController.value.text),
-                  //     targetDate: DateTime.now());
+
+                  final response = await ref
+                      .read(PromptCreatorDeps.modelProvider)
+                      .generateContent(
+                    [Content.text(prompt)],
+                  );
+                  print('response ${response.text}');
+                  actionController.addAction(
+                      newAction: ScheduleAction.fromJson(response.text ?? ''),
+                      targetDate: DateTime.now());
                 },
                 child: Text(
                   'Done',

@@ -341,34 +341,35 @@ class ActionController extends StateNotifier<AsyncValue<void>> {
     required ScheduleAction newAction,
     required DateTime targetDate,
   }) async {
-    //   try {
-    //   state = const AsyncValue<void>.loading();
-    //
-    //   final scheduleAsync = ref.read(CalendarDeps.scheduleProvider);
-    //   if (!scheduleAsync.hasValue) {
-    //     throw Exception('Schedule not available');
-    //   }
-    //   final schedule = scheduleAsync.value!;
-    //
-    //   // Create updated schedule with new action added
-    //   final updatedSchedule = schedule.copyWith(
-    //     dailySchedule: schedule.dailySchedule.map((daily) {
-    //       if (daily. == targetDate) {
-    //         final existingActions = daily.actions ?? [];
-    //         return daily.copyWith(
-    //           actions: [...existingActions, newAction],
-    //         );
-    //       }
-    //       return daily;
-    //     }).toList(),
-    //   );
-    //
-    //   await _persistSchedule(updatedSchedule);
-    //   ref.invalidate(scheduleProvider);
-    //   state = const AsyncValue<void>.data(null);
-    // } catch (e, st) {
-    //   state = AsyncValue<void>.error(e, st);
-    //   rethrow;
-    // }
+    print('the recived action ${newAction.category}');
+      try {
+      state = const AsyncValue<void>.loading();
+
+      final scheduleAsync = ref.read(CalendarDeps.scheduleProvider);
+      if (!scheduleAsync.hasValue) {
+        throw Exception('Schedule not available');
+      }
+      final schedule = scheduleAsync.value!;
+
+      // Create updated schedule with new action added
+      final updatedSchedule = schedule.copyWith(
+        dailySchedule: schedule.dailySchedule.map((daily) {
+          if (daily. == targetDate) {
+            final existingActions = daily.actions ?? [];
+            return daily.copyWith(
+              actions: [...existingActions, newAction],
+            );
+          }
+          return daily;
+        }).toList(),
+      );
+
+      await _persistSchedule(updatedSchedule);
+      ref.invalidate(scheduleProvider);
+      state = const AsyncValue<void>.data(null);
+    } catch (e, st) {
+      state = AsyncValue<void>.error(e, st);
+      rethrow;
+    }
   }
 }
