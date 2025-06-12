@@ -22,15 +22,29 @@ class MyApp extends ConsumerWidget {
       routerConfig: appRouter.config(),
       theme: ThemeData(
           colorScheme: ColorScheme(
-              brightness: Brightness.light,
-              primary: Color(0xff4C7B8B),
-              onPrimary: Color(0xff282828),
-              secondary: Color(0xff4C7B8B),
-              onSecondary: Colors.white,
-              error: Color(0xD5A80A0A),
-              onError: Colors.white,
-              surface: Colors.white,
-              onSurface: Color(0xff282828)),
+            brightness: Brightness.light,
+            primary: Color(0xff4C7B8B), // Deep teal-blue
+            onPrimary: Colors.white, // For text/icons on primary
+
+            secondary: Color(0xfffff9f0), // Soft cream
+            onSecondary: Color(0xff4C7B8B), // Contrast text/icons on secondary
+
+            primaryContainer: Color(0xff6E9CA7), // Lighter shade of primary
+            onPrimaryContainer: Color(0xff102B33),
+
+            secondaryContainer:
+                Color(0xfffff0dd), // Slightly darker than secondary
+            onSecondaryContainer: Color(0xff3A545B),
+
+            background: Color(0xffffffff), // Pure white background
+            onBackground: Color(0xff1C2B2F), // Dark text for readability
+
+            surface: Color(0xfffdfdfd), // Soft white surface
+            onSurface: Color(0xff1C2B2F), // Text/icons on surface
+
+            error: Color(0xffD32F2F), // Standard material red
+            onError: Colors.white, // White text on error color
+          ),
           fontFamily: 'Roboto',
           inputDecorationTheme: InputDecorationTheme(
             labelStyle: TextStyle(color: Color(0xff282828).withAlpha(60)),

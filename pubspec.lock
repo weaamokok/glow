@@ -368,6 +368,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.0"
+  flutter_localizations:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -892,6 +897,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.0"
+  reactive_forms:
+    dependency: "direct main"
+    description:
+      name: reactive_forms
+      sha256: "8394f3bbea59a49820174893739152bbce292e130fc1f3f1fb2a5f83f7e7c43e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "18.0.0"
   riverpod:
     dependency: "direct main"
     description:
