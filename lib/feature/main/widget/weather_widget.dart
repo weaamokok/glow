@@ -14,7 +14,6 @@ class WeatherSummaryWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final weather = ref.watch(HomeDeps.weatherProvider);
-    print(weather);
     if (weather.hasError) {
       return Column(
         children: [
@@ -31,9 +30,7 @@ class WeatherSummaryWidget extends ConsumerWidget {
                       // Refresh provider here
                       ref.invalidate(HomeDeps.weatherProvider);
                     },
-                  onExit: (event) {
-                    print('hi');
-                  },
+                  onExit: (event) {},
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       decoration: TextDecoration.underline)),

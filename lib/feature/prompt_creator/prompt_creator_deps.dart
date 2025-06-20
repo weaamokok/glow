@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data' show Uint8List;
 
@@ -12,8 +13,10 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:sembast/sembast.dart';
 
 import '../../app/local_db.dart';
+import '../../domain/action_instance.dart';
 import '../../domain/user_info.dart';
 import '../../helper/helper_functions.dart';
+import '../home/home_deps.dart';
 import 'image_picker_step.dart';
 
 class PromptCreatorDeps {
@@ -113,10 +116,9 @@ class PromptCreatorDeps {
     },
   );
   static final promptProvider =
-      StateNotifierProvider<PromptNotifier, FutureOr<AsyncValue<String?>>>(
-          (ref) {
+      StateNotifierProvider<PromptNotifier, dynamic>((ref) {
     //  PromptNotifier.submitPrompt(ref: ref);
-    return PromptNotifier();
+    return PromptNotifier(ref: ref);
   });
 
   static final promptCreatorStepProvider = ChangeNotifierProvider.autoDispose(
@@ -188,11 +190,11 @@ class PromptPersonalInfoNotifier extends StateNotifier<UserPersonalInfo> {
   }
 }
 
-class PromptNotifier extends StateNotifier<FutureOr<AsyncValue<String?>>> {
-  PromptNotifier() : super(const AsyncLoading());
+class PromptNotifier extends StateNotifier {
+  PromptNotifier({required this.ref}) : super(const AsyncLoading());
+  final Ref ref;
 
-  FutureOr<AsyncValue<GlowSchedule?>> submitPrompt(
-      {required WidgetRef ref}) async {
+  FutureOr<AsyncValue<GlowSchedule?>> submitPrompt() async {
     AsyncValue<GlowSchedule?> state = AsyncValue.loading();
     var store = StoreRef.main();
     try {
@@ -366,4 +368,137 @@ Focus on creating a time-bound, executable schedule rather than general advice. 
       return state;
     }
   }
+
+  Future<AsyncValue<ScheduleAction>> updateActionPrompt(
+      {required ScheduleAction action, required bool isEdit}) async {
+    final actionController =
+        ref.read(HomeDeps.actionControllerProvider.notifier);
+    try {
+      if (isEdit) {
+        final updatingResult = await actionController.addAction(
+            newAction: action, slot: Slot.undefined);
+        return updatingResult.map(
+            data: (data) => AsyncData(data.value),
+            error: (error) => AsyncError(error, error.stackTrace),
+            loading: (loading) => AsyncLoading());
+      }
+      final prompt = '''
+Update the following action by filling missing fields based on existing schedule context.
+Return  the updated action and timeSlot in valid JSON format without any additional text or explanations.
+
+Original action:
+${action.toJson()}
+
+Update rules:
+1. Preserve existing values unless they're null/empty
+2. Add realistic duration based on action type duration type is int in Minutes
+3. Set appropriate category if missing
+4. Generate sensible description if empty
+5. Add recurrence rules if relevant
+6. Never modify 'instances' field
+7. Ensure all dates are in ISO 8601 format
+8. add slot that matches the action
+9. if action is not recurring create an $ActionInstance and set date property to ${DateTime.now()} it should look like {'id':'unique-id','date':'','status':'todo'}
+match the types in the original glow up response 
+the returned response should look like :
+{
+"action":${action.toJson()},//updated action
+"slot":"Morning/Afternoon/Evening/Night"
+}
+''';
+
+      final response =
+          await ref.read(PromptCreatorDeps.modelProvider).generateContent(
+        [Content.text(prompt)],
+      );
+
+      final responseText = response.text;
+      if (responseText == null || responseText.isEmpty) {
+        throw Exception('Empty response from AI model');
+      }
+
+      // Extract JSON from markdown code block if present
+      String jsonString = responseText;
+      final jsonMatch =
+          RegExp(r'```json\n([\s\S]*?)\n```').firstMatch(responseText);
+      if (jsonMatch != null) {
+        jsonString = jsonMatch.group(1)!;
+      }
+
+      debugPrint('Received action update: $jsonString');
+
+      final updatedAction = UpdateActionResponse.fromJson(jsonString);
+
+      final updatedActionInstances = updatedAction.action.generateInstances();
+
+      final updatingResult = await actionController.addAction(
+          newAction:
+              updatedAction.action.copyWith(instances: updatedActionInstances),
+          slot: updatedAction.slot);
+      return updatingResult.map(
+          data: (data) => AsyncData(data.value),
+          error: (error) => AsyncError(error, error.stackTrace),
+          loading: (loading) => AsyncLoading());
+    } catch (e, stackTrace) {
+      debugPrint('Error updating action: $e\n$stackTrace');
+      // Fallback: Return original action with error flag
+      return AsyncError(e, stackTrace);
+    }
+  }
+}
+
+class UpdateActionResponse {
+  const UpdateActionResponse({
+    required this.action,
+    required this.slot,
+  });
+
+  final ScheduleAction action;
+  final Slot slot;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is UpdateActionResponse &&
+          runtimeType == other.runtimeType &&
+          action == other.action &&
+          slot == other.slot);
+
+  @override
+  int get hashCode => action.hashCode ^ slot.hashCode;
+
+  @override
+  String toString() {
+    return 'UpdateActionResponse{action: $action, slot: $slot, }';
+  }
+
+  UpdateActionResponse copyWith({
+    ScheduleAction? action,
+    Slot? slot,
+  }) {
+    return UpdateActionResponse(
+      action: action ?? this.action,
+      slot: slot ?? this.slot,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'action': action,
+      'slot': slot,
+    };
+  }
+
+  factory UpdateActionResponse.fromMap(Map<String, dynamic> map) {
+    return UpdateActionResponse(
+      action: ScheduleAction.fromMap(map['action'] as Map<String, dynamic>),
+      slot: TimeSlotExtension.fromJson(
+          removeEmojis(map['slot']).toString().toLowerCase()),
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory UpdateActionResponse.fromJson(String source) =>
+      UpdateActionResponse.fromMap(json.decode(source) as Map<String, dynamic>);
 }

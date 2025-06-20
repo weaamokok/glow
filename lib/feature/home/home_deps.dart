@@ -7,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:glow/domain/weather.dart';
 import 'package:glow/feature/calendar/calendar_deps.dart';
 import 'package:glow/feature/prompt_creator/prompt_creator_deps.dart';
+import 'package:glow/helper/helper_functions.dart';
 
 import '../../domain/glow.dart';
 import '../../helper/location_manager.dart';
@@ -281,34 +282,101 @@ class ActionController extends StateNotifier<AsyncValue<void>> {
         error: (error, stack) => AsyncValue.error(error, stack),
       );
     } catch (e, stack) {
-      print('eror$e');
       return AsyncValue.error(e, stack);
     }
   }
 
-  Future<AsyncValue<void>> deleteAction(
-      {required String actionId, required String instanceId}) async {
+  Future<AsyncValue<void>> deleteAction({
+    required String actionId,
+    required String instanceId,
+  }) async {
+    try {
+      // 1. Get current schedule safely
+      final schedule = ref.read(CalendarDeps.scheduleProvider);
+      if (schedule.value == null) {
+        return AsyncValue.error('No schedule found', StackTrace.current);
+      }
+
+      // 2. Create a deep copy of the schedule
+      final updatedSchedule = schedule.value!.copyWith(
+        dailySchedule: schedule.value!.dailySchedule.map((daily) {
+          // 3. Update actions only if they contain the target instance
+          final hasTargetAction = daily.actions?.any((action) =>
+              action.id == actionId &&
+              action.instances?.any((inst) => inst.id == instanceId) == true);
+
+          if (hasTargetAction != true) return daily;
+
+          return daily.copyWith(
+            actions: daily.actions?.map((action) {
+              // 4. Only modify the specific action
+              if (action.id != actionId) return action;
+
+              return action.copyWith(
+                instances: action.instances
+                    ?.where((instance) => instance.id != instanceId)
+                    .toList(),
+              );
+            }).toList(),
+          );
+        }).toList(),
+      );
+
+      // 5. Save the updated schedule
+      final saveResult = await ref.read(
+        PromptCreatorDeps.saveGlowScheduleProvider(updatedSchedule),
+      );
+
+      // 6. Handle save result
+      return saveResult.when(
+        data: (_) {
+          ref.invalidate(CalendarDeps.scheduleProvider);
+          return const AsyncValue.data(null);
+        },
+        error: (error, stack) => AsyncValue.error(error, stack),
+        loading: () => const AsyncValue.loading(),
+      );
+    } catch (e, st) {
+      return AsyncValue.error(e, st);
+    }
+  }
+
+  Future<AsyncValue<ScheduleAction>> addAction({
+    required ScheduleAction newAction,
+    required Slot slot,
+  }) async {
     try {
       final schedule = ref.read(CalendarDeps.scheduleProvider);
       if (!schedule.hasValue) {
         return AsyncValue.error('No schedule found', StackTrace.current);
       }
 
-      // Create a deep copy of the schedule with updated action
       final updatedDailySchedules = schedule.value?.dailySchedule.map((daily) {
-        final updatedActions = daily.actions?.map((action) {
-          return action.id == actionId
-              ? action.copyWith(
-                  instances: action.instances
-                      ?.where(
-                        (e) => e.id != instanceId,
-                      )
-                      .toList())
-              : action;
-        }).toList();
-        return updatedActions != null
-            ? daily.copyWith(actions: updatedActions)
-            : daily;
+        final existingAction = daily.actions?.firstWhereOrNull(
+          (action) => action.id == newAction.id,
+        );
+        if (existingAction != null) {
+          final updatedActions = daily.actions?.map(
+            (e) {
+              if (e.id == existingAction.id) {
+                return newAction;
+              } else {
+                return e;
+              }
+            },
+          ).toList();
+          return updatedActions != null
+              ? daily.copyWith(actions: updatedActions)
+              : daily;
+        } else {
+          //  schedule.value?.getSlot(time: )
+          //find the slot of the action
+          if (slot == daily.timeSlot) {
+            return daily.copyWith(actions: [...?daily.actions, newAction]);
+          } else {
+            return daily;
+          }
+        }
       }).toList();
 
       final updatedSchedule = schedule.value?.copyWith(
@@ -323,53 +391,17 @@ class ActionController extends StateNotifier<AsyncValue<void>> {
       // Handle the save result
       return saveResult.when(
         loading: () => AsyncValue.loading(),
-        data: (_) {
+        data: (data) {
           ref.invalidate(CalendarDeps.scheduleProvider);
-          return AsyncValue.data(null);
+          return AsyncValue.data(
+            newAction,
+          );
         },
         error: (error, stack) => AsyncValue.error(error, stack),
       );
     } catch (e, st) {
-      print('eror$e');
-
       state = AsyncValue<void>.error(e, st);
       rethrow;
     }
-  }
-
-  Future<void> addAction({
-    required ScheduleAction newAction,
-    required DateTime targetDate,
-  }) async {
-    // print('the recived action ${newAction.category}');
-    //   try {
-    //   state = const AsyncValue<void>.loading();
-    //
-    //   final scheduleAsync = ref.read(CalendarDeps.scheduleProvider);
-    //   if (!scheduleAsync.hasValue) {
-    //     throw Exception('Schedule not available');
-    //   }
-    //   final schedule = scheduleAsync.value!;
-    //
-    //   // Create updated schedule with new action added
-    //   final updatedSchedule = schedule.copyWith(
-    //     dailySchedule: schedule.dailySchedule.map((daily) {
-    //       if (daily. == targetDate) {
-    //         final existingActions = daily.actions ?? [];
-    //         return daily.copyWith(
-    //           actions: [...existingActions, newAction],
-    //         );
-    //       }
-    //       return daily;
-    //     }).toList(),
-    //   );
-    //
-    //   await _persistSchedule(updatedSchedule);
-    //   ref.invalidate(scheduleProvider);
-    //   state = const AsyncValue<void>.data(null);
-    // } catch (e, st) {
-    //   state = AsyncValue<void>.error(e, st);
-    //   rethrow;
-    // }
   }
 }

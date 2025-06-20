@@ -23,26 +23,32 @@ class MyApp extends ConsumerWidget {
       theme: ThemeData(
           colorScheme: ColorScheme(
             brightness: Brightness.light,
-            primary: Color(0xff4C7B8B), // Deep teal-blue
-            onPrimary: Colors.white, // For text/icons on primary
+            primary: Color(0xff4C7B8B),
+            // Deep teal-blue
+            onPrimary: Colors.white,
+            // For text/icons on primary
 
-            secondary: Color(0xfffff9f0), // Soft cream
-            onSecondary: Color(0xff4C7B8B), // Contrast text/icons on secondary
+            secondary: Color(0xfffff9f0),
+            // Soft cream
+            onSecondary: Color(0xff4C7B8B),
+            // Contrast text/icons on secondary
 
-            primaryContainer: Color(0xff6E9CA7), // Lighter shade of primary
+            primaryContainer: Color(0xff6E9CA7),
+            // Lighter shade of primary
             onPrimaryContainer: Color(0xff102B33),
 
-            secondaryContainer:
-                Color(0xfffff0dd), // Slightly darker than secondary
+            secondaryContainer: Color(0xfffff0dd),
+            // Slightly darker than secondary
             onSecondaryContainer: Color(0xff3A545B),
+            // Dark text for readability
 
-            background: Color(0xffffffff), // Pure white background
-            onBackground: Color(0xff1C2B2F), // Dark text for readability
+            surface: Color(0xfffdfdfd),
+            // Soft white surface
+            onSurface: Color(0xff1C2B2F),
+            // Text/icons on surface
 
-            surface: Color(0xfffdfdfd), // Soft white surface
-            onSurface: Color(0xff1C2B2F), // Text/icons on surface
-
-            error: Color(0xffD32F2F), // Standard material red
+            error: Color(0xffD32F2F),
+            // Standard material red
             onError: Colors.white, // White text on error color
           ),
           fontFamily: 'Roboto',

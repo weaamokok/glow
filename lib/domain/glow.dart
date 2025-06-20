@@ -41,6 +41,23 @@ class GlowSchedule {
     };
   }
 
+  Slot getSlot({DateTime? time}) {
+    final currentTime =
+        getDateTimeWithTime(time != null ? time.toString() : '');
+    for (int i = 0; i < dailySchedule.length; i++) {
+      if (i + 1 < dailySchedule.length) {
+        final slotStart = getDateTimeWithTime(dailySchedule[i].startTime ?? '');
+        final slotEnd =
+            getDateTimeWithTime(dailySchedule[i + 1].startTime ?? '');
+        if (currentTime.compareTo(slotStart) == 1 &&
+            currentTime.compareTo(slotEnd) == -1) {
+          return dailySchedule[i].timeSlot ?? Slot.undefined;
+        }
+      }
+    }
+    return Slot.night;
+  }
+
   factory GlowSchedule.fromMap(Map<String, dynamic> map) {
     return GlowSchedule(
       dailySchedule: List<DailyTimeSlot>.from(
@@ -248,28 +265,29 @@ class ScheduleAction {
 
   factory ScheduleAction.fromMap(Map<String, dynamic> map) {
     return ScheduleAction(
-        id: map['id'] as String,
-        title: map['title'] as String,
-        duration: map['duration'] as int,
-        category: map['category'] as String,
-        endDate: DateTime.parse(map['endDate'] as String),
-        startDate: DateTime.parse(map['startDate'] as String),
-        frequency: map['frequency'] != null
-            ? List<String>.from(map['frequency']
-                as List<dynamic>) // Cast dynamic list to String list
-            : null,
-        recurring: map['recurring'] as bool,
-        priority: map['priority'] as String,
-        description: map['description'] as String,
-        prepNeeded: map['prep_needed'] as bool,
-        location: map['location'] != null ? map['location'] as String : null,
-        instances: map['instances'] != null
-            ? List<ActionInstance>.from(
-                (map['instances'] as List<dynamic>).map<ActionInstance>(
-                  (x) => ActionInstance.fromMap(x as Map<String, dynamic>),
-                ),
-              )
-            : []);
+      id: map['id'] as String,
+      title: map['title'] as String,
+      duration: map['duration'] as int,
+      category: map['category'] as String,
+      endDate: DateTime.parse(map['endDate'] as String),
+      startDate: DateTime.parse(map['startDate'] as String),
+      frequency: map['frequency'] != null
+          ? List<String>.from(map['frequency']
+              as List<dynamic>) // Cast dynamic list to String list
+          : null,
+      recurring: map['recurring'] as bool,
+      priority: map['priority'] as String,
+      description: map['description'] as String,
+      prepNeeded: map['prep_needed'] as bool,
+      location: map['location'] != null ? map['location'] as String : null,
+      instances: map['instances'] != null
+          ? List<ActionInstance>.from(
+              (map['instances'] as List<dynamic>).map<ActionInstance>(
+                (x) => ActionInstance.fromMap(x as Map<String, dynamic>),
+              ),
+            )
+          : [],
+    );
   }
 
   String toJson() => json.encode(toMap());

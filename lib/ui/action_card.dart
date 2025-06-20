@@ -1,12 +1,14 @@
 import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swipe_action_cell/core/cell.dart';
+import 'package:flutter_swipe_action_cell/core/controller.dart';
 import 'package:glow/domain/glow.dart';
 import 'package:glow/helper/helper_functions.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../feature/home/action_details_sheet.dart';
 import '../feature/home/home_deps.dart';
+import '../feature/home/update_action_bottom_sheet.dart';
 
 class ActionCard extends StatelessWidget {
   const ActionCard({
@@ -25,7 +27,6 @@ class ActionCard extends StatelessWidget {
           (element) => element.id == instanceId,
         )
         ?.status;
-    print('current instance $currentActionInstance');
     return InkWell(
       onTap: () => showModalBottomSheet(
         context: context,
@@ -154,43 +155,53 @@ class ActionCard extends StatelessWidget {
 class ManageableActionCard extends ConsumerWidget {
   const ManageableActionCard({
     super.key,
-    required this.instanceId,
+    this.instanceId,
     required this.action,
   });
 
   final ScheduleAction action;
-  final String instanceId;
+  final String? instanceId;
 
   @override
   Widget build(BuildContext context, ref) {
+    final SwipeActionController controller = SwipeActionController();
     return SwipeActionCell(
+        controller: controller,
         trailingActions: [
-          SwipeAction(
-              icon: Icon(
-                EneftyIcons.trash_outline,
-                color: Colors.white,
-                size: 20,
-              ),
-              onTap: (CompletionHandler handler) async {
-                final actionController = // In your widget
-                    ref.read(HomeDeps.actionControllerProvider.notifier);
+          if (instanceId != null)
+            SwipeAction(
+                icon: Icon(
+                  EneftyIcons.trash_outline,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                onTap: (CompletionHandler handler) async {
+                  controller.closeAllOpenCell();
+                  final actionController = // In your widget
+                      ref.read(HomeDeps.actionControllerProvider.notifier);
 
-                await actionController.deleteAction(
-                    actionId: action.id, instanceId: instanceId);
-              },
-              color: Colors.red),
+                  await actionController.deleteAction(
+                      actionId: action.id, instanceId: instanceId ?? '');
+                },
+                color: Colors.red),
           SwipeAction(
               icon: Icon(
                 EneftyIcons.edit_2_outline,
                 size: 20,
                 color: Colors.white,
               ),
+              closeOnTap: true,
               onTap: (CompletionHandler handler) async {
-                //  ref.read();
+                controller.closeAllOpenCell();
+                showModalBottomSheet(
+                    context: context,
+                    builder: (context) => UpdateActionBottomSheet(
+                          action: action,
+                        ));
               },
               color: Color(0xffEFB036)),
         ],
         key: Key(action.id),
-        child: ActionCard(instanceId: instanceId, action: action));
+        child: ActionCard(instanceId: instanceId ?? '', action: action));
   }
 }

@@ -5,6 +5,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:glow/domain/glow.dart';
+import 'package:glow/feature/calendar/calendar_deps.dart';
 import 'package:glow/feature/prompt_creator/image_picker_step.dart';
 import 'package:glow/feature/prompt_creator/personal_goals_step.dart';
 import 'package:glow/feature/prompt_creator/personal_info_step.dart';
@@ -23,7 +24,7 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
     final promptCreator = ref.watch(PromptCreatorDeps.promptProvider.notifier);
     final images = ref.watch(PromptCreatorDeps.promptImagesProvider);
     final personalInfo =
-        ref.watch(PromptCreatorDeps.promptPersonalInfoProvider);
+    ref.watch(PromptCreatorDeps.promptPersonalInfoProvider);
     List<Widget> steps = [
       ImagePickerStep(), //image picker
       PersonalInfoStep(), //personal info
@@ -33,11 +34,7 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
     final promptCreationState = useState(AsyncValue<GlowSchedule?>.data(null));
     final result = promptCreationState.value;
     result.map(
-      data: (data) {
-        if (data.value != null) {
-          context.router.popUntilRoot();
-        }
-      },
+      data: (data) {},
       error: (error) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -97,7 +94,7 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
                               switch (stepIndex.value) {
                                 case 0:
                                   final canProceed = images.any(
-                                    (element) => element != null,
+                                        (element) => element != null,
                                   );
                                   if (canProceed) {
                                     ref.read(PromptCreatorDeps
@@ -109,7 +106,7 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
                                             behavior: SnackBarBehavior.floating,
                                             shape: RoundedRectangleBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(10)),
+                                                BorderRadius.circular(10)),
                                             content: Text(
                                                 'we need at least one image to give you accurate results')));
                                   }
@@ -121,10 +118,36 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
                                       AsyncValue.loading();
                                   ref.read(PromptCreatorDeps
                                       .addPromptPersonalInfoProvider(
-                                          personalInfo));
-                                  promptCreationState.value =
-                                      await promptCreator.submitPrompt(
-                                          ref: ref);
+                                      personalInfo));
+                                  final state =
+                                  await promptCreator.submitPrompt();
+                                  state.map(
+                                      loading: (loading) =>
+                                      promptCreationState.value = loading,
+                                      error: (error) =>
+                                          WidgetsBinding.instance
+                                              .addPostFrameCallback((_) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(SnackBar(
+                                                behavior: SnackBarBehavior
+                                                    .floating,
+                                                shape:
+                                                RoundedRectangleBorder(
+                                                    borderRadius:
+                                                    BorderRadius
+                                                        .circular(
+                                                        10)),
+                                                content: Text(
+                                                    'something went wrong: ${error
+                                                        .error} ')));
+                                          }),
+                                      data: (data) {
+                                        if (data.value != null) {
+                                          context.router.popUntilRoot();
+                                          ref.invalidate(
+                                              CalendarDeps.scheduleProvider);
+                                        }
+                                      });
                               }
                             },
                             style: ButtonStyle(
@@ -202,15 +225,14 @@ class CloseButton extends StatelessWidget {
 }
 
 class ImagePickerContainer extends StatelessWidget {
-  const ImagePickerContainer(
-      {super.key,
-      required this.width,
-      this.height,
-      this.image,
-      this.text,
-      required this.icon,
-      this.onTap,
-      this.margin});
+  const ImagePickerContainer({super.key,
+    required this.width,
+    this.height,
+    this.image,
+    this.text,
+    required this.icon,
+    this.onTap,
+    this.margin});
 
   final double width;
   final double? height;
@@ -242,26 +264,26 @@ class ImagePickerContainer extends StatelessWidget {
                 borderRadius: BorderRadius.circular(15)),
             child: image != null
                 ? ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: Image.file(
-                      image!,
-                      fit: BoxFit.cover,
-                    ),
-                  )
+              borderRadius: BorderRadius.circular(15),
+              child: Image.file(
+                image!,
+                fit: BoxFit.cover,
+              ),
+            )
                 : Center(
-                    child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      icon,
-                      Text(
-                        text ?? '',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 15,
-                            color: Color(0xff282828).withValues(alpha: .8)),
-                      ),
-                    ],
-                  )),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    icon,
+                    Text(
+                      text ?? '',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 15,
+                          color: Color(0xff282828).withValues(alpha: .8)),
+                    ),
+                  ],
+                )),
           ),
         ),
       ),
