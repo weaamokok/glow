@@ -1,0 +1,51 @@
+locale: ar
+core:
+  somethingWentWrong: حدث خطأ ما
+  confirm: تأكيد
+  continue: استمرار
+  cancel: إلغاء
+  done: تم
+homeScreenTitle: التالي في جدولك..⏭️
+emptyActionList: لا توجد مهام حالياً. استمتع بوقتك!
+loginSubtitle: سجل الدخول  على حسابك
+userNameFieldHint: اسم المستخدم
+passwordFieldHint: كلمة المرور
+userNameValidation: الرجاء إدخال اسم المستخدم
+passwordValidation: الرجاء إدخال كلمة المرور
+imageUploadValidation: لإعطاءك أفضل نتائج يجب أن تحمل صورة شخصية واحدة على الاقل
+scheduleCreationLoading: اصنع خطة التحوّل المثالية الخاصة بك\nاستعد للتألّق! ✨
+personalInfoStep:
+  workLabel: ماهي طبيعة عملك..؟
+  birthDateLabel: تاريخ الميلاد
+  sexLabel: الجنس
+  male: ذكر
+  female: أنثى
+  activityLabel: كيف تقضي يومك؟
+  mostlySitting: أجلس معظم الوقت
+  mostlyStanding: أقف معظم الوقت
+  moveAround: أتحرك كثيرًا
+  workoutScheduleLabel: كم مرة تمارس التمارين الرياضية؟
+  noWorkout: لا أمارس التمارين
+  3DayAWeekOrLess: 3 أيام في الأسبوع أو أقل
+  3DayAWeekOrMore: أكثر من 3 أيام في الأسبوع
+  hobbiesLabel: ماذا تفعل في وقت فراغك؟
+personalGoalStep:
+  goalsLabel: ما هو هدفك من هذا الـglow-up؟
+  notesLabel: هل هناك أي ملاحظات يجب أخذها بعين الاعتبار؟
+imagePickerStep:
+  dialogTitle: هل ترغب في
+  selectFromGallery: اختر من المعرض
+  takePhoto: التقط صورة
+  description: يمكننا توفير جدول أكثر دقة بناءً على صورة واضحة لك..
+  photoFull: صورة لكامل الجسم
+  photoHead: صورة للرأس
+  photoSide: صورة جانبية
+profileScreen:
+  personalInfo: المعلومات الشخصية
+  language: اللغة
+  privacyPolicy: سياسة الخصوصية
+  languageBottomSheet:
+    description: اختر اللغة التي تفضلها
+    arLang: العربية
+    engLang: English
+

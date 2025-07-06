@@ -8,15 +8,15 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../helper/image_picker.dart';
+import '../../l10n/translations.g.dart';
 
 class ImagePickerStep extends HookConsumerWidget {
-  const ImagePickerStep({super.key} //   {required this.promptImages, super.key}
-      );
-
-//  final ValueNotifier promptImages;
+  const ImagePickerStep({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
+    final local = context.t;
+    final imagePickerLocal = local.imagePickerStep;
     final promptImages = ref.read(PromptCreatorDeps.promptImagesProvider);
     // final stepProvider =
     //     ref.watch(PromptCreatorDeps.promptCreatorStepProvider.notifier);
@@ -31,10 +31,10 @@ class ImagePickerStep extends HookConsumerWidget {
           ),
           backgroundColor: Colors.white.withValues(alpha: .9),
           elevation: 0,
-          title: Text('would You Like To'),
+          title: Text(imagePickerLocal.dialogTitle),
           children: <Widget>[
             SimpleDialogOption(
-              child: Text('select From Gallery'),
+              child: Text(imagePickerLocal.selectFromGallery),
               onPressed: () async {
                 context.maybePop();
                 final imageFile = await selectOrTakePhoto(ImageSource.gallery);
@@ -46,7 +46,7 @@ class ImagePickerStep extends HookConsumerWidget {
               },
             ),
             SimpleDialogOption(
-              child: Text('take a photo'),
+              child: Text(imagePickerLocal.takePhoto),
               onPressed: () async {
                 context.maybePop();
                 final imageFile = await selectOrTakePhoto(ImageSource.camera);
@@ -69,8 +69,7 @@ class ImagePickerStep extends HookConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 30.0),
           child: Column(
             children: [
-              Text(
-                  'we can provide more efficient schedule based on a clear photo of you..'),
+              Text(imagePickerLocal.description),
               SizedBox(
                 height: 12,
               ),
@@ -92,9 +91,12 @@ class ImagePickerStep extends HookConsumerWidget {
                             image: promptImages[e.index],
                             margin: EdgeInsets.all(5),
                             text: switch (e) {
-                              UserImagesTypes.full => 'Full length photo',
-                              UserImagesTypes.head => 'Head Shot',
-                              UserImagesTypes.sideProfile => 'Side Profile'
+                              UserImagesTypes.full =>
+                                imagePickerLocal.photoFull,
+                              UserImagesTypes.head =>
+                                imagePickerLocal.photoHead,
+                              UserImagesTypes.sideProfile =>
+                                imagePickerLocal.photoSide
                             },
                             icon: Icon(EneftyIcons.camera_outline),
                           ),
@@ -108,36 +110,6 @@ class ImagePickerStep extends HookConsumerWidget {
             ],
           ),
         ),
-        // Align(
-        //   alignment: Alignment.bottomCenter,
-        //   child: Container(
-        //       height: 44,
-        //       margin: EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-        //       width: double.infinity,
-        //       child: ElevatedButton(
-        //         onPressed: () {
-        //           ref.read(PromptCreatorDeps.addPromptImagesProvider(
-        //               promptImages.value));
-        //           ref
-        //               .read(PromptCreatorDeps.promptCreatorStepProvider)
-        //               .value = 1;
-        //
-        //           //    stepProvider.value = 1;
-        //         },
-        //         style: ButtonStyle(
-        //           elevation: WidgetStatePropertyAll(0),
-        //           shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-        //               borderRadius: BorderRadius.circular(10))),
-        //           backgroundColor: WidgetStatePropertyAll(
-        //             Color(0xffEFB036),
-        //           ),
-        //         ),
-        //         child: Text(
-        //           'continue',
-        //           style: TextStyle(color: Color(0xff282828), fontSize: 15),
-        //         ),
-        //       )),
-        // )
       ],
     );
   }

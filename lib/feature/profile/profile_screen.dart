@@ -3,16 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glow/domain/mock_values.dart';
 import 'package:glow/feature/profile/profile_deps.dart';
-import 'package:glow/feature/profile/widget/edit_profile.dart';
+import 'package:glow/feature/profile/widget/language_selection_bottom_sheet.dart';
 import 'package:glow/feature/profile/widget/user_profile_widget.dart';
-import 'package:reactive_forms/reactive_forms.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+
+import '../../l10n/translations.g.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final local = context.t.profileScreen;
+
     return Padding(
       padding: const EdgeInsetsDirectional.symmetric(horizontal: 14.0),
       child: Column(
@@ -46,15 +49,20 @@ class ProfileScreen extends StatelessWidget {
             child: Column(
               children: [
                 SettingsTile(
-                  text: 'Personal Information',
+                  text: local.personalInfo,
                   onTap: () {},
                 ),
                 SettingsTile(
-                  text: 'Language',
-                  onTap: () {},
+                  text: local.language,
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) => LanguageSelectionBottomSheet(),
+                    );
+                  },
                 ),
                 SettingsTile(
-                  text: 'Privacy policy',
+                  text: local.privacyPolicy,
                   onTap: () {},
                 )
               ],

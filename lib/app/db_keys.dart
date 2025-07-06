@@ -3,4 +3,5 @@ class DbKeys {
   static const userPersonalInfo = 'user_personal_info';
   static const userProfile = 'user_profile';
   static const glowSchedule = 'glow_schedule';
+  static const appLocal = 'app_local';
 }

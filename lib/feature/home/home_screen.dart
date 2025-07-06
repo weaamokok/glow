@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:glow/domain/glow.dart';
+import 'package:glow/l10n/translations.g.dart';
 import 'package:glow/ui/action_card.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../helper/helper_functions.dart';
@@ -12,26 +14,32 @@ class HomeScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final schedule = ref.watch(CalendarDeps.scheduleProvider);
-    // Use useEffect to handle showing the bottom sheet AFTER build completes
-    print('here -$schedule');
-    schedule.when(
-      data: (data) {
-        if (data == null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            showModalBottomSheet(
-              context: context,
-              shape: const LinearBorder(),
-              isScrollControlled: true,
-              constraints: BoxConstraints.expand(),
-              builder: (context) => const PromptCreatorStepperScreen(),
-            );
-          });
-        }
-      },
-      error: (error, stackTrace) {},
-      loading: () {},
-    );
+    final hasOpenedPromptCreator = useState(false);
 
+    useEffect(() {
+      schedule.when(
+        data: (data) {
+          if (data == null && !hasOpenedPromptCreator.value) {
+            hasOpenedPromptCreator.value = true; // prevent multiple openings
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (context) => const PromptCreatorStepperScreen(),
+              );
+            });
+          }
+        },
+        error: (_, __) {},
+        loading: () {},
+      );
+      return null;
+    }, [schedule]);
+
+    final local = context.t;
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 18.0),
@@ -45,7 +53,7 @@ class HomeScreen extends HookConsumerWidget {
             Padding(
               padding: const EdgeInsetsDirectional.only(start: 6, bottom: 2),
               child: Text(
-                'Next in your Schedule.. ⏭️',
+                local.homeScreenTitle,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
               ),
             ),
@@ -56,7 +64,7 @@ class HomeScreen extends HookConsumerWidget {
                     schedule.value?.dailySchedule ?? [];
                 if (dailySchedule.isEmpty) {
                   return Column(
-                    children: [Text('no items')],
+                    children: [Text(local.emptyActionList)],
                   );
                 }
                 final currentSlot = getCurrentSlot(

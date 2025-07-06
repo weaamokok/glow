@@ -44,6 +44,24 @@ extension FirstWhereOrNullExtension<T> on Iterable<T> {
   }
 }
 
+extension LocaleMapExtension on Locale? {
+  Map<String, String?>? toMap() {
+    if (this == null) return null;
+    return {
+      'languageCode': this!.languageCode,
+      'countryCode': this!.countryCode,
+    };
+  }
+
+  static Locale? fromMap(Map<String, dynamic>? map) {
+    if (map == null || map['languageCode'] == null) return null;
+    return Locale(
+      map['languageCode'] as String,
+      map['countryCode'] as String?,
+    );
+  }
+}
+
 List<DateTime?> currentWeek() {
   return List.generate(
     7,

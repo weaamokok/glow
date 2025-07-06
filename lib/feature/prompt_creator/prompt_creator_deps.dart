@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data' show Uint8List;
-
+import 'package:dartz/dartz.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glow/app/db_keys.dart';
 import 'package:glow/domain/glow.dart';
+import 'package:glow/feature/calendar/calendar_deps.dart';
 import 'package:glow/helper/prompt_functions.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:sembast/sembast.dart';
@@ -16,6 +17,8 @@ import 'package:sembast/sembast.dart';
 import '../../app/local_db.dart';
 import '../../domain/user_info.dart';
 import '../../helper/helper_functions.dart';
+import '../../helper/locale_manager.dart';
+import '../../helper/prompt_loader.dart';
 import '../home/home_deps.dart';
 import 'image_picker_step.dart';
 
@@ -120,7 +123,89 @@ class PromptCreatorDeps {
     //  PromptNotifier.submitPrompt(ref: ref);
     return PromptNotifier(ref: ref);
   });
+  static final promptCreatorProvider =
+      FutureProvider<Either<Error, GlowSchedule>>(
+    (
+      ref,
+    ) async {
+      var store = StoreRef.main();
 
+      // Get stored images
+      final storedImages = (await store
+              .record(DbKeys.userImages)
+              .get(await LocalDB.db) as List<dynamic>?)
+          ?.toList();
+
+      if (storedImages == null || storedImages.isEmpty) {
+        throw Exception("No images found in local storage");
+      }
+
+      // Safely convert each element to Uint8List
+      final imageParts = <DataPart>[];
+      for (final item in storedImages) {
+        // Handle ImmutableList<Object?> case
+        if (item is List<Object?>) {
+          try {
+            // Convert List<Object?> to List<int>
+            final List<int> bytes = item.cast<int>();
+            imageParts.add(DataPart('image/jpg', Uint8List.fromList(bytes)));
+          } catch (e) {
+            debugPrint('failed to convert images: $e');
+            continue; // Skip invalid entries
+          }
+        } else if (item is Uint8List) {
+          imageParts.add(DataPart('image/jpg', item));
+        } else {
+          debugPrint('Unsupported type: ${item.runtimeType}');
+        }
+      }
+      // Get personal info
+      final userInfo = UserPersonalInfo(
+        job: 'doctor',
+        gender: 'female',
+        activity: ' mostly standing',
+        workoutSchedule: '3 days a week or less',
+        birthDate: '1998-01-01',
+        hobbies: 'nothing',
+        goals: 'to be prettier',
+        notes: '..',
+      );
+      final locale = await ref.read(LocaleManager.appLocaleProvider.future);
+
+      final prompt = scheduleCreationPrompt(
+        local: locale,
+        userInfo: userInfo,
+      );
+
+      final content = [
+        Content.multi([
+          TextPart(prompt),
+          ...imageParts,
+        ])
+      ];
+      final response =
+          await ref.read(PromptCreatorDeps.modelProvider).generateContent(
+                content,
+              );
+
+      debugPrint('response type${response.text.toString()}', wrapWidth: 100);
+      final glowResponse = GlowSchedule.fromJson(response.text ?? '');
+      await ref.read(PromptCreatorDeps.saveGlowScheduleProvider(glowResponse));
+      for (var slot in glowResponse.dailySchedule) {
+        slot.actions?.forEach((action) {
+          final instances = action.generateInstances();
+          slot.actions
+              ?.firstWhereOrNull(
+                (p0) => p0.id == action.id,
+              )
+              ?.instances
+              ?.addAll(instances);
+        });
+      }
+
+      return right(glowResponse);
+    },
+  );
   static final promptCreatorStepProvider = ChangeNotifierProvider.autoDispose(
     (ref) {
       ref.keepAlive();
@@ -238,8 +323,12 @@ class PromptNotifier extends StateNotifier {
         goals: 'to be prettier',
         notes: '..',
       );
+      final locale = await ref.read(LocaleManager.appLocaleProvider.future);
 
-      final prompt = scheduleCreationPrompt(userInfo: userInfo);
+      final prompt = scheduleCreationPrompt(
+        local: locale,
+        userInfo: userInfo,
+      );
 
       final content = [
         Content.multi([
@@ -254,6 +343,7 @@ class PromptNotifier extends StateNotifier {
 
       debugPrint('response type${response.text.toString()}', wrapWidth: 100);
       final glowResponse = GlowSchedule.fromJson(response.text ?? '');
+      await ref.read(PromptCreatorDeps.saveGlowScheduleProvider(glowResponse));
       for (var slot in glowResponse.dailySchedule) {
         slot.actions?.forEach((action) {
           final instances = action.generateInstances();
@@ -265,7 +355,8 @@ class PromptNotifier extends StateNotifier {
               ?.addAll(instances);
         });
       }
-      ref.read(PromptCreatorDeps.saveGlowScheduleProvider(glowResponse));
+      ref.invalidate(CalendarDeps.scheduleProvider);
+
       state = AsyncValue<GlowSchedule?>.data(glowResponse);
       return state;
     } catch (e) {

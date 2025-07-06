@@ -238,11 +238,9 @@ class ActionController extends StateNotifier<AsyncValue<void>> {
   }) async {
     try {
       final schedule = ref.read(CalendarDeps.scheduleProvider);
-      if (!schedule.hasValue) {
+      if (schedule.value == null)
         return AsyncValue.error('No schedule found', StackTrace.current);
-      }
-
-      // Create a deep copy of the schedule with updated action
+// Create a deep copy of the schedule with updated action
       final updatedDailySchedules = schedule.value?.dailySchedule.map((daily) {
         final updatedActions = daily.actions?.map((e) {
           return e.id == action.id

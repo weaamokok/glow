@@ -1,7 +1,10 @@
+import 'dart:ui';
+
 import '../domain/glow.dart';
 import '../domain/user_info.dart';
 
-String scheduleCreationPrompt({required UserPersonalInfo userInfo}) {
+String scheduleCreationPrompt(
+    {required UserPersonalInfo userInfo, required Locale local}) {
   return '''
 Generate a personalized glow-up routine in JSON format optimized for calendar/schedule display. Follow these requirements:
 

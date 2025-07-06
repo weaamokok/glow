@@ -3,6 +3,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:glow/feature/prompt_creator/prompt_creator_deps.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../l10n/translations.g.dart';
+
 class PersonalGoalsStep extends HookConsumerWidget {
   const PersonalGoalsStep({super.key});
 
@@ -12,6 +14,8 @@ class PersonalGoalsStep extends HookConsumerWidget {
         ref.read(PromptCreatorDeps.promptPersonalInfoProvider.notifier);
     final goalsTextFieldController = useTextEditingController();
     final notesTextFieldController = useTextEditingController();
+    final local = context.t;
+    final userGoalsLoc = local.personalGoalStep;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -21,7 +25,7 @@ class PersonalGoalsStep extends HookConsumerWidget {
           TextFormField(
             controller: goalsTextFieldController,
             decoration: InputDecoration(
-              labelText: "what's your goal from this glow up",
+              labelText: userGoalsLoc.goalsLabel,
             ),
             onChanged: (value) {
               promptPersonalInfo
@@ -31,7 +35,7 @@ class PersonalGoalsStep extends HookConsumerWidget {
           TextFormField(
             controller: notesTextFieldController,
             decoration: InputDecoration(
-              labelText: "Any notes to take in consideration",
+              labelText: userGoalsLoc.notesLabel,
             ),
             onChanged: (value) {
               promptPersonalInfo

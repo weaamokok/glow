@@ -1,0 +1,51 @@
+locale: en
+core:
+  somethingWentWrong: Something went wrong
+  confirm: Confirm
+  continue: Continue
+  cancel: Cancel
+  done: Done
+homeScreenTitle: Next in your Schedule.. ⏭️
+emptyActionList: No tasks at the moment. Enjoy your time!
+loginSubtitle: Login to your account
+userNameFieldHint: Username
+passwordFieldHint: Password
+userNameValidation: Username is required
+passwordValidation: Password is required
+imageUploadValidation: We need at least one image to give you accurate results
+scheduleCreationLoading: Crafting your ultimate glow-up plan\nget ready to shine!✨
+personalInfoStep:
+  workLabel: What do you do for living..?
+  birthDateLabel: Birth date
+  sexLabel: Gender
+  male: Male
+  female: Female
+  activityLabel: How do you spend your day?
+  mostlySitting: Mostly sitting
+  mostlyStanding: Mostly standing
+  moveAround: I move around a lot
+  workoutScheduleLabel: How often do you workout?
+  noWorkout: I don't workout
+  3DayAWeekOrLess: 3 days a week or less
+  3DayAWeekOrMore: more that 3 days a week
+  hobbiesLabel: What do you do in your free time?
+personalGoalStep:
+  goalsLabel: what's your goal from this glow up?
+  notesLabel: Any notes to take in consideration
+imagePickerStep:
+  dialogTitle: Would you like to
+  selectFromGallery: Select From Gallery
+  takePhoto: Take a photo
+  description: We can provide more efficient schedule based on a clear photo of you..
+  photoFull: Full length photo
+  photoHead: Head Shot
+  photoSide: Side Profile
+
+profileScreen:
+  personalInfo: Personal Information
+  language: Language
+  privacyPolicy: Privacy policy
+  languageBottomSheet:
+    description: Select your preferred language
+    arLang: العربية
+    engLang: English

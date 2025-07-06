@@ -4,11 +4,26 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:glow/feature/prompt_creator/prompt_creator_deps.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../l10n/translations.g.dart';
+
 class PersonalInfoStep extends HookConsumerWidget {
   const PersonalInfoStep({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
+    final local = context.t;
+    final userInfoLoc = local.personalInfoStep;
+
+    final activityType = [
+      userInfoLoc.mostlySitting,
+      userInfoLoc.mostlyStanding,
+      userInfoLoc.moveAround
+    ];
+    final workOutSchedule = [
+      userInfoLoc.noWorkout,
+      userInfoLoc.k3DayAWeekOrLess,
+      userInfoLoc.k3DayAWeekOrMore,
+    ];
     final promptPersonalInfo =
         ref.read(PromptCreatorDeps.promptPersonalInfoProvider.notifier);
     final workTextFieldController = useTextEditingController();
@@ -26,47 +41,6 @@ class PersonalInfoStep extends HookConsumerWidget {
       return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
     }
 
-    // // Function to validate all fields
-    // bool validateFields() {
-    //   if (workTextFieldController.text.isEmpty) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(content: Text('Please enter your job')),
-    //     );
-    //     return false;
-    //   }
-    //   if (birthDateTextFieldController.text.isEmpty) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(content: Text('Please select your birth date')),
-    //     );
-    //     return false;
-    //   }
-    //   if (genderTextFieldController.text.isEmpty) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(content: Text('Please select your gender')),
-    //     );
-    //     return false;
-    //   }
-    //   if (activityTextFieldController.text.isEmpty) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(content: Text('Please select your daily activity')),
-    //     );
-    //     return false;
-    //   }
-    //   if (workoutScheduleTextFieldController.text.isEmpty) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(content: Text('Please select your workout schedule')),
-    //     );
-    //     return false;
-    //   }
-    //   if (hobbiesTextFieldController.text.isEmpty) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(content: Text('Please enter your hobbies')),
-    //     );
-    //     return false;
-    //   }
-    //   return true;
-    // }
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 28.0),
       child: Column(
@@ -76,7 +50,7 @@ class PersonalInfoStep extends HookConsumerWidget {
             controller: workTextFieldController,
             decoration: InputDecoration(
               // hintText: 'What do you do for living..?',
-              labelText: 'What do you do for living..?',
+              labelText: userInfoLoc.workLabel,
             ),
             onChanged: (value) {
               promptPersonalInfo.updateJob(workTextFieldController.value.text);
@@ -99,7 +73,7 @@ class PersonalInfoStep extends HookConsumerWidget {
               }
             },
             decoration: InputDecoration(
-                labelText: 'birth date',
+                labelText: userInfoLoc.birthDateLabel,
                 suffixIcon: Icon(
                   EneftyIcons.calendar_2_outline,
                   color: Color(0xff4C7B8B).withValues(alpha: .7),
@@ -122,7 +96,7 @@ class PersonalInfoStep extends HookConsumerWidget {
                         child: Column(
                           children: [
                             ListTile(
-                              title: const Text('male'),
+                              title: Text(userInfoLoc.male),
                               leading: Radio<Gender>(
                                 value: Gender.male,
                                 groupValue: selectedOption.value,
@@ -140,7 +114,7 @@ class PersonalInfoStep extends HookConsumerWidget {
                               ),
                             ),
                             ListTile(
-                              title: const Text('female'),
+                              title: Text(userInfoLoc.female),
                               leading: Radio<Gender>(
                                 value: Gender.female,
                                 groupValue: selectedOption.value,
@@ -166,7 +140,7 @@ class PersonalInfoStep extends HookConsumerWidget {
               );
             },
             decoration: InputDecoration(
-              labelText: 'gender',
+              labelText: userInfoLoc.sexLabel,
             ),
           ),
           TextFormField(
@@ -212,7 +186,7 @@ class PersonalInfoStep extends HookConsumerWidget {
               );
             },
             decoration: InputDecoration(
-              labelText: 'how do you spend your day?',
+              labelText: userInfoLoc.activityLabel,
             ),
           ),
           TextFormField(
@@ -258,13 +232,13 @@ class PersonalInfoStep extends HookConsumerWidget {
               );
             },
             decoration: InputDecoration(
-              labelText: 'how often do you workout?',
+              labelText: userInfoLoc.workoutScheduleLabel,
             ),
           ),
           TextFormField(
             controller: hobbiesTextFieldController,
             decoration: InputDecoration(
-              labelText: 'what do you do in your free time?',
+              labelText: userInfoLoc.hobbiesLabel,
             ),
             onChanged: (value) {
               promptPersonalInfo
@@ -278,14 +252,3 @@ class PersonalInfoStep extends HookConsumerWidget {
 }
 
 enum Gender { male, female }
-
-final activityType = [
-  'mostly sitting',
-  'mostly standing',
-  'I move around a lot'
-];
-final workOutSchedule = [
-  "I don't workout ",
-  "3 days a week or less",
-  "more that 3 days a week",
-];
