@@ -57,6 +57,7 @@ class ProfileScreen extends StatelessWidget {
                   onTap: () {
                     showModalBottomSheet(
                       context: context,
+                      isScrollControlled: true,
                       builder: (context) => LanguageSelectionBottomSheet(),
                     );
                   },

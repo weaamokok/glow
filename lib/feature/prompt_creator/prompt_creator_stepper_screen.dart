@@ -14,7 +14,6 @@ import 'package:glow/l10n/translations.g.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-//todo add form validation
 @RoutePage()
 class PromptCreatorStepperScreen extends HookConsumerWidget {
   const PromptCreatorStepperScreen({super.key});

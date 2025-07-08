@@ -45,7 +45,18 @@ profileScreen:
   personalInfo: Personal Information
   language: Language
   privacyPolicy: Privacy policy
+  updateProfileImageBottomSheet:
+    removeCurrentPhoto: remove current photo
   languageBottomSheet:
     description: Select your preferred language
     arLang: العربية
     engLang: English
+editProfileScreen:
+  nameLabel: Name
+  bioLabel: Bio
+  nameRequired: Name is required
+  updateError: Couldn't update
+calendarScreen:
+  today: Today
+  empty: No actions for this day
+

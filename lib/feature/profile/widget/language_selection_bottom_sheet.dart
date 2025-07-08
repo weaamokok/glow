@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -15,72 +14,40 @@ class LanguageSelectionBottomSheet extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final appLocale = context.t;
     final currentLocale = Localizations.localeOf(context);
-    final localeFuture = ref.read(LocaleManager.appLocaleProvider.future);
-    final locale = useFuture(localeFuture);
-    print('locale is $locale');
+    final localeFuture = ref.read(LocaleManager.localeProvider);
+    // final locale = useFuture(localeFuture);
+    final locale = localeFuture;
+    print('locale is $localeFuture');
 
-    final selectedLocale = useState<Locale>(currentLocale);
-
-// Update `selectedLocale` only once when `locale.data` is ready
-    useEffect(() {
-      if (locale.hasData && locale.data != null) {
-        selectedLocale.value = locale.data!;
-      }
-      return null; // no dispose
-    }, [locale.data]);
+    final selectedLocale = useState<Locale>(locale);
 
     return Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 10,
         ),
-        child: Column(spacing: 10, children: [
+        child: Column(spacing: 10, mainAxisSize: MainAxisSize.min, children: [
           SizedBox(
-            height: 2,
+            height: 10,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextButton(
-                onPressed: () {
-                  context.maybePop();
-                },
-                child: Text(
-                  appLocale.core.cancel,
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-              Container(
-                height: 3,
-                width: 20,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    color: Color(0xff282828).withValues(alpha: .5)),
-              ),
-              TextButton(
-                onPressed: () {
-                  context.maybePop();
-                },
-                child: Text(
-                  appLocale.core.done,
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ],
+          Container(
+            height: 3,
+            width: 20,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                color: Color(0xff282828).withValues(alpha: .5)),
+          ),
+          SizedBox(
+            height: 10,
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Column(
               spacing: 5,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  appLocale.profileScreen.languageBottomSheet.description,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
                 Column(
                   spacing: 10,
+                  mainAxisSize: MainAxisSize.min,
                   children: Consts.supportedLocale.map(
                     (e) {
                       final title = e.languageCode == 'ar'
@@ -114,18 +81,23 @@ class LanguageSelectionBottomSheet extends HookConsumerWidget {
                                 Icons.circle_outlined,
                                 color: Colors.grey.shade300,
                               ),
-                        onTap: () {
+                        onTap: () async {
                           selectedLocale.value = e;
-                          ref.read(LocaleManager.changeAppLocale(e));
+                          ref
+                              .read(LocaleManager.localeProvider.notifier)
+                              .updateLocale(e);
+                          await context.maybePop();
                         },
                       );
-                      ;
                     },
                   ).toList(),
                 )
               ],
             ),
           ),
+          SizedBox(
+            height: 26,
+          )
         ]));
   }
 }

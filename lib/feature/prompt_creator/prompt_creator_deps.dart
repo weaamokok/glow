@@ -170,7 +170,7 @@ class PromptCreatorDeps {
         goals: 'to be prettier',
         notes: '..',
       );
-      final locale = await ref.read(LocaleManager.appLocaleProvider.future);
+      final locale = ref.read(LocaleManager.localeProvider);
 
       final prompt = scheduleCreationPrompt(
         local: locale,
@@ -323,7 +323,7 @@ class PromptNotifier extends StateNotifier {
         goals: 'to be prettier',
         notes: '..',
       );
-      final locale = await ref.read(LocaleManager.appLocaleProvider.future);
+      final locale = ref.read(LocaleManager.localeProvider);
 
       final prompt = scheduleCreationPrompt(
         local: locale,
@@ -343,7 +343,6 @@ class PromptNotifier extends StateNotifier {
 
       debugPrint('response type${response.text.toString()}', wrapWidth: 100);
       final glowResponse = GlowSchedule.fromJson(response.text ?? '');
-      await ref.read(PromptCreatorDeps.saveGlowScheduleProvider(glowResponse));
       for (var slot in glowResponse.dailySchedule) {
         slot.actions?.forEach((action) {
           final instances = action.generateInstances();
@@ -355,9 +354,10 @@ class PromptNotifier extends StateNotifier {
               ?.addAll(instances);
         });
       }
-      ref.invalidate(CalendarDeps.scheduleProvider);
+      await ref.read(PromptCreatorDeps.saveGlowScheduleProvider(glowResponse));
 
       state = AsyncValue<GlowSchedule?>.data(glowResponse);
+
       return state;
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.empty);

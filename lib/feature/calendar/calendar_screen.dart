@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:glow/domain/action_instance.dart';
 import 'package:glow/domain/glow.dart';
+import 'package:glow/l10n/translations.g.dart';
 import 'package:glow/ui/action_card.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
+import '../../domain/mock_values.dart';
 import '../../helper/helper_functions.dart';
 import 'calendar_deps.dart';
 
@@ -18,7 +21,7 @@ class CalendarScreen extends HookConsumerWidget {
     final currentWeekDates = currentWeek();
     currentWeekDates.sort();
     final glowSchedule = ref.watch(CalendarDeps.scheduleProvider);
-
+    final locale = context.t;
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -27,9 +30,10 @@ class CalendarScreen extends HookConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18.0),
             child: Consumer(builder: (context, ref, widget) {
-              return glowSchedule.map(
+              return glowSchedule.when(
                 data: (data) {
-                  final allActions = data.value?.dailySchedule
+                  print('data in calender $data');
+                  final allActions = data?.dailySchedule
                       .map(
                         (e) =>
                             e.actions
@@ -43,81 +47,22 @@ class CalendarScreen extends HookConsumerWidget {
                             <ScheduleAction>[],
                       )
                       .toList();
-
+                  print('all actions $allActions');
                   final actions =
                       allActions?.expand((list) => list).toList() ?? [];
-                  if (actions.isEmpty) return Text('empty');
-                  return Container(
-                    padding: EdgeInsets.only(top: 5),
-                    decoration: BoxDecoration(),
-                    child: Column(
-                      spacing: 14,
-                      children: data.value?.dailySchedule.map(
-                            (dailyTime) {
-                              if ((dailyTime.actions ?? []).isEmpty) {
-                                return Text('empty');
-                              }
-                              return Column(
-                                spacing: 10,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsetsDirectional.symmetric(
-                                        horizontal: 8),
-                                    child: Row(
-                                      spacing: 10,
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            dailyTime.timeSlot?.name ?? '',
-                                            style:
-                                                TextStyle(color: Colors.grey),
-                                          ),
-                                        ),
-                                        Flexible(
-                                          flex: 4,
-                                          child: SizedBox(
-                                              width: double.infinity,
-                                              child: Divider(
-                                                  height: 2,
-                                                  color: Color(0xff282828)
-                                                      .withValues(alpha: .1))),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  Column(
-                                      spacing: 5,
-                                      children: dailyTime.actions?.map(
-                                            (e) {
-                                              ActionInstance?
-                                                  actionCurrentInstance =
-                                                  e.datedInstance(
-                                                      date: selectedDay.value);
-
-                                              if (actionCurrentInstance !=
-                                                  null) {
-                                                return ManageableActionCard(
-                                                  instanceId:
-                                                      actionCurrentInstance.id,
-                                                  action: e,
-                                                );
-                                              } else {
-                                                return SizedBox();
-                                              }
-                                            },
-                                          ).toList() ??
-                                          []),
-                                ],
-                              );
-                            },
-                          ).toList() ??
-                          [],
-                    ),
+                  if (actions.isEmpty) return Text(locale.calendarScreen.empty);
+                  if (data == null) return Text('noooooo');
+                  return CalenderBody(
+                    schedule: data,
+                    selectedDay: selectedDay,
                   );
                 },
-                error: (error) => Text('something went wrong $error'),
-                loading: (loading) => CircularProgressIndicator(),
+                error: (error, stack) =>
+                    Text('${locale.core.somethingWentWrong}: $error'),
+                loading: () => Skeletonizer(
+                    child: CalenderBody(
+                        schedule: MockValues.mockGlowSchedule,
+                        selectedDay: selectedDay)),
               );
             }),
           ),
@@ -125,6 +70,81 @@ class CalendarScreen extends HookConsumerWidget {
             height: 10,
           )
         ],
+      ),
+    );
+  }
+}
+
+class CalenderBody extends StatelessWidget {
+  const CalenderBody(
+      {Key? key, required this.schedule, required this.selectedDay})
+      : super(key: key);
+  final GlowSchedule schedule;
+  final ValueNotifier<DateTime> selectedDay;
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = context.t;
+    return Container(
+      padding: EdgeInsets.only(top: 5),
+      decoration: BoxDecoration(),
+      child: Column(
+        spacing: 14,
+        children: schedule.dailySchedule.map(
+              (dailyTime) {
+                if ((dailyTime.actions ?? []).isEmpty) {
+                  return Text(locale.calendarScreen.empty);
+                }
+                return Column(
+                  spacing: 10,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsetsDirectional.symmetric(horizontal: 8),
+                      child: Row(
+                        spacing: 10,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              dailyTime.timeSlot?.name ?? '',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                          Flexible(
+                            flex: 4,
+                            child: SizedBox(
+                                width: double.infinity,
+                                child: Divider(
+                                    height: 2,
+                                    color: Color(0xff282828)
+                                        .withValues(alpha: .1))),
+                          )
+                        ],
+                      ),
+                    ),
+                    Column(
+                        spacing: 5,
+                        children: dailyTime.actions?.map(
+                              (e) {
+                                ActionInstance? actionCurrentInstance =
+                                    e.datedInstance(date: selectedDay.value);
+
+                                if (actionCurrentInstance != null) {
+                                  return ManageableActionCard(
+                                    instanceId: actionCurrentInstance.id,
+                                    action: e,
+                                  );
+                                } else {
+                                  return SizedBox();
+                                }
+                              },
+                            ).toList() ??
+                            []),
+                  ],
+                );
+              },
+            ).toList() ??
+            [],
       ),
     );
   }
@@ -139,6 +159,7 @@ class CalenderHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentWeekDates = currentWeek();
     currentWeekDates.sort();
+    final locale = context.t.calendarScreen;
     return Column(
       spacing: 10,
       children: [
@@ -148,7 +169,7 @@ class CalenderHeader extends StatelessWidget {
                         .format(selectedDay.value)
                         .compareTo(DateFormat.yMd().format(DateTime.now())) ==
                     0
-                ? 'Today'
+                ? locale.today
                 : DateFormat.yMMMMEEEEd().format(selectedDay.value),
             textAlign: TextAlign.start,
             style: TextStyle(fontWeight: FontWeight.bold),
