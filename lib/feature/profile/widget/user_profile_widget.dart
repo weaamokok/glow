@@ -31,6 +31,9 @@ class UserProfileWidget extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           ListTile(
+                            onTap: () {
+
+                            },
                             leading: Icon(EneftyIcons.image_outline),
                             title: Text(
                               locale.imagePickerStep.selectFromGallery,
@@ -95,9 +98,10 @@ class UserProfileWidget extends StatelessWidget {
               onPressed: () {
                 showModalBottomSheet(
                   context: context,
-                  builder: (context) => EditProfile(
-                    user: user,
-                  ),
+                  builder: (context) =>
+                      EditProfile(
+                        user: user,
+                      ),
                 );
               },
               icon: Icon(EneftyIcons.edit_outline)),

@@ -1,11 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:dot_navigation_bar/dot_navigation_bar.dart';
-import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glow/feature/calendar/calendar_screen.dart';
 import 'package:glow/feature/home/home_screen.dart';
-import 'package:glow/feature/main/widget/glow_progress_widget.dart';
+import 'package:glow/feature/main/widget/glow_bottom_nav.dart';
 import 'package:glow/feature/main/widget/weather_widget.dart';
 import 'package:glow/feature/profile/profile_screen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -61,9 +60,9 @@ class MainScreen extends ConsumerWidget {
                 ))
             : null,
       ),
-      bottomNavigationBar: BottomNavBar(indexBottomNavbar: indexBottomNavbar),
-      bottomSheet: indexBottomNavbar == 0 ? GlowProgressWidget() : null,
-      body: screens[indexBottomNavbar],
+      //   bottomNavigationBar: BottomNavBar(indexBottomNavbar: indexBottomNavbar),
+      //bottomSheet: indexBottomNavbar == 0 ? GlowProgressWidget() : null,
+      body: const GlowBottomNavBar(),
     );
   }
 }
@@ -128,20 +127,20 @@ class GlowBubble extends StatelessWidget {
   }
 }
 
-List<DotNavigationBarItem> _items = [
-  DotNavigationBarItem(
-    icon: const Icon(EneftyIcons.home_2_outline),
-    // selectedColor: Colors.black,
-  ),
-  DotNavigationBarItem(
-    icon: const Icon(EneftyIcons.calendar_2_outline),
-    // selectedColor: Colors.black,
-  ),
-  DotNavigationBarItem(
-    icon: const Icon(EneftyIcons.user_outline),
-    // selectedColor: Colors.black,
-  ),
-];
+// List<DotNavigationBarItem> _items = [
+//   DotNavigationBarItem(
+//     icon: const Icon(EneftyIcons.home_2_outline),
+//     // selectedColor: Colors.black,
+//   ),
+//   DotNavigationBarItem(
+//     icon: const Icon(EneftyIcons.calendar_2_outline),
+//     // selectedColor: Colors.black,
+//   ),
+//   DotNavigationBarItem(
+//     icon: const Icon(EneftyIcons.user_outline),
+//     // selectedColor: Colors.black,
+//   ),
+// ];
 
 class BottomNavBar extends ConsumerWidget {
   const BottomNavBar({super.key, required this.indexBottomNavbar});
@@ -171,25 +170,27 @@ class BottomNavBar extends ConsumerWidget {
         ),
         height: 60,
         child: DotNavigationBar(
-          // splashColor: Colors.black,
-          unselectedItemColor:
-              Theme.of(context).bottomNavigationBarTheme.unselectedItemColor,
-          selectedItemColor:
-              Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
-          backgroundColor: Colors.transparent,
-          borderRadius: 30,
-          margin: const EdgeInsets.symmetric(horizontal: 15),
-          paddingR: const EdgeInsets.only(bottom: 0, top: 0),
-          itemPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-          enableFloatingNavBar: false,
-          marginR: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-          currentIndex: indexBottomNavbar,
-          onTap: (value) => ref
-              .read(indexBottomNavbarProvider.notifier)
-              .update((state) => value),
-          dotIndicatorColor: Color(0xffEFB036),
-          items: _items,
-        ),
+            // splashColor: Colors.black,
+            unselectedItemColor:
+                Theme.of(context).bottomNavigationBarTheme.unselectedItemColor,
+            selectedItemColor:
+                Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
+            backgroundColor: Colors.transparent,
+            borderRadius: 30,
+            margin: const EdgeInsets.symmetric(horizontal: 15),
+            //   paddingR: const EdgeInsets.only(bottom: 0, top: 0),
+            itemPadding:
+                const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+            enableFloatingNavBar: false,
+            marginR: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+            currentIndex: indexBottomNavbar,
+            enablePaddingAnimation: true,
+            onTap: (value) => ref
+                .read(indexBottomNavbarProvider.notifier)
+                .update((state) => value),
+            dotIndicatorColor: Color(0xffEFB036),
+            items: [] // _items,
+            ),
       ),
     );
   }

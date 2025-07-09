@@ -140,7 +140,7 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
                                                                     .circular(
                                                                         10)),
                                                     content: Text(
-                                                        '${local.core.somethingWentWrong} ${error} ')));
+                                                        '${local.core.somethingWentWrong} $error ')));
                                           }),
                                       data: (data) {
                                         if (data != null) {

@@ -24,7 +24,7 @@ class User {
 
   @override
   String toString() {
-    return 'User{' + ' id: $id,' + ' name: $name,' + ' bio: $bio,' + '}';
+    return 'User{' ' id: $id,' ' name: $name,' ' bio: $bio,' '}';
   }
 
   User copyWith({
@@ -41,9 +41,9 @@ class User {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': this.id,
-      'name': this.name,
-      'bio': this.bio,
+      'id': id,
+      'name': name,
+      'bio': bio,
     };
   }
 

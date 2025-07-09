@@ -13,11 +13,10 @@ class LanguageSelectionBottomSheet extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final appLocale = context.t;
-    final currentLocale = Localizations.localeOf(context);
+    Localizations.localeOf(context);
     final localeFuture = ref.read(LocaleManager.localeProvider);
     // final locale = useFuture(localeFuture);
     final locale = localeFuture;
-    print('locale is $localeFuture');
 
     final selectedLocale = useState<Locale>(locale);
 

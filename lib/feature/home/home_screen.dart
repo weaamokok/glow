@@ -9,7 +9,9 @@ import '../calendar/calendar_deps.dart';
 import '../prompt_creator/prompt_creator_stepper_screen.dart';
 
 class HomeScreen extends HookConsumerWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.controller});
+
+  final ScrollController? controller;
 
   @override
   Widget build(BuildContext context, ref) {
@@ -41,6 +43,7 @@ class HomeScreen extends HookConsumerWidget {
 
     final local = context.t;
     return SingleChildScrollView(
+      controller: controller,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 18.0),
         child: Column(
@@ -70,7 +73,6 @@ class HomeScreen extends HookConsumerWidget {
                 final currentSlot = getCurrentSlot(
                   dailySchedule: dailySchedule,
                 );
-                print('crrent slot $currentSlot');
                 final nextActions = dailySchedule.firstWhereOrNull(
                   (element) {
                     return element.timeSlot == currentSlot;
@@ -103,7 +105,6 @@ class HomeScreen extends HookConsumerWidget {
                     spacing: 2,
                     children: [
                       ...sortedActions.map((e) {
-                        print('action $e');
                         return ManageableActionCard(
                           action: e,
                           instanceId: e.datedInstance()?.id,

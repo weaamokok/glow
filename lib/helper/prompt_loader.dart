@@ -9,13 +9,11 @@ class PromptLoader {
   static Future<void> loadPrompts() async {
     final jsonString =
         await rootBundle.loadString('assets/prompts/schedule_prompts.json');
-    print('recived json${jsonString}');
     final cleanJson = jsonString
         .replaceAll(r'\', r'\\')
         .replaceAll('\n', r'\n')
         .replaceAll('"', r'\"');
 
-    ;
     final Map<String, dynamic> jsonMap = jsonDecode(cleanJson);
 
     _prompts = jsonMap.map((key, value) => MapEntry(key, value.toString()));
@@ -45,8 +43,6 @@ class PromptLoader {
     required Locale locale,
     required UserPersonalInfo userInfo,
   }) async {
-    print('local $locale');
-
     if (_prompts == null) {
       await loadPrompts();
     }

@@ -32,11 +32,10 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appRouter = AppRouter(ref);
     final currentLocale = ref.watch(LocaleManager.localeProvider);
-    print('locale in main $currentLocale');
     return TranslationProvider(
       // 👈 wrap here, so it rebuilds when locale changes
       child: MaterialApp.router(
-        title: 'Glowr',
+        title: 'Glower',
         routerConfig: appRouter.config(),
         supportedLocales: Consts.supportedLocale,
         locale: currentLocale,

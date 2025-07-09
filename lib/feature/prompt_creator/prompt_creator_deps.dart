@@ -9,7 +9,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glow/app/db_keys.dart';
 import 'package:glow/domain/glow.dart';
-import 'package:glow/feature/calendar/calendar_deps.dart';
 import 'package:glow/helper/prompt_functions.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:sembast/sembast.dart';
@@ -18,7 +17,6 @@ import '../../app/local_db.dart';
 import '../../domain/user_info.dart';
 import '../../helper/helper_functions.dart';
 import '../../helper/locale_manager.dart';
-import '../../helper/prompt_loader.dart';
 import '../home/home_deps.dart';
 import 'image_picker_step.dart';
 

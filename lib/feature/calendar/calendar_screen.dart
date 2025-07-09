@@ -13,7 +13,9 @@ import '../../helper/helper_functions.dart';
 import 'calendar_deps.dart';
 
 class CalendarScreen extends HookConsumerWidget {
-  const CalendarScreen({super.key});
+  const CalendarScreen({super.key, this.controller});
+
+  final ScrollController? controller;
 
   @override
   Widget build(BuildContext context, ref) {
@@ -23,6 +25,7 @@ class CalendarScreen extends HookConsumerWidget {
     final glowSchedule = ref.watch(CalendarDeps.scheduleProvider);
     final locale = context.t;
     return SingleChildScrollView(
+      controller: controller,
       child: Column(
         children: [
           CalenderHeader(selectedDay: selectedDay),
@@ -32,7 +35,6 @@ class CalendarScreen extends HookConsumerWidget {
             child: Consumer(builder: (context, ref, widget) {
               return glowSchedule.when(
                 data: (data) {
-                  print('data in calender $data');
                   final allActions = data?.dailySchedule
                       .map(
                         (e) =>
@@ -47,7 +49,6 @@ class CalendarScreen extends HookConsumerWidget {
                             <ScheduleAction>[],
                       )
                       .toList();
-                  print('all actions $allActions');
                   final actions =
                       allActions?.expand((list) => list).toList() ?? [];
                   if (actions.isEmpty) return Text(locale.calendarScreen.empty);
@@ -67,7 +68,7 @@ class CalendarScreen extends HookConsumerWidget {
             }),
           ),
           SizedBox(
-            height: 10,
+            height: MediaQuery.of(context).size.height * 0.1,
           )
         ],
       ),
@@ -77,8 +78,8 @@ class CalendarScreen extends HookConsumerWidget {
 
 class CalenderBody extends StatelessWidget {
   const CalenderBody(
-      {Key? key, required this.schedule, required this.selectedDay})
-      : super(key: key);
+      {super.key, required this.schedule, required this.selectedDay});
+
   final GlowSchedule schedule;
   final ValueNotifier<DateTime> selectedDay;
 
@@ -91,60 +92,59 @@ class CalenderBody extends StatelessWidget {
       child: Column(
         spacing: 14,
         children: schedule.dailySchedule.map(
-              (dailyTime) {
-                if ((dailyTime.actions ?? []).isEmpty) {
-                  return Text(locale.calendarScreen.empty);
-                }
-                return Column(
-                  spacing: 10,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsetsDirectional.symmetric(horizontal: 8),
-                      child: Row(
-                        spacing: 10,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              dailyTime.timeSlot?.name ?? '',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ),
-                          Flexible(
-                            flex: 4,
-                            child: SizedBox(
-                                width: double.infinity,
-                                child: Divider(
-                                    height: 2,
-                                    color: Color(0xff282828)
-                                        .withValues(alpha: .1))),
-                          )
-                        ],
+          (dailyTime) {
+            if ((dailyTime.actions ?? []).isEmpty) {
+              return Text(locale.calendarScreen.empty);
+            }
+            return Column(
+              spacing: 10,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: EdgeInsetsDirectional.symmetric(horizontal: 8),
+                  child: Row(
+                    spacing: 10,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          dailyTime.timeSlot?.name ?? '',
+                          style: TextStyle(color: Colors.grey),
+                        ),
                       ),
-                    ),
-                    Column(
-                        spacing: 5,
-                        children: dailyTime.actions?.map(
-                              (e) {
-                                ActionInstance? actionCurrentInstance =
-                                    e.datedInstance(date: selectedDay.value);
+                      Flexible(
+                        flex: 4,
+                        child: SizedBox(
+                            width: double.infinity,
+                            child: Divider(
+                                height: 2,
+                                color:
+                                    Color(0xff282828).withValues(alpha: .1))),
+                      )
+                    ],
+                  ),
+                ),
+                Column(
+                    spacing: 5,
+                    children: dailyTime.actions?.map(
+                          (e) {
+                            ActionInstance? actionCurrentInstance =
+                                e.datedInstance(date: selectedDay.value);
 
-                                if (actionCurrentInstance != null) {
-                                  return ManageableActionCard(
-                                    instanceId: actionCurrentInstance.id,
-                                    action: e,
-                                  );
-                                } else {
-                                  return SizedBox();
-                                }
-                              },
-                            ).toList() ??
-                            []),
-                  ],
-                );
-              },
-            ).toList() ??
-            [],
+                            if (actionCurrentInstance != null) {
+                              return ManageableActionCard(
+                                instanceId: actionCurrentInstance.id,
+                                action: e,
+                              );
+                            } else {
+                              return SizedBox();
+                            }
+                          },
+                        ).toList() ??
+                        []),
+              ],
+            );
+          },
+        ).toList(),
       ),
     );
   }
