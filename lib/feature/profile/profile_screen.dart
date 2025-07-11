@@ -6,7 +6,6 @@ import 'package:glow/app/app_router.gr.dart';
 import 'package:glow/domain/mock_values.dart';
 import 'package:glow/feature/profile/profile_deps.dart';
 import 'package:glow/feature/profile/widget/language_selection_bottom_sheet.dart';
-import 'package:glow/feature/profile/widget/personal_info_sheet.dart';
 import 'package:glow/feature/profile/widget/user_profile_widget.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
