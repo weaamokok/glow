@@ -51,6 +51,7 @@ class CalendarScreen extends HookConsumerWidget {
                       .toList();
                   final actions =
                       allActions?.expand((list) => list).toList() ?? [];
+                  print('all actions $allActions data $data');
                   if (actions.isEmpty) return Text(locale.calendarScreen.empty);
                   if (data == null) return Text('noooooo');
                   return CalenderBody(

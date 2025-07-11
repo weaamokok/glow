@@ -17,7 +17,7 @@ class HomeScreen extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final schedule = ref.watch(CalendarDeps.scheduleProvider);
     final hasOpenedPromptCreator = useState(false);
-
+    print('schedule $schedule');
     useEffect(() {
       schedule.when(
         data: (data) {
@@ -30,7 +30,9 @@ class HomeScreen extends HookConsumerWidget {
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
-                builder: (context) => const PromptCreatorStepperScreen(),
+                builder: (context) => const PromptCreatorStepperBody(
+                  isEdit: false,
+                ),
               );
             });
           }

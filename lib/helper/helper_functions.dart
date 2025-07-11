@@ -1,5 +1,9 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 
 String removeEmojis(String input) {
   // Regex pattern to match most emojis
@@ -32,6 +36,13 @@ DateTime getDateTimeWithNoTime(String dateString) {
     // Fallback to current time
     return DateTime(now.year, now.month, now.day, 00, 00);
   }
+}
+
+Future<File> uint8ListToFile(Uint8List data, String filename) async {
+  final tempDir = await getTemporaryDirectory();
+  final file = File('${tempDir.path}/$filename');
+  await file.writeAsBytes(data);
+  return file;
 }
 
 extension FirstWhereOrNullExtension<T> on Iterable<T> {

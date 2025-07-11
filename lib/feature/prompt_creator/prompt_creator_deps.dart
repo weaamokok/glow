@@ -49,7 +49,24 @@ class PromptCreatorDeps {
       }
       return true;
     },
-  ); //to local storage class/provider
+  );
+  static final getSavedImages = Provider<Future<List<dynamic>>>(
+    (ref) async {
+      var store = StoreRef.main();
+
+      // Get stored images
+      final storedImages = (await store
+              .record(DbKeys.userImages)
+              .get(await LocalDB.db) as List<dynamic>?)
+          ?.toList();
+
+      if (storedImages == null || storedImages.isEmpty) {
+        throw Exception("No images found in local storage");
+      }
+      return storedImages;
+    },
+  );
+
   static final saveGlowScheduleProvider =
       StateProviderFamily<Future<AsyncValue<GlowSchedule>>, GlowSchedule>(
     (ref, arg) async {
@@ -126,17 +143,7 @@ class PromptCreatorDeps {
     (
       ref,
     ) async {
-      var store = StoreRef.main();
-
-      // Get stored images
-      final storedImages = (await store
-              .record(DbKeys.userImages)
-              .get(await LocalDB.db) as List<dynamic>?)
-          ?.toList();
-
-      if (storedImages == null || storedImages.isEmpty) {
-        throw Exception("No images found in local storage");
-      }
+      final storedImages = await ref.read(getSavedImages);
 
       // Safely convert each element to Uint8List
       final imageParts = <DataPart>[];
@@ -353,7 +360,6 @@ class PromptNotifier extends StateNotifier {
         });
       }
       await ref.read(PromptCreatorDeps.saveGlowScheduleProvider(glowResponse));
-
       state = AsyncValue<GlowSchedule?>.data(glowResponse);
 
       return state;

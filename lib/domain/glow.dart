@@ -295,6 +295,7 @@ class ScheduleAction {
   ActionInstance? datedInstance({DateTime? date}) =>
       instances?.firstWhereOrNull(
         (element) {
+          print('element: $element');
           return getDateTimeWithNoTime((date ?? DateTime.now()).toString())
                   .difference(getDateTimeWithNoTime(element.date.toString()))
                   .inDays ==

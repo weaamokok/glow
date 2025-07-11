@@ -23,6 +23,7 @@ class ProfileDeps {
             debugPrint('user info added successfully');
           },
         );
+        ref.invalidate(userProfile);
         return AsyncValue.data(user);
         // print('post   ${arg}');
       } catch (e) {
@@ -43,6 +44,8 @@ class ProfileDeps {
             .get(
               await LocalDB.db,
             ) as Map<String, dynamic>?;
+        print('user from provider $user');
+
         if (user == null) return null;
         return User.fromMap(user);
       } catch (e) {

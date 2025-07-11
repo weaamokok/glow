@@ -98,7 +98,7 @@ Generate a personalized glow-up routine in JSON format optimized for calendar/sc
 - Suggest specific YouTube workout videos when relevant
 - Recommend exact product names for skincare don't recommend product from companies that support israel, recommend korean skin care but not from COSRX company
 - Include 5-minute buffer between consecutive tasks
--the actions starts from ${DateTime.now()} to 3 months add the start date and end date form actions accordingly
+-the actions starts from ${DateTime.now()} to 3 months add the start date and end date form actions accordingly make sure its starts from ${DateTime.now()} in the year ${DateTime.now().year} and month ${DateTime.now().month}
 -make sure the json response in correctly formatted 
 Focus on creating a time-bound, executable schedule rather than general advice. The output should be ready for direct import into a digital calendar.''';
 }
