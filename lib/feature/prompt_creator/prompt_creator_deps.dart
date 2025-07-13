@@ -22,23 +22,23 @@ import 'image_picker_step.dart';
 
 class PromptCreatorDeps {
   static final addPromptImagesProvider =
-      StateProviderFamily<Future<bool>, List<File?>>(
-    (ref, arg) async {
+  StateProviderFamily<Future<bool>, List<File?>>(
+        (ref, arg) async {
       //add image to local
       var store = StoreRef.main();
       final imagesAsUnit8List = arg.map(
-        (e) {
+            (e) {
           return e?.readAsBytesSync();
         },
       ).toList();
       try {
         await store
             .record(
-              DbKeys.userImages,
-            )
+          DbKeys.userImages,
+        )
             .put(await LocalDB.db, imagesAsUnit8List)
             .then(
-          (value) {
+              (value) {
             debugPrint('image added successfully!');
           },
         );
@@ -51,13 +51,13 @@ class PromptCreatorDeps {
     },
   );
   static final getSavedImages = Provider<Future<List<dynamic>>>(
-    (ref) async {
+        (ref) async {
       var store = StoreRef.main();
 
       // Get stored images
       final storedImages = (await store
-              .record(DbKeys.userImages)
-              .get(await LocalDB.db) as List<dynamic>?)
+          .record(DbKeys.userImages)
+          .get(await LocalDB.db) as List<dynamic>?)
           ?.toList();
 
       if (storedImages == null || storedImages.isEmpty) {
@@ -66,21 +66,35 @@ class PromptCreatorDeps {
       return storedImages;
     },
   );
+  static final getPersonalInformation = Provider(
+        (ref) async {
+      try {
+        var store = StoreRef.main();
+        final promptInfoMap = await store
+            .record(DbKeys.userPersonalInfo)
+            .get(await LocalDB.db) as Map<String, dynamic>;
 
+        final promptInfo = UserPersonalInfo.fromMap(promptInfoMap);
+        return promptInfo;
+      } catch (e) {
+        print('error $e');
+      }
+    },
+  );
   static final saveGlowScheduleProvider =
-      StateProviderFamily<Future<AsyncValue<GlowSchedule>>, GlowSchedule>(
-    (ref, arg) async {
+  StateProviderFamily<Future<AsyncValue<GlowSchedule>>, GlowSchedule>(
+        (ref, arg) async {
       //add image to local
       var store = StoreRef.main();
 
       try {
         final savedSchedule = await store
             .record(
-              DbKeys.glowSchedule,
-            )
+          DbKeys.glowSchedule,
+        )
             .put(await LocalDB.db, arg.toMap(), merge: true)
             .then(
-          (value) {
+              (value) {
             debugPrint('glow schedule added successfully');
             return value as Map<String, dynamic>;
           },
@@ -94,19 +108,19 @@ class PromptCreatorDeps {
     },
   ); //to local storage class/provider
   static final addPromptPersonalInfoProvider =
-      StateProviderFamily<Future<bool>, UserPersonalInfo>(
-    (ref, arg) async {
+  StateProviderFamily<Future<bool>, UserPersonalInfo>(
+        (ref, arg) async {
       //add image to local
       var store = StoreRef.main();
 
       try {
         await store
             .record(
-              DbKeys.userPersonalInfo,
-            )
+          DbKeys.userPersonalInfo,
+        )
             .put(await LocalDB.db, arg.toMap())
             .then(
-          (value) {
+              (value) {
             debugPrint('user info added successfully');
           },
         );
@@ -119,7 +133,7 @@ class PromptCreatorDeps {
     },
   ); //to local storage class/provider
   static final modelProvider = Provider<GenerativeModel>(
-    (ref) {
+        (ref) {
       final apiKey = dotenv.get(
         'GOOGLE_AI_API_KEY',
       );
@@ -134,15 +148,13 @@ class PromptCreatorDeps {
     },
   );
   static final promptProvider =
-      StateNotifierProvider<PromptNotifier, dynamic>((ref) {
+  StateNotifierProvider<PromptNotifier, dynamic>((ref) {
     //  PromptNotifier.submitPrompt(ref: ref);
     return PromptNotifier(ref: ref);
   });
   static final promptCreatorProvider =
-      FutureProvider<Either<Error, GlowSchedule>>(
-    (
-      ref,
-    ) async {
+  FutureProvider<Either<Error, GlowSchedule>>(
+        (ref,) async {
       final storedImages = await ref.read(getSavedImages);
 
       // Safely convert each element to Uint8List
@@ -165,6 +177,7 @@ class PromptCreatorDeps {
         }
       }
       // Get personal info
+      final userSavedInfo = await ref.read(getPersonalInformation);
       final userInfo = UserPersonalInfo(
         job: 'doctor',
         gender: 'female',
@@ -189,9 +202,9 @@ class PromptCreatorDeps {
         ])
       ];
       final response =
-          await ref.read(PromptCreatorDeps.modelProvider).generateContent(
-                content,
-              );
+      await ref.read(PromptCreatorDeps.modelProvider).generateContent(
+        content,
+      );
 
       debugPrint('response type${response.text.toString()}', wrapWidth: 100);
       final glowResponse = GlowSchedule.fromJson(response.text ?? '');
@@ -202,7 +215,7 @@ class PromptCreatorDeps {
           slot.actions
               ?.firstWhereOrNull(
                 (p0) => p0.id == action.id,
-              )
+          )
               ?.instances
               ?.addAll(instances);
         });
@@ -212,7 +225,7 @@ class PromptCreatorDeps {
     },
   );
   static final promptCreatorStepProvider = ChangeNotifierProvider.autoDispose(
-    (ref) {
+        (ref) {
       ref.keepAlive();
 
       return useState(0);
@@ -220,16 +233,16 @@ class PromptCreatorDeps {
   );
 
   static final promptImagesProvider =
-      StateNotifierProvider<PromptImagesNotifier, List<File?>>(
-    (ref) => PromptImagesNotifier(),
+  StateNotifierProvider<PromptImagesNotifier, List<File?>>(
+        (ref) => PromptImagesNotifier(),
   );
   static final promptPersonalInfoProvider =
-      StateNotifierProvider<PromptPersonalInfoNotifier, UserPersonalInfo>(
-    (ref) => PromptPersonalInfoNotifier(),
+  StateNotifierProvider<PromptPersonalInfoNotifier, UserPersonalInfo>(
+        (ref) => PromptPersonalInfoNotifier(),
   );
 
   static final promptProgressProvider = ChangeNotifierProvider(
-    (ref) {
+        (ref) {
       return useState(0.0);
     },
   );
@@ -240,7 +253,8 @@ class PromptImagesNotifier extends StateNotifier<List<File?>> {
       : super(List.filled(UserImagesTypes.values.length, null));
 
   void updateImage(int index, File? file) {
-    state = List<File?>.from(state)..[index] = file;
+    state = List<File?>.from(state)
+      ..[index] = file;
   }
 }
 
@@ -290,8 +304,8 @@ class PromptNotifier extends StateNotifier {
     try {
       // Get stored images
       final storedImages = (await store
-              .record(DbKeys.userImages)
-              .get(await LocalDB.db) as List<dynamic>?)
+          .record(DbKeys.userImages)
+          .get(await LocalDB.db) as List<dynamic>?)
           ?.toList();
 
       if (storedImages == null || storedImages.isEmpty) {
@@ -318,6 +332,7 @@ class PromptNotifier extends StateNotifier {
         }
       }
       // Get personal info
+
       final userInfo = UserPersonalInfo(
         job: 'doctor',
         gender: 'female',
@@ -342,9 +357,9 @@ class PromptNotifier extends StateNotifier {
         ])
       ];
       final response =
-          await ref.read(PromptCreatorDeps.modelProvider).generateContent(
-                content,
-              );
+      await ref.read(PromptCreatorDeps.modelProvider).generateContent(
+        content,
+      );
 
       debugPrint('response type${response.text.toString()}', wrapWidth: 100);
       final glowResponse = GlowSchedule.fromJson(response.text ?? '');
@@ -354,7 +369,7 @@ class PromptNotifier extends StateNotifier {
           slot.actions
               ?.firstWhereOrNull(
                 (p0) => p0.id == action.id,
-              )
+          )
               ?.instances
               ?.addAll(instances);
         });
@@ -373,7 +388,7 @@ class PromptNotifier extends StateNotifier {
   Future<AsyncValue<ScheduleAction>> updateActionPrompt(
       {required ScheduleAction action, required bool isEdit}) async {
     final actionController =
-        ref.read(HomeDeps.actionControllerProvider.notifier);
+    ref.read(HomeDeps.actionControllerProvider.notifier);
     try {
       if (isEdit) {
         final updatingResult = await actionController.addAction(
@@ -386,7 +401,7 @@ class PromptNotifier extends StateNotifier {
       final prompt = actionUpdatePrompt(action: action);
 
       final response =
-          await ref.read(PromptCreatorDeps.modelProvider).generateContent(
+      await ref.read(PromptCreatorDeps.modelProvider).generateContent(
         [Content.text(prompt)],
       );
 
@@ -398,7 +413,7 @@ class PromptNotifier extends StateNotifier {
       // Extract JSON from markdown code block if present
       String jsonString = responseText;
       final jsonMatch =
-          RegExp(r'```json\n([\s\S]*?)\n```').firstMatch(responseText);
+      RegExp(r'```json\n([\s\S]*?)\n```').firstMatch(responseText);
       if (jsonMatch != null) {
         jsonString = jsonMatch.group(1)!;
       }
@@ -411,7 +426,7 @@ class PromptNotifier extends StateNotifier {
 
       final updatingResult = await actionController.addAction(
           newAction:
-              updatedAction.action.copyWith(instances: updatedActionInstances),
+          updatedAction.action.copyWith(instances: updatedActionInstances),
           slot: updatedAction.slot);
       return updatingResult.map(
           data: (data) => AsyncData(data.value),
@@ -437,10 +452,10 @@ class UpdateActionResponse {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is UpdateActionResponse &&
-          runtimeType == other.runtimeType &&
-          action == other.action &&
-          slot == other.slot);
+          (other is UpdateActionResponse &&
+              runtimeType == other.runtimeType &&
+              action == other.action &&
+              slot == other.slot);
 
   @override
   int get hashCode => action.hashCode ^ slot.hashCode;

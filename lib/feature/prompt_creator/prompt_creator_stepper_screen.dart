@@ -53,8 +53,12 @@ class PromptCreatorStepperBody extends HookConsumerWidget {
       ImagePickerStep(
         isEdit: isEdit,
       ), //image picker
-      PersonalInfoStep(), //personal info
-      PersonalGoalsStep(), //goals and life style
+      PersonalInfoStep(
+        isEdit: isEdit,
+      ), //personal info
+      PersonalGoalsStep(
+        isEdit: isEdit,
+      ), //goals and life style
       //goals and life style
     ];
     final promptCreationState = useState(AsyncValue<GlowSchedule?>.data(null));

@@ -84,6 +84,7 @@ Generate a personalized glow-up routine in JSON format optimized for calendar/sc
 
 4. **Output Requirements:**
 - All time slots must have concrete start times add related emoji to time_slot
+-every slot most have an action at least
 - Duration in whole minutes only
 - Include location requirements
 - Specify needed preparation items

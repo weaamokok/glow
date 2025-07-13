@@ -38,11 +38,35 @@ DateTime getDateTimeWithNoTime(String dateString) {
   }
 }
 
-Future<File> uint8ListToFile(Uint8List data, String filename) async {
-  final tempDir = await getTemporaryDirectory();
-  final file = File('${tempDir.path}/$filename');
-  await file.writeAsBytes(data);
-  return file;
+Future<List<File?>> uint8ListToFile(List<dynamic> imagesFromMemory) async {
+  try {
+    final tempDir = await getTemporaryDirectory();
+
+    final files =
+        await Future.wait(imagesFromMemory.asMap().entries.map((entry) async {
+      final index = entry.key;
+      final imageData = entry.value;
+
+      Uint8List bytes;
+      if (imageData is Uint8List) {
+        bytes = imageData;
+      } else if (imageData is List<Object?>) {
+        bytes = Uint8List.fromList(imageData.cast<int>());
+      } else {
+        return null;
+      }
+
+      final file = File('${tempDir.path}/user_image_$index.jpg');
+      await file.writeAsBytes(bytes);
+      print('file is $file');
+      return file;
+    }));
+
+    return files;
+  } catch (e) {
+    print('error: $e');
+    return [];
+  }
 }
 
 extension FirstWhereOrNullExtension<T> on Iterable<T> {

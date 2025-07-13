@@ -1,13 +1,17 @@
 import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:glow/domain/user_info.dart';
 import 'package:glow/feature/prompt_creator/prompt_creator_deps.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:reactive_forms/reactive_forms.dart';
 
 import '../../l10n/translations.g.dart';
 
 class PersonalInfoStep extends HookConsumerWidget {
-  const PersonalInfoStep({super.key});
+  const PersonalInfoStep({required this.isEdit, super.key});
+
+  final bool isEdit;
 
   @override
   Widget build(BuildContext context, ref) {
@@ -17,235 +21,232 @@ class PersonalInfoStep extends HookConsumerWidget {
     final activityType = [
       userInfoLoc.mostlySitting,
       userInfoLoc.mostlyStanding,
-      userInfoLoc.moveAround
+      userInfoLoc.moveAround,
     ];
     final workOutSchedule = [
       userInfoLoc.noWorkout,
       userInfoLoc.k3DayAWeekOrLess,
       userInfoLoc.k3DayAWeekOrMore,
     ];
+
     final promptPersonalInfo =
         ref.read(PromptCreatorDeps.promptPersonalInfoProvider.notifier);
-    final workTextFieldController = useTextEditingController();
-    final birthDateTextFieldController = useTextEditingController();
-    final genderTextFieldController = useTextEditingController();
-    final activityTextFieldController = useTextEditingController();
-    final workoutScheduleTextFieldController = useTextEditingController();
-    final hobbiesTextFieldController = useTextEditingController();
+
     final selectedOption = useValueNotifier<Gender>(Gender.male);
     final selectedActivity = useValueNotifier<String>(activityType.first);
     final selectedSchedule = useValueNotifier<String>(workOutSchedule.first);
 
-    // Function to format the date as yyyy-MM-dd
+    final personalInfo = useState<UserPersonalInfo?>(null);
+    final isLoaded = useState<bool>(!isEdit);
+
+    useEffect(() {
+      if (isEdit) {
+        Future.microtask(() async {
+          try {
+            final saved =
+                await ref.read(PromptCreatorDeps.getPersonalInformation);
+            personalInfo.value = saved;
+          } catch (e) {
+            debugPrint('Failed to load personal info: $e');
+          } finally {
+            isLoaded.value = true;
+          }
+        });
+      }
+      return null;
+    }, []);
+
+    if (!isLoaded.value) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final info = personalInfo.value;
+    final form = FormGroup({
+      'work': FormControl<String>(value: info?.job),
+      'birthdate': FormControl<String>(value: info?.birthDate),
+      'gender': FormControl<String>(value: info?.gender),
+      'activity': FormControl<String>(value: info?.activity),
+      'workout': FormControl<String>(value: info?.workoutSchedule),
+      'hobbies': FormControl<String>(value: info?.hobbies),
+    });
+
+    // Set default selected values for UI state
+    selectedOption.value =
+        info?.gender == 'female' ? Gender.female : Gender.male;
+    if (activityType.contains(info?.activity)) {
+      selectedActivity.value = info!.activity!;
+    }
+    if (workOutSchedule.contains(info?.workoutSchedule)) {
+      selectedSchedule.value = info!.workoutSchedule!;
+    }
+
     String formatDate(DateTime date) {
       return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
     }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 28.0),
-      child: Column(
-        spacing: 15,
-        children: [
-          TextFormField(
-            controller: workTextFieldController,
-            decoration: InputDecoration(
-              // hintText: 'What do you do for living..?',
-              labelText: userInfoLoc.workLabel,
+      child: ReactiveForm(
+        formGroup: form,
+        child: Column(
+          spacing: 15,
+          children: [
+            ReactiveTextField<String>(
+              formControlName: 'work',
+              decoration: InputDecoration(labelText: userInfoLoc.workLabel),
+              onChanged: (_) => promptPersonalInfo
+                  .updateJob(form.control('work').value ?? ''),
             ),
-            onChanged: (value) {
-              promptPersonalInfo.updateJob(workTextFieldController.value.text);
-            },
-          ),
-          TextFormField(
-            controller: birthDateTextFieldController,
-            readOnly: true,
-            onTap: () async {
-              final date = await showDatePicker(
-                context: context,
-                firstDate: DateTime(1920),
-                lastDate: DateTime(2017),
-              );
-              if (date != null) {
-                birthDateTextFieldController.value =
-                    TextEditingValue(text: formatDate(date));
-                promptPersonalInfo
-                    .updateBirthDate(birthDateTextFieldController.value.text);
-              }
-            },
-            decoration: InputDecoration(
+            ReactiveTextField<String>(
+              formControlName: 'birthdate',
+              readOnly: true,
+              decoration: InputDecoration(
                 labelText: userInfoLoc.birthDateLabel,
                 suffixIcon: Icon(
                   EneftyIcons.calendar_2_outline,
-                  color: Color(0xff4C7B8B).withValues(alpha: .7),
-                )),
-          ),
-          TextFormField(
-            controller: genderTextFieldController,
-            readOnly: true,
-            onTap: () {
-              showAdaptiveDialog(
-                context: context,
-                builder: (context) {
-                  return Dialog(
-                    backgroundColor: Colors.white,
+                  color: const Color(0xff4C7B8B).withAlpha(70),
+                ),
+              ),
+              onTap: (control) async {
+                final date = await showDatePicker(
+                  context: context,
+                  firstDate: DateTime(1920),
+                  lastDate: DateTime(2017),
+                );
+                if (date != null) {
+                  final formatted = formatDate(date);
+                  control.value = formatted;
+                  promptPersonalInfo.updateBirthDate(formatted);
+                }
+              },
+            ),
+            ReactiveTextField<String>(
+              formControlName: 'gender',
+              readOnly: true,
+              decoration: InputDecoration(labelText: userInfoLoc.sexLabel),
+              onTap: (control) {
+                showAdaptiveDialog(
+                  context: context,
+                  builder: (context) => Dialog(
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15)),
                     child: IntrinsicHeight(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Column(
-                          children: [
-                            ListTile(
-                              title: Text(userInfoLoc.male),
-                              leading: Radio<Gender>(
-                                value: Gender.male,
-                                groupValue: selectedOption.value,
-                                onChanged: (value) {
-                                  if (value == null) return;
-                                  selectedOption.value = value;
-                                  genderTextFieldController.value =
-                                      TextEditingValue(
-                                          text:
-                                              value.toString().split('.').last);
-                                  promptPersonalInfo.updateGender(
-                                      value.toString().split('.').last);
-                                  Navigator.pop(context);
-                                },
-                              ),
+                      child: Column(
+                        children: [
+                          ListTile(
+                            title: Text(userInfoLoc.male),
+                            leading: Radio<Gender>(
+                              value: Gender.male,
+                              groupValue: selectedOption.value,
+                              onChanged: (value) {
+                                if (value == null) return;
+                                selectedOption.value = value;
+                                final val = 'male';
+                                control.value = val;
+                                promptPersonalInfo.updateGender(val);
+                                Navigator.pop(context);
+                              },
                             ),
-                            ListTile(
-                              title: Text(userInfoLoc.female),
-                              leading: Radio<Gender>(
-                                value: Gender.female,
-                                groupValue: selectedOption.value,
-                                onChanged: (value) {
-                                  if (value == null) return;
-                                  selectedOption.value = value;
-                                  genderTextFieldController.value =
-                                      TextEditingValue(
-                                          text:
-                                              value.toString().split('.').last);
-                                  promptPersonalInfo.updateGender(
-                                      value.toString().split('.').last);
-                                  Navigator.pop(context);
-                                },
-                              ),
+                          ),
+                          ListTile(
+                            title: Text(userInfoLoc.female),
+                            leading: Radio<Gender>(
+                              value: Gender.female,
+                              groupValue: selectedOption.value,
+                              onChanged: (value) {
+                                if (value == null) return;
+                                selectedOption.value = value;
+                                final val = 'female';
+                                control.value = val;
+                                promptPersonalInfo.updateGender(val);
+                                Navigator.pop(context);
+                              },
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                  );
-                },
-              );
-            },
-            decoration: InputDecoration(
-              labelText: userInfoLoc.sexLabel,
+                  ),
+                );
+              },
             ),
-          ),
-          TextFormField(
-            controller: activityTextFieldController,
-            readOnly: true,
-            onTap: () {
-              showAdaptiveDialog(
-                context: context,
-                builder: (context) {
-                  //  String selectedActivity = activityType.first;
-                  return Dialog(
-                    backgroundColor: Colors.white,
+            ReactiveTextField<String>(
+              formControlName: 'activity',
+              readOnly: true,
+              decoration: InputDecoration(labelText: userInfoLoc.activityLabel),
+              onTap: (control) {
+                showAdaptiveDialog(
+                  context: context,
+                  builder: (context) => Dialog(
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15)),
                     child: IntrinsicHeight(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Column(
-                            children: activityType
-                                .map(
-                                  (e) => ListTile(
-                                    title: Text(e),
-                                    leading: Radio<String>(
-                                      value: e,
-                                      groupValue: selectedActivity.value,
-                                      onChanged: (value) {
-                                        if (value == null) return;
-                                        selectedActivity.value = value;
-                                        activityTextFieldController.value =
-                                            TextEditingValue(text: value);
-                                        promptPersonalInfo
-                                            .updateActivity(value);
-                                        Navigator.pop(context);
-                                      },
-                                    ),
-                                  ),
-                                )
-                                .toList()),
+                      child: Column(
+                        children: activityType.map((e) {
+                          return ListTile(
+                            title: Text(e),
+                            leading: Radio<String>(
+                              value: e,
+                              groupValue: selectedActivity.value,
+                              onChanged: (value) {
+                                if (value == null) return;
+                                selectedActivity.value = value;
+                                control.value = value;
+                                promptPersonalInfo.updateActivity(value);
+                                Navigator.pop(context);
+                              },
+                            ),
+                          );
+                        }).toList(),
                       ),
                     ),
-                  );
-                },
-              );
-            },
-            decoration: InputDecoration(
-              labelText: userInfoLoc.activityLabel,
+                  ),
+                );
+              },
             ),
-          ),
-          TextFormField(
-            controller: workoutScheduleTextFieldController,
-            readOnly: true,
-            onTap: () {
-              showAdaptiveDialog(
-                context: context,
-                builder: (context) {
-                  return Dialog(
-                    backgroundColor: Colors.white,
+            ReactiveTextField<String>(
+              formControlName: 'workout',
+              readOnly: true,
+              decoration:
+                  InputDecoration(labelText: userInfoLoc.workoutScheduleLabel),
+              onTap: (control) {
+                showAdaptiveDialog(
+                  context: context,
+                  builder: (context) => Dialog(
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15)),
                     child: IntrinsicHeight(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Column(
-                            children: workOutSchedule
-                                .map(
-                                  (e) => ListTile(
-                                    title: Text(e),
-                                    leading: Radio<String>(
-                                      value: e,
-                                      groupValue: selectedSchedule.value,
-                                      onChanged: (value) {
-                                        if (value == null) return;
-                                        selectedSchedule.value = value;
-                                        workoutScheduleTextFieldController
-                                                .value =
-                                            TextEditingValue(text: value);
-                                        promptPersonalInfo
-                                            .updateWorkoutSchedule(value);
-                                        Navigator.pop(context);
-                                      },
-                                    ),
-                                  ),
-                                )
-                                .toList()),
+                      child: Column(
+                        children: workOutSchedule.map((e) {
+                          return ListTile(
+                            title: Text(e),
+                            leading: Radio<String>(
+                              value: e,
+                              groupValue: selectedSchedule.value,
+                              onChanged: (value) {
+                                if (value == null) return;
+                                selectedSchedule.value = value;
+                                control.value = value;
+                                promptPersonalInfo.updateWorkoutSchedule(value);
+                                Navigator.pop(context);
+                              },
+                            ),
+                          );
+                        }).toList(),
                       ),
                     ),
-                  );
-                },
-              );
-            },
-            decoration: InputDecoration(
-              labelText: userInfoLoc.workoutScheduleLabel,
+                  ),
+                );
+              },
             ),
-          ),
-          TextFormField(
-            controller: hobbiesTextFieldController,
-            decoration: InputDecoration(
-              labelText: userInfoLoc.hobbiesLabel,
+            ReactiveTextField<String>(
+              formControlName: 'hobbies',
+              decoration: InputDecoration(labelText: userInfoLoc.hobbiesLabel),
+              onChanged: (control) =>
+                  promptPersonalInfo.updateHobbies(control.value ?? ''),
             ),
-            onChanged: (value) {
-              promptPersonalInfo
-                  .updateHobbies(hobbiesTextFieldController.value.text);
-            },
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

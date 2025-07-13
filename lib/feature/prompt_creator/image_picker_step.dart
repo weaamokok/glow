@@ -12,6 +12,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../helper/helper_functions.dart';
 import '../../helper/image_picker.dart';
 import '../../l10n/translations.g.dart';
 
@@ -33,26 +34,7 @@ class ImagePickerStep extends HookConsumerWidget {
           try {
             final savedImages =
                 await ref.read(PromptCreatorDeps.getSavedImages);
-            final tempDir = await getTemporaryDirectory();
-
-            final files = await Future.wait(
-                savedImages.asMap().entries.map((entry) async {
-              final index = entry.key;
-              final imageData = entry.value;
-
-              Uint8List bytes;
-              if (imageData is Uint8List) {
-                bytes = imageData;
-              } else if (imageData is List<Object?>) {
-                bytes = Uint8List.fromList(imageData.cast<int>());
-              } else {
-                return null;
-              }
-
-              final file = File('${tempDir.path}/user_image_$index.jpg');
-              await file.writeAsBytes(bytes);
-              return file;
-            }));
+            final files = await uint8ListToFile(savedImages);
 
             // Remove nulls in case of conversion failures
             for (int i = 0; i < files.length; i++) {

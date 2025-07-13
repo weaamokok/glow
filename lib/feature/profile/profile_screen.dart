@@ -54,8 +54,7 @@ class ProfileScreen extends ConsumerWidget {
                 SettingsTile(
                   text: local.personalInfo,
                   onTap: () {
-                    context.router
-                        .push(PromptCreatorStepperRoute(isEdit: true));
+                    context.router.push(UserProfileSummaryRoute());
                   },
                 ),
                 SettingsTile(

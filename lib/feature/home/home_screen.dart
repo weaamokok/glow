@@ -30,7 +30,8 @@ class HomeScreen extends HookConsumerWidget {
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
-                builder: (context) => const PromptCreatorStepperBody(
+                builder: (context) =>
+                const PromptCreatorStepperBody(
                   isEdit: false,
                 ),
               );
@@ -76,27 +77,34 @@ class HomeScreen extends HookConsumerWidget {
                   dailySchedule: dailySchedule,
                 );
                 final nextActions = dailySchedule.firstWhereOrNull(
-                  (element) {
+                      (element) {
                     return element.timeSlot == currentSlot;
                   },
                 );
                 final today = DateUtils.dateOnly(DateTime.now());
 
                 final actions = nextActions?.actions
-                        ?.where((action) =>
-                            action.instances?.any((instance) =>
-                                DateUtils.dateOnly(
-                                    instance.date ?? DateTime(2000)) ==
-                                today) ??
-                            false)
-                        .toList() ??
+                    ?.where((action) =>
+                action.instances?.any((instance) =>
+                DateUtils.dateOnly(
+                    instance.date ?? DateTime(2000)) ==
+                    today) ??
+                    false)
+                    .toList() ??
                     [];
-                final sortedActions = [...actions]..sort((a, b) {
-                    if (a.datedInstance()?.status == ActionStatus.completed &&
-                        b.datedInstance()?.status == ActionStatus.completed) {
+                final sortedActions = [...actions]
+                  ..sort((a, b) {
+                    if (a
+                        .datedInstance()
+                        ?.status == ActionStatus.completed &&
+                        b
+                            .datedInstance()
+                            ?.status == ActionStatus.completed) {
                       return 0;
                     }
-                    return a.datedInstance()?.status == ActionStatus.completed
+                    return a
+                        .datedInstance()
+                        ?.status == ActionStatus.completed
                         ? 1
                         : -1;
                   });
@@ -109,7 +117,9 @@ class HomeScreen extends HookConsumerWidget {
                       ...sortedActions.map((e) {
                         return ManageableActionCard(
                           action: e,
-                          instanceId: e.datedInstance()?.id,
+                          instanceId: e
+                              .datedInstance()
+                              ?.id,
                         );
                       }),
                       SizedBox(
@@ -144,7 +154,7 @@ Slot getCurrentSlot({
   // If current time is after the last slot, return the last one
   if (dailySchedule.isNotEmpty) {
     final lastSlotTime =
-        getDateTimeWithTime(dailySchedule.last.startTime ?? '');
+    getDateTimeWithTime(dailySchedule.last.startTime ?? '');
     if (currentTime.isAfter(lastSlotTime)) {
       return dailySchedule.last.timeSlot ?? Slot.night;
     }
