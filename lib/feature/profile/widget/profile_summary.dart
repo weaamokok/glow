@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:auto_route/auto_route.dart';
+import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,87 +51,114 @@ class UserProfileSummaryScreen extends HookConsumerWidget {
     }, []);
 
     return Scaffold(
-        body: SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          spacing: 16,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 10,
-            ),
-            _ImageGrid(images.value),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Job',
-                        style: TextStyle(color: Colors.grey, fontSize: 17),
-                      ),
-                      Text(personalInfo.value?.workoutSchedule ?? ''),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'BirthDate',
-                        style: TextStyle(color: Colors.grey, fontSize: 17),
-                      ),
-                      Text(personalInfo.value?.birthDate ?? ''),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Gender',
-                        style: TextStyle(color: Colors.grey, fontSize: 17),
-                      ),
-                      Text(personalInfo.value?.gender ?? ''),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Activity Level',
-                        style: TextStyle(color: Colors.grey, fontSize: 17),
-                      ),
-                      Text(personalInfo.value?.activity ?? ''),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Hobbies',
-                        style: TextStyle(color: Colors.grey, fontSize: 17),
-                      ),
-                      Text(personalInfo.value?.hobbies ?? ''),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Note',
-                        style: TextStyle(color: Colors.grey, fontSize: 17),
-                      ),
-                      Text(personalInfo.value?.notes ?? ''),
-                    ],
-                  ),
-                ],
-              ),
-            )
-          ],
+        backgroundColor: Colors.grey.shade100,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          leading: InkWell(
+              onTap: () => context.maybePop(),
+              child: Icon(EneftyIcons.arrow_left_3_outline)),
         ),
-      ),
-    )
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              spacing: 5,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: 10,
+                ),
+                Container(
+                  padding: EdgeInsets.only(top: 20),
+                  color: Colors.white,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                            start: 20.0, bottom: 10, end: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Personal Details',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            InkWell(
+                                onTap: () {
+                                  context.pushRoute(
+                                      PromptCreatorStepperRoute(isEdit: true));
+                                },
+                                child: Container(
+                                  padding: EdgeInsetsDirectional.symmetric(
+                                      horizontal: 10, vertical: 8),
+                                  decoration: BoxDecoration(
+                                      color: Color(0xff6E9CA7),
+                                      borderRadius: BorderRadius.circular(20)),
+                                  child: Text(
+                                    're-generate prompt',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.white),
+                                  ),
+                                )),
+                          ],
+                        ),
+                      ),
+                      _ImageGrid(images.value),
+                      Divider(
+                        color: Color(0xff282828).withAlpha(30),
+                      ),
+                      _InfoTile(
+                        label: 'Job',
+                        value: personalInfo.value?.workoutSchedule ?? '',
+                      ),
+                      Divider(
+                        color: Color(0xff282828).withAlpha(30),
+                      ),
+                      _InfoTile(
+                        label: 'BirthDate',
+                        value: personalInfo.value?.birthDate,
+                      ),
+                      Divider(
+                        color: Color(0xff282828).withAlpha(30),
+                      ),
+                      _InfoTile(
+                        label: 'Gender',
+                        value: personalInfo.value?.gender,
+                      ),
+                      Divider(
+                        color: Color(0xff282828).withAlpha(30),
+                      ),
+                      _InfoTile(
+                        label: 'Activity Level',
+                        value: personalInfo.value?.activity,
+                      ),
+                      Divider(
+                        color: Color(0xff282828).withAlpha(30),
+                      ),
+                      _InfoTile(
+                        label: 'Hobbies',
+                        value: personalInfo.value?.hobbies,
+                      ),
+                      Divider(
+                        color: Color(0xff282828).withAlpha(30),
+                      ),
+                      _InfoTile(
+                        label: 'Note',
+                        value: personalInfo.value?.notes,
+                      ),
+                      SizedBox(
+                        height: 50,
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        )
         // userInfoAsync.when(
         //   loading: () => const Center(child: CircularProgressIndicator()),
         //   error: (e, _) => Center(child: Text(local.core.somethingWentWrong)),
@@ -183,21 +211,27 @@ class _SectionTitle extends StatelessWidget {
 }
 
 class _InfoTile extends StatelessWidget {
-  const _InfoTile(this.label, this.value, {super.key});
+  const _InfoTile({required this.label, this.value, super.key});
 
   final String label;
   final String? value;
 
   @override
   Widget build(BuildContext context) {
-    if (value == null || value!.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      padding:
+          const EdgeInsetsDirectional.symmetric(vertical: 6.0, horizontal: 20),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('$label: ', style: const TextStyle(fontWeight: FontWeight.w600)),
-          Expanded(child: Text(value!)),
+          Text(
+            label,
+            style: TextStyle(color: Color(0xff282828), fontSize: 14),
+          ),
+          Text(
+            value ?? '',
+            style: TextStyle(color: Colors.grey, fontSize: 14),
+          ),
         ],
       ),
     );
@@ -212,7 +246,7 @@ class _ImageGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsetsDirectional.only(start: 20.0),
+      padding: const EdgeInsetsDirectional.only(start: 20.0, bottom: 20),
       child: Row(
           spacing: 5,
           children: images
