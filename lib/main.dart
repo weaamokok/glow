@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glow/helper/locale_manager.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'app/app_router.dart';
 import 'core/consts.dart';
 import 'l10n/translations.g.dart';
@@ -25,7 +25,7 @@ void main() async {
   );
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends HookConsumerWidget {
   const MyApp({super.key});
 
   @override

@@ -59,3 +59,13 @@ editProfileScreen:
 calendarScreen:
   today: اليوم
   empty: لا توجد إجراءات لهذا اليوم
+
+userProfileSummary:
+  title: التفاصيل الشخصية
+  editButton: إعادة إنشاء الجدول
+  job: الوظيفة
+  birthDate: تاريخ الميلاد
+  gender: الجنس
+  activity: مستوى النشاط
+  hobbies: الهوايات
+  notes: ملاحظات

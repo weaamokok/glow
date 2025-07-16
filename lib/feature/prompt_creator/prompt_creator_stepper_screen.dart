@@ -43,7 +43,6 @@ class PromptCreatorStepperBody extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final local = context.t;
     final stepIndex = useState(0);
-    final futureImages = useFuture(ref.read(PromptCreatorDeps.getSavedImages));
 
     final promptCreator = ref.watch(PromptCreatorDeps.promptProvider.notifier);
     final images = ref.watch(PromptCreatorDeps.promptImagesProvider);
@@ -76,9 +75,7 @@ class PromptCreatorStepperBody extends HookConsumerWidget {
         });
       },
     );
-//when we receive data we pop our route
     if (result.value != null) {}
-    print('images ${futureImages.data}');
     return Stack(
       children: [
         Container(

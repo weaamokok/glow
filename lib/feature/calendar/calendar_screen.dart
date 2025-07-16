@@ -51,7 +51,6 @@ class CalendarScreen extends HookConsumerWidget {
                       .toList();
                   final actions =
                       allActions?.expand((list) => list).toList() ?? [];
-                  print('all actions $allActions data $data');
                   if (actions.isEmpty) return Text(locale.calendarScreen.empty);
                   if (data == null) return Text('noooooo');
                   return CalenderBody(
@@ -182,48 +181,50 @@ class CalenderHeader extends StatelessWidget {
           children: currentWeekDates.map(
             (e) {
               if (e == null) return SizedBox();
-              return InkWell(
-                onTap: () {
-                  selectedDay.value = e;
-                },
-                child: Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: e.day == selectedDay.value.day
-                      ? BoxDecoration(
-                          border:
-                              Border.all(color: Color(0xffB399D4), width: 1.5),
-                          borderRadius: BorderRadius.circular(24))
-                      : null,
-                  child: Column(
-                    children: [
-                      Text(
-                        DateFormat('EEEE').format(e).substring(0, 3),
-                        style: TextStyle(
-                          color: Color(0xff282828).withValues(
-                            alpha: e.day == selectedDay.value.day ? 1 : .5,
+              return Flexible(
+                child: InkWell(
+                  onTap: () {
+                    selectedDay.value = e;
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                    decoration: e.day == selectedDay.value.day
+                        ? BoxDecoration(
+                            border: Border.all(
+                                color: Color(0xffB399D4), width: 1.5),
+                            borderRadius: BorderRadius.circular(24))
+                        : null,
+                    child: Column(
+                      children: [
+                        Text(
+                          DateFormat('EEEE').format(e).substring(0, 3),
+                          style: TextStyle(
+                            color: Color(0xff282828).withValues(
+                              alpha: e.day == selectedDay.value.day ? 1 : .5,
+                            ),
                           ),
                         ),
-                      ),
-                      Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                          decoration: BoxDecoration(
-                              color: e.day == selectedDay.value.day
-                                  ? Color(0xffB399D4)
-                                  : null,
-                              borderRadius: BorderRadius.circular(18)),
-                          child: Text(
-                            '${e.day}',
-                            style: TextStyle(
+                        Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 2, vertical: 4),
+                            decoration: BoxDecoration(
                                 color: e.day == selectedDay.value.day
-                                    ? Colors.white
-                                    : Colors.black.withValues(
-                                        alpha: e.day == selectedDay.value.day
-                                            ? 1
-                                            : .3,
-                                      )),
-                          )),
-                    ],
+                                    ? Color(0xffB399D4)
+                                    : null,
+                                borderRadius: BorderRadius.circular(18)),
+                            child: Text(
+                              '${e.day}',
+                              style: TextStyle(
+                                  color: e.day == selectedDay.value.day
+                                      ? Colors.white
+                                      : Colors.black.withValues(
+                                          alpha: e.day == selectedDay.value.day
+                                              ? 1
+                                              : .3,
+                                        )),
+                            )),
+                      ],
+                    ),
                   ),
                 ),
               );

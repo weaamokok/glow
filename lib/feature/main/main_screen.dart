@@ -160,7 +160,7 @@ class BottomNavBar extends ConsumerWidget {
               : null),
       child: Container(
         decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.transparent,
             border: Border.all(width: 1, color: Color(0xff282828)),
             borderRadius: BorderRadius.circular(
               40,

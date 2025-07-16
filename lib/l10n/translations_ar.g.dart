@@ -72,6 +72,8 @@ class TranslationsAr extends Translations {
   late final _TranslationsEditProfileScreenAr editProfileScreen = _TranslationsEditProfileScreenAr._(_root);
   @override
   late final _TranslationsCalendarScreenAr calendarScreen = _TranslationsCalendarScreenAr._(_root);
+  @override
+  late final _TranslationsUserProfileSummaryAr userProfileSummary = _TranslationsUserProfileSummaryAr._(_root);
 }
 
 // Path: core
@@ -228,6 +230,33 @@ class _TranslationsCalendarScreenAr extends TranslationsCalendarScreenEn {
   String get today => 'اليوم';
   @override
   String get empty => 'لا توجد إجراءات لهذا اليوم';
+}
+
+// Path: userProfileSummary
+class _TranslationsUserProfileSummaryAr extends TranslationsUserProfileSummaryEn {
+  _TranslationsUserProfileSummaryAr._(TranslationsAr root)
+      : this._root = root,
+        super.internal(root);
+
+  final TranslationsAr _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get title => 'التفاصيل الشخصية';
+  @override
+  String get editButton => 'إعادة إنشاء الجدول';
+  @override
+  String get job => 'الوظيفة';
+  @override
+  String get birthDate => 'تاريخ الميلاد';
+  @override
+  String get gender => 'الجنس';
+  @override
+  String get activity => 'مستوى النشاط';
+  @override
+  String get hobbies => 'الهوايات';
+  @override
+  String get notes => 'ملاحظات';
 }
 
 // Path: profileScreen.updateProfileImageBottomSheet

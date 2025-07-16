@@ -58,6 +58,7 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
   late final TranslationsProfileScreenEn profileScreen = TranslationsProfileScreenEn.internal(_root);
   late final TranslationsEditProfileScreenEn editProfileScreen = TranslationsEditProfileScreenEn.internal(_root);
   late final TranslationsCalendarScreenEn calendarScreen = TranslationsCalendarScreenEn.internal(_root);
+  late final TranslationsUserProfileSummaryEn userProfileSummary = TranslationsUserProfileSummaryEn.internal(_root);
 }
 
 // Path: core
@@ -161,6 +162,23 @@ class TranslationsCalendarScreenEn {
   // Translations
   String get today => 'Today';
   String get empty => 'No actions for this day';
+}
+
+// Path: userProfileSummary
+class TranslationsUserProfileSummaryEn {
+  TranslationsUserProfileSummaryEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+  String get title => 'Personal Details';
+  String get editButton => 'Re-generate prompt';
+  String get job => 'Job';
+  String get birthDate => 'BirthDate';
+  String get gender => 'Gender';
+  String get activity => 'Activity Level';
+  String get hobbies => 'Hobbies';
+  String get notes => 'Note';
 }
 
 // Path: profileScreen.updateProfileImageBottomSheet

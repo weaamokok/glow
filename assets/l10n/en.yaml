@@ -60,3 +60,12 @@ calendarScreen:
   today: Today
   empty: No actions for this day
 
+userProfileSummary:
+  title: Personal Details
+  editButton: Re-generate prompt
+  job: Job
+  birthDate: BirthDate
+  gender: Gender
+  activity: Activity Level
+  hobbies: Hobbies
+  notes: Note

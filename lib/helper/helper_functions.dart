@@ -58,13 +58,13 @@ Future<List<File?>> uint8ListToFile(List<dynamic> imagesFromMemory) async {
 
       final file = File('${tempDir.path}/user_image_$index.jpg');
       await file.writeAsBytes(bytes);
-      print('file is $file');
+      debugPrint('file is $file');
       return file;
     }));
 
     return files;
   } catch (e) {
-    print('error: $e');
+    debugPrint('error: $e');
     return [];
   }
 }

@@ -11,7 +11,7 @@ class GlowProgressWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final schedule = ref.watch(CalendarDeps.scheduleProvider);
-
+    if (schedule.value == null) return SizedBox.shrink();
     final allInstances = schedule.value?.dailySchedule
         .expand((e) => e.actions ?? <ScheduleAction>[])
         .expand((action) => action.instances ?? <ActionInstance>[])

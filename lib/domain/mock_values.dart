@@ -1,10 +1,20 @@
 import 'package:glow/domain/user.dart';
+import 'package:glow/domain/user_info.dart';
 
 import 'glow.dart';
 
 class MockValues {
   static final user = User(name: 'wiam', bio: "stay focused, 'Don't quit.");
-
+  static final mockUserInfo = UserPersonalInfo(
+    job: 'doctor',
+    gender: 'female',
+    activity: ' mostly standing',
+    workoutSchedule: '3 days a week or less',
+    birthDate: '1998-01-01',
+    hobbies: 'nothing',
+    goals: 'to be prettier',
+    notes: '..',
+  );
   static final mockGlowSchedule = GlowSchedule(
     dailySchedule: [
       DailyTimeSlot(
@@ -122,4 +132,5 @@ class MockValues {
       ),
     ],
   );
+
 }

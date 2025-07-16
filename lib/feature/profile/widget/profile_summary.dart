@@ -3,7 +3,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glow/domain/user_info.dart';
 import 'package:glow/feature/prompt_creator/prompt_creator_deps.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -17,11 +16,10 @@ class UserProfileSummaryScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final local = context.t;
+    final local = context.t.userProfileSummary;
     final images = useState<List<File?>>([]);
     final personalInfo = useState<UserPersonalInfo?>(null);
-    final userInfoAsync =
-        useFuture(ref.read(PromptCreatorDeps.getPersonalInformation));
+    useFuture(ref.read(PromptCreatorDeps.getPersonalInformation));
     useEffect(() {
       Future.microtask(() async {
         try {
@@ -30,9 +28,7 @@ class UserProfileSummaryScreen extends HookConsumerWidget {
               await ref.read(PromptCreatorDeps.getPersonalInformation);
           List<File?> temp = [];
           if (ima.isNotEmpty) {
-            print('not empty $ima');
-            final files = await uint8ListToFile(ima ?? []);
-            print('files $files');
+            final files = await uint8ListToFile(ima);
             // Remove nulls in case of conversion failures
             for (int i = 0; i < files.length; i++) {
               final file = files[i];
@@ -80,7 +76,7 @@ class UserProfileSummaryScreen extends HookConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Personal Details',
+                              local.title,
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -97,7 +93,7 @@ class UserProfileSummaryScreen extends HookConsumerWidget {
                                       color: Color(0xff6E9CA7),
                                       borderRadius: BorderRadius.circular(20)),
                                   child: Text(
-                                    're-generate prompt',
+                                    local.editButton,
                                     style: TextStyle(
                                         fontWeight: FontWeight.w500,
                                         color: Colors.white),
@@ -111,42 +107,42 @@ class UserProfileSummaryScreen extends HookConsumerWidget {
                         color: Color(0xff282828).withAlpha(30),
                       ),
                       _InfoTile(
-                        label: 'Job',
+                        label: local.job,
                         value: personalInfo.value?.workoutSchedule ?? '',
                       ),
                       Divider(
                         color: Color(0xff282828).withAlpha(30),
                       ),
                       _InfoTile(
-                        label: 'BirthDate',
+                        label: local.birthDate,
                         value: personalInfo.value?.birthDate,
                       ),
                       Divider(
                         color: Color(0xff282828).withAlpha(30),
                       ),
                       _InfoTile(
-                        label: 'Gender',
+                        label: local.gender,
                         value: personalInfo.value?.gender,
                       ),
                       Divider(
                         color: Color(0xff282828).withAlpha(30),
                       ),
                       _InfoTile(
-                        label: 'Activity Level',
+                        label: local.activity,
                         value: personalInfo.value?.activity,
                       ),
                       Divider(
                         color: Color(0xff282828).withAlpha(30),
                       ),
                       _InfoTile(
-                        label: 'Hobbies',
+                        label: local.hobbies,
                         value: personalInfo.value?.hobbies,
                       ),
                       Divider(
                         color: Color(0xff282828).withAlpha(30),
                       ),
                       _InfoTile(
-                        label: 'Note',
+                        label: local.notes,
                         value: personalInfo.value?.notes,
                       ),
                       SizedBox(
@@ -158,60 +154,12 @@ class UserProfileSummaryScreen extends HookConsumerWidget {
               ],
             ),
           ),
-        )
-        // userInfoAsync.when(
-        //   loading: () => const Center(child: CircularProgressIndicator()),
-        //   error: (e, _) => Center(child: Text(local.core.somethingWentWrong)),
-        //   data: (info) {
-        //     if (info == null) {
-        //       return Center(child: Text('local.core.noDataFound'));
-        //     }
-        //
-        //     return ListView(
-        //       padding: const EdgeInsets.all(20),
-        //       children: [
-        //         _SectionTitle(local.imagePickerStep.description),
-        //         _ImageGrid(userImages),
-        //         const SizedBox(height: 16),
-        //         _SectionTitle(local.personalInfoStep.k3DayAWeekOrMore),
-        //         _InfoTile(local.personalInfoStep.workLabel, info.job),
-        //         _InfoTile(local.personalInfoStep.birthDateLabel, info.birthDate),
-        //         _InfoTile(local.personalInfoStep.sexLabel, info.gender),
-        //         _InfoTile(local.personalInfoStep.activityLabel, info.activity),
-        //         _InfoTile(local.personalInfoStep.workoutScheduleLabel,
-        //             info.workoutSchedule),
-        //         _InfoTile(local.personalInfoStep.hobbiesLabel, info.hobbies),
-        //         const SizedBox(height: 16),
-        //         _SectionTitle(local.personalGoalStep.goalsLabel),
-        //         _InfoTile(local.personalGoalStep.goalsLabel, info.goals),
-        //         _InfoTile(local.personalGoalStep.notesLabel, info.notes),
-        //       ],
-        //     );
-        //   },
-        // ),
-        );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.title, {super.key});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: Theme.of(context)
-          .textTheme
-          .titleLarge
-          ?.copyWith(fontWeight: FontWeight.bold),
-    );
+        ));
   }
 }
 
 class _InfoTile extends StatelessWidget {
-  const _InfoTile({required this.label, this.value, super.key});
+  const _InfoTile({required this.label, this.value});
 
   final String label;
   final String? value;
@@ -239,7 +187,7 @@ class _InfoTile extends StatelessWidget {
 }
 
 class _ImageGrid extends StatelessWidget {
-  const _ImageGrid(this.images, {super.key});
+  const _ImageGrid(this.images);
 
   final List<File?> images;
 
@@ -268,36 +216,6 @@ class _ImageGrid extends StatelessWidget {
                 ),
               )
               .toList()),
-    );
-    SizedBox(
-      height: 100,
-      width: double.infinity,
-      child: Padding(
-        padding: const EdgeInsetsDirectional.only(start: 20.0),
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: images.length,
-          scrollDirection: Axis.horizontal,
-          itemBuilder: (_, index) {
-            final file = images[index];
-            return Container(
-              height: 100,
-              width: 100,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.grey.shade100,
-              ),
-              child: file != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.file(file, fit: BoxFit.cover),
-                    )
-                  : const Icon(Icons.image_not_supported, size: 40),
-            );
-          },
-        ),
-      ),
     );
   }
 }

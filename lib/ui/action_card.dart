@@ -68,21 +68,17 @@ class ActionCard extends StatelessWidget {
                       action.category ?? '',
                       style: TextStyle(color: Colors.grey, fontSize: 12),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          action.title ?? '',
-                          style: TextStyle(
-                              decoration: currentActionInstance ==
-                                      ActionStatus.completed
+                    Text(
+                      action.title ?? '',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          decoration:
+                              currentActionInstance == ActionStatus.completed
                                   ? TextDecoration.lineThrough
                                   : null,
-                              fontSize: 14,
-                              color: Color(0xff282828),
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                          fontSize: 14,
+                          color: Color(0xff282828),
+                          fontWeight: FontWeight.bold),
                     ),
                     SizedBox(
                       height: 4,

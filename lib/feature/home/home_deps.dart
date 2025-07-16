@@ -39,13 +39,9 @@ class HomeDeps {
       final dio = Dio();
       final userLocation = await ref.watch(LocationHandler.getCurtrentLocation);
 
-      final response = await dio
-          .get(
-            'https://api.openweathermap.org/data/2.5/weather?lat=${userLocation.latitude}&lon=${userLocation.longitude}&units=metric&appid=2b9775e044c23e8dfa57eec0d27c6626',
-          )
-          .whenComplete(
-            () => print('request was sent'),
-          );
+      final response = await dio.get(
+        'https://api.openweathermap.org/data/2.5/weather?lat=${userLocation.latitude}&lon=${userLocation.longitude}&units=metric&appid=2b9775e044c23e8dfa57eec0d27c6626',
+      );
 
       final weatherData = response.data;
       return WeatherResponse.fromJson(weatherData as Map<String, dynamic>);

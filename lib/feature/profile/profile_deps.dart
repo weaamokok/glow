@@ -44,7 +44,6 @@ class ProfileDeps {
             .get(
               await LocalDB.db,
             ) as Map<String, dynamic>?;
-        print('user from provider $user');
 
         if (user == null) return null;
         return User.fromMap(user);

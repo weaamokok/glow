@@ -20,7 +20,6 @@ class UserProfileWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    print('user n  $user');
     final locale = context.t;
     final userImage =
         user?.fileImage != null ? File(user?.fileImage ?? '') : null;

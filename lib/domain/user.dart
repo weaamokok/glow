@@ -15,12 +15,12 @@ class User {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is User &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          name == other.name &&
-          bio == other.bio &&
-          fileImage == other.fileImage);
+          (other is User &&
+              runtimeType == other.runtimeType &&
+              id == other.id &&
+              name == other.name &&
+              bio == other.bio &&
+              fileImage == other.fileImage);
 
   @override
   int get hashCode =>
@@ -28,11 +28,11 @@ class User {
 
   @override
   String toString() {
-    return 'User{' +
-        ' id: $id,' +
-        ' name: $name,' +
-        ' bio: $bio,' +
-        ' file_image: $fileImage,' +
+    return 'User{'
+        ' id: $id,'
+        ' name: $name,'
+        ' bio: $bio,'
+        ' file_image: $fileImage,'
         '}';
   }
 
@@ -52,10 +52,10 @@ class User {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': this.id,
-      'name': this.name,
-      'bio': this.bio,
-      'file_image': this.fileImage,
+      'id': id,
+      'name': name,
+      'bio': bio,
+      'file_image': fileImage,
     };
   }
 
