@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:glow/helper/locale_manager.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:upgrader/upgrader.dart';
 import 'app/app_router.dart';
 import 'core/consts.dart';
 import 'l10n/translations.g.dart';
@@ -20,7 +21,7 @@ void main() async {
 
   runApp(
     ProviderScope(
-      child: MyApp(), // no longer wrapped with TranslationProvider here
+      child: MyApp(),
     ),
   );
 }
@@ -36,11 +37,15 @@ class MyApp extends HookConsumerWidget {
       // 👈 wrap here, so it rebuilds when locale changes
       child: MaterialApp.router(
         title: 'Glower',
+        debugShowCheckedModeBanner: false,
         routerConfig: appRouter.config(),
         supportedLocales: Consts.supportedLocale,
         locale: currentLocale,
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
         theme: _buildTheme(),
+        builder: (context, child) => UpgradeAlert(
+          child: child,
+        ),
       ),
     );
   }

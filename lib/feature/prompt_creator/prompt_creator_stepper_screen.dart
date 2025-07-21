@@ -9,6 +9,7 @@ import 'package:glow/feature/prompt_creator/personal_goals_step.dart';
 import 'package:glow/feature/prompt_creator/personal_info_step.dart';
 import 'package:glow/feature/prompt_creator/prompt_creator_deps.dart';
 import 'package:glow/l10n/translations.g.dart';
+import 'package:glow/ui/close_button.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
@@ -24,7 +25,7 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
       appBar: AppBar(
         leading: InkWell(
             onTap: () => context.maybePop(),
-            child: Icon(EneftyIcons.arrow_left_3_outline)),
+            child: Icon(EneftyIcons.arrow_left_4_outline)),
       ),
       resizeToAvoidBottomInset: false,
       body: PromptCreatorStepperBody(
@@ -80,16 +81,17 @@ class PromptCreatorStepperBody extends HookConsumerWidget {
       children: [
         Container(
             color: Colors.white,
-            padding: EdgeInsetsDirectional.only(end: 10, top: 16),
+            padding: EdgeInsetsDirectional.only(end: 10, top: 30),
             width: double.infinity,
             child: Column(
               children: [
-                if (!context.router.canNavigateBack) BackButton(),
+                if (!context.router.canNavigateBack)
+                  CloseOrBackButton(isClose: !isEdit),
                 SizedBox(
                   height: 10,
                 ),
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: 28, vertical: 20),
+                  margin: EdgeInsets.symmetric(horizontal: 28, vertical: 10),
                   width: double.infinity,
                   child: LinearProgressIndicator(
                     value: (stepIndex.value + 1) / steps.length,
@@ -101,7 +103,7 @@ class PromptCreatorStepperBody extends HookConsumerWidget {
                   ),
                 ),
                 SizedBox(
-                  height: 14,
+                  height: 10,
                 ),
                 steps[stepIndex.value.toInt()],
                 Expanded(
