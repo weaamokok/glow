@@ -19,11 +19,7 @@ void main() async {
   );
   await LocaleSettings.setLocale(locale);
 
-  runApp(
-    ProviderScope(
-      child: MyApp(),
-    ),
-  );
+  runApp(ProviderScope(child: MyApp()));
 }
 
 class MyApp extends HookConsumerWidget {
@@ -43,9 +39,7 @@ class MyApp extends HookConsumerWidget {
         locale: currentLocale,
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
         theme: _buildTheme(),
-        builder: (context, child) => UpgradeAlert(
-          child: child,
-        ),
+        builder: (context, child) => UpgradeAlert(child: child),
       ),
     );
   }
@@ -62,12 +56,26 @@ class MyApp extends HookConsumerWidget {
         onPrimaryContainer: const Color(0xff102B33),
         secondaryContainer: const Color(0xfffff0dd),
         onSecondaryContainer: const Color(0xff3A545B),
-        surface: const Color(0xfffdfdfd),
+        surface: const Color(0xffFBFAF6),
         onSurface: const Color(0xff1C2B2F),
         error: const Color(0xffD32F2F),
         onError: Colors.white,
       ),
       fontFamily: 'Roboto',
+
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ButtonStyle(
+          elevation: WidgetStatePropertyAll(0),
+          backgroundColor: WidgetStatePropertyAll(Color(0xff73B79B)),
+          foregroundColor: WidgetStatePropertyAll(Colors.white),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadiusGeometry.circular(15),
+              side: BorderSide(color: Color(0xff282828)),
+            ),
+          ),
+        ),
+      ),
       inputDecorationTheme: InputDecorationTheme(
         labelStyle: TextStyle(color: const Color(0xff282828).withAlpha(60)),
         hintStyle: TextStyle(color: const Color(0xff323a3f).withAlpha(180)),
@@ -78,11 +86,15 @@ class MyApp extends HookConsumerWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(
-              color: const Color(0xff282828).withAlpha(128), width: 0.4),
+            color: const Color(0xff282828).withAlpha(128),
+            width: 0.4,
+          ),
           borderRadius: BorderRadius.circular(12.0),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 10,
+        ),
       ),
     );
   }

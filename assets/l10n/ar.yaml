@@ -3,10 +3,17 @@ core:
   somethingWentWrong: حدث خطأ ما
   confirm: تأكيد
   continue: استمرار
-  cancel: إلغاء
+  cancel: إلغاءdart
   done: تم
-homeScreenTitle: التالي في جدولك..⏭️
-emptyActionList: لا توجد مهام حالياً. استمتع بوقتك!
+homeScreen:
+  title: التالي في جدولك..⏭️
+  emptyScheduleMessage: لا توجد خطط بعد — هذه فرصتك لصنع ساعتك الذهبية ✨
+  emptyScheduleTitle: أنت المتحكم في وقتك
+  emptyScheduleSubTitle: خطط لشيء يضيء حياتك ✨
+  createScheduleCta: ابدأ رحلة التوهج
+
+
+noActionsToday: !لا مهام اليوم — خذ لحظة للتوهج والراحة أو يمكنك إضافة مهمة لنفسك
 loginSubtitle: سجل الدخول  على حسابك
 userNameFieldHint: اسم المستخدم
 passwordFieldHint: كلمة المرور
@@ -58,7 +65,7 @@ editProfileScreen:
   updateError: تعذر التحديث
 calendarScreen:
   today: اليوم
-  empty: لا توجد إجراءات لهذا اليوم
+  empty: أيام من الانجازات في انتظارك! هل أنت مستعد لتغيير حياتك؟
 
 userProfileSummary:
   title: التفاصيل الشخصية

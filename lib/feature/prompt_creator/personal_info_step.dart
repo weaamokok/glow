@@ -85,356 +85,191 @@ class PersonalInfoStep extends HookConsumerWidget {
     }
 
     return Padding(
-      padding:
-          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: SingleChildScrollView(
-          padding: EdgeInsetsDirectional.symmetric(),
-          child: ReactiveForm(
-            formGroup: form,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                ReactiveTextField<String>(
-                  formControlName: 'work',
-                  decoration: InputDecoration(labelText: userInfoLoc.workLabel),
-                  onChanged: (_) => promptPersonalInfo
-                      .updateJob(form.control('work').value ?? ''),
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                ReactiveTextField<String>(
-                  formControlName: 'birthdate',
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    labelText: userInfoLoc.birthDateLabel,
-                    suffixIcon: Icon(
-                      EneftyIcons.calendar_2_outline,
-                      color: const Color(0xff4C7B8B).withAlpha(70),
-                    ),
-                  ),
-                  onTap: (control) async {
-                    final date = await showDatePicker(
-                      context: context,
-                      firstDate: DateTime(1920),
-                      lastDate: DateTime(2017),
-                    );
-                    if (date != null) {
-                      final formatted = formatDate(date);
-                      control.value = formatted;
-                      promptPersonalInfo.updateBirthDate(formatted);
-                    }
-                  },
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                ReactiveTextField<String>(
-                  formControlName: 'gender',
-                  readOnly: true,
-                  decoration: InputDecoration(labelText: userInfoLoc.sexLabel),
-                  onTap: (control) {
-                    showAdaptiveDialog(
-                      context: context,
-                      builder: (context) => Dialog(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15)),
-                        child: IntrinsicHeight(
-                          child: Column(
-                            children: [
-                              ListTile(
-                                title: Text(userInfoLoc.male),
-                                leading: Radio<Gender>(
-                                  value: Gender.male,
-                                  groupValue: selectedOption.value,
-                                  onChanged: (value) {
-                                    if (value == null) return;
-                                    selectedOption.value = value;
-                                    final val = 'male';
-                                    control.value = val;
-                                    promptPersonalInfo.updateGender(val);
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                              ),
-                              ListTile(
-                                title: Text(userInfoLoc.female),
-                                leading: Radio<Gender>(
-                                  value: Gender.female,
-                                  groupValue: selectedOption.value,
-                                  onChanged: (value) {
-                                    if (value == null) return;
-                                    selectedOption.value = value;
-                                    final val = 'female';
-                                    control.value = val;
-                                    promptPersonalInfo.updateGender(val);
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                ReactiveTextField<String>(
-                  formControlName: 'activity',
-                  readOnly: true,
-                  decoration:
-                      InputDecoration(labelText: userInfoLoc.activityLabel),
-                  onTap: (control) {
-                    showAdaptiveDialog(
-                      context: context,
-                      builder: (context) => Dialog(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15)),
-                        child: IntrinsicHeight(
-                          child: Column(
-                            children: activityType.map((e) {
-                              return ListTile(
-                                title: Text(e),
-                                leading: Radio<String>(
-                                  value: e,
-                                  groupValue: selectedActivity.value,
-                                  onChanged: (value) {
-                                    if (value == null) return;
-                                    selectedActivity.value = value;
-                                    control.value = value;
-                                    promptPersonalInfo.updateActivity(value);
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                ReactiveTextField<String>(
-                  formControlName: 'workout',
-                  readOnly: true,
-                  decoration: InputDecoration(
-                      labelText: userInfoLoc.workoutScheduleLabel),
-                  onTap: (control) {
-                    showAdaptiveDialog(
-                      context: context,
-                      builder: (context) => Dialog(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15)),
-                        child: IntrinsicHeight(
-                          child: Column(
-                            children: workOutSchedule.map((e) {
-                              return ListTile(
-                                onTap: () {
-                                  selectedSchedule.value = e;
-                                  control.value = e;
-                                  promptPersonalInfo.updateWorkoutSchedule(e);
-                                  Navigator.pop(context);
-                                },
-                                title: Text(e),
-                                leading: Radio<String>(
-                                  value: e,
-                                  groupValue: selectedSchedule.value,
-                                  onChanged: (value) {},
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                ReactiveTextField<String>(
-                  formControlName: 'hobbies',
-                  decoration:
-                      InputDecoration(labelText: userInfoLoc.hobbiesLabel),
-                  onChanged: (control) =>
-                      promptPersonalInfo.updateHobbies(control.value ?? ''),
-                ),
-                SizedBox(
-                  height: 150,
-                )
-              ],
-            ),
-          )),
-    );
-
-    Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28.0),
+      padding: EdgeInsets.only(
+        right: 28,
+        left: 28,
+        //  bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: ReactiveForm(
         formGroup: form,
-        child: Column(
-          spacing: 15,
-          children: [
-            ReactiveTextField<String>(
-              formControlName: 'work',
-              decoration: InputDecoration(labelText: userInfoLoc.workLabel),
-              onChanged: (_) => promptPersonalInfo
-                  .updateJob(form.control('work').value ?? ''),
-            ),
-            ReactiveTextField<String>(
-              formControlName: 'birthdate',
-              readOnly: true,
-              decoration: InputDecoration(
-                labelText: userInfoLoc.birthDateLabel,
-                suffixIcon: Icon(
-                  EneftyIcons.calendar_2_outline,
-                  color: const Color(0xff4C7B8B).withAlpha(70),
-                ),
+        child: SizedBox(
+          height: 500,
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              ReactiveTextField<String>(
+                formControlName: 'work',
+                decoration: InputDecoration(labelText: userInfoLoc.workLabel),
+                onChanged: (_) => promptPersonalInfo
+                    .updateJob(form.control('work').value ?? ''),
               ),
-              onTap: (control) async {
-                final date = await showDatePicker(
-                  context: context,
-                  firstDate: DateTime(1920),
-                  lastDate: DateTime(2017),
-                );
-                if (date != null) {
-                  final formatted = formatDate(date);
-                  control.value = formatted;
-                  promptPersonalInfo.updateBirthDate(formatted);
-                }
-              },
-            ),
-            ReactiveTextField<String>(
-              formControlName: 'gender',
-              readOnly: true,
-              decoration: InputDecoration(labelText: userInfoLoc.sexLabel),
-              onTap: (control) {
-                showAdaptiveDialog(
-                  context: context,
-                  builder: (context) => Dialog(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15)),
-                    child: IntrinsicHeight(
-                      child: Column(
-                        children: [
-                          ListTile(
-                            title: Text(userInfoLoc.male),
-                            leading: Radio<Gender>(
-                              value: Gender.male,
-                              groupValue: selectedOption.value,
-                              onChanged: (value) {
-                                if (value == null) return;
-                                selectedOption.value = value;
-                                final val = 'male';
-                                control.value = val;
-                                promptPersonalInfo.updateGender(val);
-                                Navigator.pop(context);
-                              },
+              SizedBox(
+                height: 10,
+              ),
+              ReactiveTextField<String>(
+                formControlName: 'birthdate',
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: userInfoLoc.birthDateLabel,
+                  suffixIcon: Icon(
+                    EneftyIcons.calendar_2_outline,
+                    color: const Color(0xff4C7B8B).withAlpha(70),
+                  ),
+                ),
+                onTap: (control) async {
+                  final date = await showDatePicker(
+                    context: context,
+                    firstDate: DateTime(1920),
+                    lastDate: DateTime(2017),
+                  );
+                  if (date != null) {
+                    final formatted = formatDate(date);
+                    control.value = formatted;
+                    promptPersonalInfo.updateBirthDate(formatted);
+                  }
+                },
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              ReactiveTextField<String>(
+                formControlName: 'gender',
+                readOnly: true,
+                decoration: InputDecoration(labelText: userInfoLoc.sexLabel),
+                onTap: (control) {
+                  showAdaptiveDialog(
+                    context: context,
+                    builder: (context) => Dialog(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
+                      child: IntrinsicHeight(
+                        child: Column(
+                          children: [
+                            ListTile(
+                              title: Text(userInfoLoc.male),
+                              leading: Radio<Gender>(
+                                value: Gender.male,
+                                groupValue: selectedOption.value,
+                                onChanged: (value) {
+                                  if (value == null) return;
+                                  selectedOption.value = value;
+                                  final val = 'male';
+                                  control.value = val;
+                                  promptPersonalInfo.updateGender(val);
+                                  Navigator.pop(context);
+                                },
+                              ),
                             ),
-                          ),
-                          ListTile(
-                            title: Text(userInfoLoc.female),
-                            leading: Radio<Gender>(
-                              value: Gender.female,
-                              groupValue: selectedOption.value,
-                              onChanged: (value) {
-                                if (value == null) return;
-                                selectedOption.value = value;
-                                final val = 'female';
-                                control.value = val;
-                                promptPersonalInfo.updateGender(val);
-                                Navigator.pop(context);
-                              },
+                            ListTile(
+                              title: Text(userInfoLoc.female),
+                              leading: Radio<Gender>(
+                                value: Gender.female,
+                                groupValue: selectedOption.value,
+                                onChanged: (value) {
+                                  if (value == null) return;
+                                  selectedOption.value = value;
+                                  final val = 'female';
+                                  control.value = val;
+                                  promptPersonalInfo.updateGender(val);
+                                  Navigator.pop(context);
+                                },
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-            ReactiveTextField<String>(
-              formControlName: 'activity',
-              readOnly: true,
-              decoration: InputDecoration(labelText: userInfoLoc.activityLabel),
-              onTap: (control) {
-                showAdaptiveDialog(
-                  context: context,
-                  builder: (context) => Dialog(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15)),
-                    child: IntrinsicHeight(
-                      child: Column(
-                        children: activityType.map((e) {
-                          return ListTile(
-                            title: Text(e),
-                            leading: Radio<String>(
-                              value: e,
-                              groupValue: selectedActivity.value,
-                              onChanged: (value) {
-                                if (value == null) return;
-                                selectedActivity.value = value;
-                                control.value = value;
-                                promptPersonalInfo.updateActivity(value);
+                  );
+                },
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              ReactiveTextField<String>(
+                formControlName: 'activity',
+                readOnly: true,
+                decoration:
+                    InputDecoration(labelText: userInfoLoc.activityLabel),
+                onTap: (control) {
+                  showAdaptiveDialog(
+                    context: context,
+                    builder: (context) => Dialog(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
+                      child: IntrinsicHeight(
+                        child: Column(
+                          children: activityType.map((e) {
+                            return ListTile(
+                              title: Text(e),
+                              leading: Radio<String>(
+                                value: e,
+                                groupValue: selectedActivity.value,
+                                onChanged: (value) {
+                                  if (value == null) return;
+                                  selectedActivity.value = value;
+                                  control.value = value;
+                                  promptPersonalInfo.updateActivity(value);
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              ReactiveTextField<String>(
+                formControlName: 'workout',
+                readOnly: true,
+                decoration: InputDecoration(
+                    labelText: userInfoLoc.workoutScheduleLabel),
+                onTap: (control) {
+                  showAdaptiveDialog(
+                    context: context,
+                    builder: (context) => Dialog(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
+                      child: IntrinsicHeight(
+                        child: Column(
+                          children: workOutSchedule.map((e) {
+                            return ListTile(
+                              onTap: () {
+                                selectedSchedule.value = e;
+                                control.value = e;
+                                promptPersonalInfo.updateWorkoutSchedule(e);
                                 Navigator.pop(context);
                               },
-                            ),
-                          );
-                        }).toList(),
+                              title: Text(e),
+                              leading: Radio<String>(
+                                value: e,
+                                groupValue: selectedSchedule.value,
+                                onChanged: (value) {},
+                              ),
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-            ReactiveTextField<String>(
-              formControlName: 'workout',
-              readOnly: true,
-              decoration:
-                  InputDecoration(labelText: userInfoLoc.workoutScheduleLabel),
-              onTap: (control) {
-                showAdaptiveDialog(
-                  context: context,
-                  builder: (context) => Dialog(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15)),
-                    child: IntrinsicHeight(
-                      child: Column(
-                        children: workOutSchedule.map((e) {
-                          return ListTile(
-                            onTap: () {
-                              selectedSchedule.value = e;
-                              control.value = e;
-                              promptPersonalInfo.updateWorkoutSchedule(e);
-                              Navigator.pop(context);
-                            },
-                            title: Text(e),
-                            leading: Radio<String>(
-                              value: e,
-                              groupValue: selectedSchedule.value,
-                              onChanged: (value) {},
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-            ReactiveTextField<String>(
-              formControlName: 'hobbies',
-              decoration: InputDecoration(labelText: userInfoLoc.hobbiesLabel),
-              onChanged: (control) =>
-                  promptPersonalInfo.updateHobbies(control.value ?? ''),
-            ),
-          ],
+                  );
+                },
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              ReactiveTextField<String>(
+                formControlName: 'hobbies',
+                decoration:
+                    InputDecoration(labelText: userInfoLoc.hobbiesLabel),
+                onChanged: (control) =>
+                    promptPersonalInfo.updateHobbies(control.value ?? ''),
+              ),
+            ],
+          ),
         ),
       ),
     );

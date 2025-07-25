@@ -13,20 +13,21 @@ import 'translations.g.dart';
 class TranslationsAr extends Translations {
   /// You can call this constructor and build your own translation instance of this locale.
   /// Constructing via the enum [AppLocale.build] is preferred.
-  TranslationsAr(
-      {Map<String, Node>? overrides,
-      PluralResolver? cardinalResolver,
-      PluralResolver? ordinalResolver,
-      TranslationMetadata<AppLocale, Translations>? meta})
-      : assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-        $meta = meta ??
-            TranslationMetadata(
-              locale: AppLocale.ar,
-              overrides: overrides ?? {},
-              cardinalResolver: cardinalResolver,
-              ordinalResolver: ordinalResolver,
-            ),
-        super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver);
+  TranslationsAr({
+    Map<String, Node>? overrides,
+    PluralResolver? cardinalResolver,
+    PluralResolver? ordinalResolver,
+    TranslationMetadata<AppLocale, Translations>? meta,
+  }) : assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
+       $meta =
+           meta ??
+           TranslationMetadata(
+             locale: AppLocale.ar,
+             overrides: overrides ?? {},
+             cardinalResolver: cardinalResolver,
+             ordinalResolver: ordinalResolver,
+           ),
+       super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver);
 
   /// Metadata for the translations of <ar>.
   @override
@@ -43,9 +44,9 @@ class TranslationsAr extends Translations {
   @override
   late final _TranslationsCoreAr core = _TranslationsCoreAr._(_root);
   @override
-  String get homeScreenTitle => 'التالي في جدولك..⏭️';
+  late final _TranslationsHomeScreenAr homeScreen = _TranslationsHomeScreenAr._(_root);
   @override
-  String get emptyActionList => 'لا توجد مهام حالياً. استمتع بوقتك!';
+  String get noActionsToday => 'لا مهام اليوم — خذ لحظة للتوهج والراحة أو يمكنك إضافة مهمة لنفسك';
   @override
   String get loginSubtitle => 'سجل الدخول  على حسابك';
   @override
@@ -78,9 +79,7 @@ class TranslationsAr extends Translations {
 
 // Path: core
 class _TranslationsCoreAr extends TranslationsCoreEn {
-  _TranslationsCoreAr._(TranslationsAr root)
-      : this._root = root,
-        super.internal(root);
+  _TranslationsCoreAr._(TranslationsAr root) : this._root = root, super.internal(root);
 
   final TranslationsAr _root; // ignore: unused_field
 
@@ -92,16 +91,33 @@ class _TranslationsCoreAr extends TranslationsCoreEn {
   @override
   String get kContinue => 'استمرار';
   @override
-  String get cancel => 'إلغاء';
+  String get cancel => 'إلغاءdart';
   @override
   String get done => 'تم';
 }
 
+// Path: homeScreen
+class _TranslationsHomeScreenAr extends TranslationsHomeScreenEn {
+  _TranslationsHomeScreenAr._(TranslationsAr root) : this._root = root, super.internal(root);
+
+  final TranslationsAr _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get title => 'التالي في جدولك..⏭️';
+  @override
+  String get emptyScheduleMessage => 'لا توجد خطط بعد — هذه فرصتك لصنع ساعتك الذهبية ✨';
+  @override
+  String get emptyScheduleTitle => 'أنت المتحكم في وقتك';
+  @override
+  String get emptyScheduleSubTitle => 'خطط لشيء يضيء حياتك ✨';
+  @override
+  String get createScheduleCta => 'ابدأ رحلة التوهج';
+}
+
 // Path: personalInfoStep
 class _TranslationsPersonalInfoStepAr extends TranslationsPersonalInfoStepEn {
-  _TranslationsPersonalInfoStepAr._(TranslationsAr root)
-      : this._root = root,
-        super.internal(root);
+  _TranslationsPersonalInfoStepAr._(TranslationsAr root) : this._root = root, super.internal(root);
 
   final TranslationsAr _root; // ignore: unused_field
 
@@ -138,9 +154,7 @@ class _TranslationsPersonalInfoStepAr extends TranslationsPersonalInfoStepEn {
 
 // Path: personalGoalStep
 class _TranslationsPersonalGoalStepAr extends TranslationsPersonalGoalStepEn {
-  _TranslationsPersonalGoalStepAr._(TranslationsAr root)
-      : this._root = root,
-        super.internal(root);
+  _TranslationsPersonalGoalStepAr._(TranslationsAr root) : this._root = root, super.internal(root);
 
   final TranslationsAr _root; // ignore: unused_field
 
@@ -153,9 +167,7 @@ class _TranslationsPersonalGoalStepAr extends TranslationsPersonalGoalStepEn {
 
 // Path: imagePickerStep
 class _TranslationsImagePickerStepAr extends TranslationsImagePickerStepEn {
-  _TranslationsImagePickerStepAr._(TranslationsAr root)
-      : this._root = root,
-        super.internal(root);
+  _TranslationsImagePickerStepAr._(TranslationsAr root) : this._root = root, super.internal(root);
 
   final TranslationsAr _root; // ignore: unused_field
 
@@ -178,9 +190,7 @@ class _TranslationsImagePickerStepAr extends TranslationsImagePickerStepEn {
 
 // Path: profileScreen
 class _TranslationsProfileScreenAr extends TranslationsProfileScreenEn {
-  _TranslationsProfileScreenAr._(TranslationsAr root)
-      : this._root = root,
-        super.internal(root);
+  _TranslationsProfileScreenAr._(TranslationsAr root) : this._root = root, super.internal(root);
 
   final TranslationsAr _root; // ignore: unused_field
 
@@ -200,9 +210,7 @@ class _TranslationsProfileScreenAr extends TranslationsProfileScreenEn {
 
 // Path: editProfileScreen
 class _TranslationsEditProfileScreenAr extends TranslationsEditProfileScreenEn {
-  _TranslationsEditProfileScreenAr._(TranslationsAr root)
-      : this._root = root,
-        super.internal(root);
+  _TranslationsEditProfileScreenAr._(TranslationsAr root) : this._root = root, super.internal(root);
 
   final TranslationsAr _root; // ignore: unused_field
 
@@ -219,9 +227,7 @@ class _TranslationsEditProfileScreenAr extends TranslationsEditProfileScreenEn {
 
 // Path: calendarScreen
 class _TranslationsCalendarScreenAr extends TranslationsCalendarScreenEn {
-  _TranslationsCalendarScreenAr._(TranslationsAr root)
-      : this._root = root,
-        super.internal(root);
+  _TranslationsCalendarScreenAr._(TranslationsAr root) : this._root = root, super.internal(root);
 
   final TranslationsAr _root; // ignore: unused_field
 
@@ -229,14 +235,12 @@ class _TranslationsCalendarScreenAr extends TranslationsCalendarScreenEn {
   @override
   String get today => 'اليوم';
   @override
-  String get empty => 'لا توجد إجراءات لهذا اليوم';
+  String get empty => 'أيام من الانجازات في انتظارك! هل أنت مستعد لتغيير حياتك؟';
 }
 
 // Path: userProfileSummary
 class _TranslationsUserProfileSummaryAr extends TranslationsUserProfileSummaryEn {
-  _TranslationsUserProfileSummaryAr._(TranslationsAr root)
-      : this._root = root,
-        super.internal(root);
+  _TranslationsUserProfileSummaryAr._(TranslationsAr root) : this._root = root, super.internal(root);
 
   final TranslationsAr _root; // ignore: unused_field
 
@@ -261,9 +265,7 @@ class _TranslationsUserProfileSummaryAr extends TranslationsUserProfileSummaryEn
 
 // Path: profileScreen.updateProfileImageBottomSheet
 class _TranslationsProfileScreenUpdateProfileImageBottomSheetAr extends TranslationsProfileScreenUpdateProfileImageBottomSheetEn {
-  _TranslationsProfileScreenUpdateProfileImageBottomSheetAr._(TranslationsAr root)
-      : this._root = root,
-        super.internal(root);
+  _TranslationsProfileScreenUpdateProfileImageBottomSheetAr._(TranslationsAr root) : this._root = root, super.internal(root);
 
   final TranslationsAr _root; // ignore: unused_field
 
@@ -274,9 +276,7 @@ class _TranslationsProfileScreenUpdateProfileImageBottomSheetAr extends Translat
 
 // Path: profileScreen.languageBottomSheet
 class _TranslationsProfileScreenLanguageBottomSheetAr extends TranslationsProfileScreenLanguageBottomSheetEn {
-  _TranslationsProfileScreenLanguageBottomSheetAr._(TranslationsAr root)
-      : this._root = root,
-        super.internal(root);
+  _TranslationsProfileScreenLanguageBottomSheetAr._(TranslationsAr root) : this._root = root, super.internal(root);
 
   final TranslationsAr _root; // ignore: unused_field
 

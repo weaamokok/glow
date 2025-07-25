@@ -4,9 +4,9 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 2
-/// Strings: 118 (59 per locale)
+/// Strings: 126 (63 per locale)
 ///
-/// Built on 2025-07-15 at 21:24 UTC
+/// Built on 2025-07-25 at 19:23 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint, unused_import
@@ -44,47 +44,23 @@ enum AppLocale with BaseAppLocale<AppLocale, Translations> {
   final String? countryCode;
 
   @override
-  Future<Translations> build({
-    Map<String, Node>? overrides,
-    PluralResolver? cardinalResolver,
-    PluralResolver? ordinalResolver,
-  }) async {
+  Future<Translations> build({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver}) async {
     switch (this) {
       case AppLocale.en:
-        return TranslationsEn(
-          overrides: overrides,
-          cardinalResolver: cardinalResolver,
-          ordinalResolver: ordinalResolver,
-        );
+        return TranslationsEn(overrides: overrides, cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver);
       case AppLocale.ar:
         await l_ar.loadLibrary();
-        return l_ar.TranslationsAr(
-          overrides: overrides,
-          cardinalResolver: cardinalResolver,
-          ordinalResolver: ordinalResolver,
-        );
+        return l_ar.TranslationsAr(overrides: overrides, cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver);
     }
   }
 
   @override
-  Translations buildSync({
-    Map<String, Node>? overrides,
-    PluralResolver? cardinalResolver,
-    PluralResolver? ordinalResolver,
-  }) {
+  Translations buildSync({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver}) {
     switch (this) {
       case AppLocale.en:
-        return TranslationsEn(
-          overrides: overrides,
-          cardinalResolver: cardinalResolver,
-          ordinalResolver: ordinalResolver,
-        );
+        return TranslationsEn(overrides: overrides, cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver);
       case AppLocale.ar:
-        return l_ar.TranslationsAr(
-          overrides: overrides,
-          cardinalResolver: cardinalResolver,
-          ordinalResolver: ordinalResolver,
-        );
+        return l_ar.TranslationsAr(overrides: overrides, cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver);
     }
   }
 
@@ -133,11 +109,7 @@ extension BuildContextTranslationsExtension on BuildContext {
 
 /// Manages all translation instances and the current locale
 class LocaleSettings extends BaseFlutterLocaleSettings<AppLocale, Translations> {
-  LocaleSettings._()
-      : super(
-          utils: AppLocaleUtils.instance,
-          lazy: true,
-        );
+  LocaleSettings._() : super(utils: AppLocaleUtils.instance, lazy: true);
 
   static final instance = LocaleSettings._();
 
@@ -150,12 +122,7 @@ class LocaleSettings extends BaseFlutterLocaleSettings<AppLocale, Translations> 
       instance.setLocaleRaw(rawLocale, listenToDeviceLocale: listenToDeviceLocale);
   static Future<AppLocale> useDeviceLocale() => instance.useDeviceLocale();
   static Future<void> setPluralResolver({String? language, AppLocale? locale, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver}) =>
-      instance.setPluralResolver(
-        language: language,
-        locale: locale,
-        cardinalResolver: cardinalResolver,
-        ordinalResolver: ordinalResolver,
-      );
+      instance.setPluralResolver(language: language, locale: locale, cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver);
 
   // synchronous versions
   static AppLocale setLocaleSync(AppLocale locale, {bool? listenToDeviceLocale = false}) =>
@@ -164,21 +131,12 @@ class LocaleSettings extends BaseFlutterLocaleSettings<AppLocale, Translations> 
       instance.setLocaleRawSync(rawLocale, listenToDeviceLocale: listenToDeviceLocale);
   static AppLocale useDeviceLocaleSync() => instance.useDeviceLocaleSync();
   static void setPluralResolverSync({String? language, AppLocale? locale, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver}) =>
-      instance.setPluralResolverSync(
-        language: language,
-        locale: locale,
-        cardinalResolver: cardinalResolver,
-        ordinalResolver: ordinalResolver,
-      );
+      instance.setPluralResolverSync(language: language, locale: locale, cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver);
 }
 
 /// Provides utility functions without any side effects.
 class AppLocaleUtils extends BaseAppLocaleUtils<AppLocale, Translations> {
-  AppLocaleUtils._()
-      : super(
-          baseLocale: AppLocale.en,
-          locales: AppLocale.values,
-        );
+  AppLocaleUtils._() : super(baseLocale: AppLocale.en, locales: AppLocale.values);
 
   static final instance = AppLocaleUtils._();
 
@@ -222,8 +180,5 @@ mixin PageData2 {
     return result;
   }
 
-  List<Object?> get $fields => [
-        title,
-        content,
-      ];
+  List<Object?> get $fields => [title, content];
 }

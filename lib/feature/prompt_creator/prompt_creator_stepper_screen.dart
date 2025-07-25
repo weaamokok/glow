@@ -27,9 +27,11 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
             onTap: () => context.maybePop(),
             child: Icon(EneftyIcons.arrow_left_4_outline)),
       ),
-      resizeToAvoidBottomInset: false,
-      body: PromptCreatorStepperBody(
-        isEdit: isEdit,
+      resizeToAvoidBottomInset: true,
+      body: SingleChildScrollView(
+        child: PromptCreatorStepperBody(
+          isEdit: isEdit,
+        ),
       ),
     );
   }
@@ -228,6 +230,9 @@ class PromptCreatorStepperBody extends HookConsumerWidget {
               ),
             ),
           ),
+        SizedBox(
+          height: 500,
+        )
       ],
     );
   }

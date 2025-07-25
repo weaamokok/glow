@@ -60,8 +60,6 @@ class MainScreen extends ConsumerWidget {
                 ))
             : null,
       ),
-      //   bottomNavigationBar: BottomNavBar(indexBottomNavbar: indexBottomNavbar),
-      //bottomSheet: indexBottomNavbar == 0 ? GlowProgressWidget() : null,
       body: const GlowBottomNavBar(),
     );
   }

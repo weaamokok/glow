@@ -10,6 +10,8 @@ import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../domain/mock_values.dart';
 import '../../helper/helper_functions.dart';
+import '../../resources/resources.dart';
+import '../home/home_screen.dart';
 import 'calendar_deps.dart';
 
 class CalendarScreen extends HookConsumerWidget {
@@ -32,44 +34,68 @@ class CalendarScreen extends HookConsumerWidget {
           SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18.0),
-            child: Consumer(builder: (context, ref, widget) {
-              return glowSchedule.when(
-                data: (data) {
-                  final allActions = data?.dailySchedule
-                      .map(
-                        (e) =>
-                            e.actions
-                                ?.where(
-                                  (action) =>
-                                      action.datedInstance(
-                                          date: selectedDay.value) !=
-                                      null,
-                                )
-                                .toList() ??
-                            <ScheduleAction>[],
-                      )
-                      .toList();
-                  final actions =
-                      allActions?.expand((list) => list).toList() ?? [];
-                  if (actions.isEmpty) return Text(locale.calendarScreen.empty);
-                  if (data == null) return Text('noooooo');
-                  return CalenderBody(
-                    schedule: data,
-                    selectedDay: selectedDay,
+            child: Consumer(
+              builder: (context, ref, widget) {
+                if (glowSchedule.value == null) {
+                  return GUserWidget(
+                    imagePath: Images.emptyCalender,
+                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 25),
+                    label: locale.calendarScreen.empty,
+                    child: ElevatedButton(
+                      onPressed: () {},
+
+                      child: Text(locale.homeScreen.createScheduleCta),
+                    ),
                   );
-                },
-                error: (error, stack) =>
-                    Text('${locale.core.somethingWentWrong}: $error'),
-                loading: () => Skeletonizer(
+                }
+                return glowSchedule.when(
+                  data: (data) {
+                    final allActions = data?.dailySchedule
+                        .map(
+                          (e) =>
+                              e.actions
+                                  ?.where(
+                                    (action) =>
+                                        action.datedInstance(
+                                          date: selectedDay.value,
+                                        ) !=
+                                        null,
+                                  )
+                                  .toList() ??
+                              <ScheduleAction>[],
+                        )
+                        .toList();
+                    final actions =
+                        allActions?.expand((list) => list).toList() ?? [];
+                    if (actions.isEmpty) {
+                      return GUserWidget(
+                        imagePath: Images.emptyActions,
+                        label: locale.noActionsToday,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 25,
+                        ),
+                      );
+                    }
+                    if (data == null) return Text('noooooo');
+                    return CalenderBody(
+                      schedule: data,
+                      selectedDay: selectedDay,
+                    );
+                  },
+                  error: (error, stack) =>
+                      Text('${locale.core.somethingWentWrong}: $error'),
+                  loading: () => Skeletonizer(
                     child: CalenderBody(
-                        schedule: MockValues.mockGlowSchedule,
-                        selectedDay: selectedDay)),
-              );
-            }),
+                      schedule: MockValues.mockGlowSchedule,
+                      selectedDay: selectedDay,
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.1,
-          )
+          SizedBox(height: MediaQuery.of(context).size.height * 0.1),
         ],
       ),
     );
@@ -77,8 +103,11 @@ class CalendarScreen extends HookConsumerWidget {
 }
 
 class CalenderBody extends StatelessWidget {
-  const CalenderBody(
-      {super.key, required this.schedule, required this.selectedDay});
+  const CalenderBody({
+    super.key,
+    required this.schedule,
+    required this.selectedDay,
+  });
 
   final GlowSchedule schedule;
   final ValueNotifier<DateTime> selectedDay;
@@ -91,60 +120,60 @@ class CalenderBody extends StatelessWidget {
       decoration: BoxDecoration(),
       child: Column(
         spacing: 14,
-        children: schedule.dailySchedule.map(
-          (dailyTime) {
-            if ((dailyTime.actions ?? []).isEmpty) {
-              return Text(locale.calendarScreen.empty);
-            }
-            return Column(
-              spacing: 10,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: EdgeInsetsDirectional.symmetric(horizontal: 8),
-                  child: Row(
-                    spacing: 10,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          dailyTime.timeSlot?.name ?? '',
-                          style: TextStyle(color: Colors.grey),
+        children: schedule.dailySchedule.map((dailyTime) {
+          if ((dailyTime.actions ?? []).isEmpty) {
+            return Text(locale.calendarScreen.empty);
+          }
+          return Column(
+            spacing: 10,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsetsDirectional.symmetric(horizontal: 8),
+                child: Row(
+                  spacing: 10,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        dailyTime.timeSlot?.name ?? '',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                    Flexible(
+                      flex: 4,
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: Divider(
+                          height: 2,
+                          color: Color(0xff282828).withValues(alpha: .1),
                         ),
                       ),
-                      Flexible(
-                        flex: 4,
-                        child: SizedBox(
-                            width: double.infinity,
-                            child: Divider(
-                                height: 2,
-                                color:
-                                    Color(0xff282828).withValues(alpha: .1))),
-                      )
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                Column(
-                    spacing: 5,
-                    children: dailyTime.actions?.map(
-                          (e) {
-                            ActionInstance? actionCurrentInstance =
-                                e.datedInstance(date: selectedDay.value);
+              ),
+              Column(
+                spacing: 5,
+                children:
+                    dailyTime.actions?.map((e) {
+                      ActionInstance? actionCurrentInstance = e.datedInstance(
+                        date: selectedDay.value,
+                      );
 
-                            if (actionCurrentInstance != null) {
-                              return ManageableActionCard(
-                                instanceId: actionCurrentInstance.id,
-                                action: e,
-                              );
-                            } else {
-                              return SizedBox();
-                            }
-                          },
-                        ).toList() ??
-                        []),
-              ],
-            );
-          },
-        ).toList(),
+                      if (actionCurrentInstance != null) {
+                        return ManageableActionCard(
+                          instanceId: actionCurrentInstance.id,
+                          action: e,
+                        );
+                      } else {
+                        return SizedBox();
+                      }
+                    }).toList() ??
+                    [],
+              ),
+            ],
+          );
+        }).toList(),
       ),
     );
   }
@@ -178,59 +207,65 @@ class CalenderHeader extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: MediaQuery.of(context).size.width * .04,
-          children: currentWeekDates.map(
-            (e) {
-              if (e == null) return SizedBox();
-              return Flexible(
-                child: InkWell(
-                  onTap: () {
-                    selectedDay.value = e;
-                  },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                    decoration: e.day == selectedDay.value.day
-                        ? BoxDecoration(
-                            border: Border.all(
-                                color: Color(0xffB399D4), width: 1.5),
-                            borderRadius: BorderRadius.circular(24))
-                        : null,
-                    child: Column(
-                      children: [
-                        Text(
-                          DateFormat('EEEE').format(e).substring(0, 3),
-                          style: TextStyle(
-                            color: Color(0xff282828).withValues(
-                              alpha: e.day == selectedDay.value.day ? 1 : .5,
-                            ),
+          children: currentWeekDates.map((e) {
+            if (e == null) return SizedBox();
+            return Flexible(
+              child: InkWell(
+                onTap: () {
+                  selectedDay.value = e;
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                  decoration: e.day == selectedDay.value.day
+                      ? BoxDecoration(
+                          border: Border.all(
+                            color: Color(0xffB399D4),
+                            width: 1.5,
+                          ),
+                          borderRadius: BorderRadius.circular(24),
+                        )
+                      : null,
+                  child: Column(
+                    children: [
+                      Text(
+                        DateFormat('EEEE').format(e).substring(0, 3),
+                        style: TextStyle(
+                          color: Color(0xff282828).withValues(
+                            alpha: e.day == selectedDay.value.day ? 1 : .5,
                           ),
                         ),
-                        Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 2, vertical: 4),
-                            decoration: BoxDecoration(
-                                color: e.day == selectedDay.value.day
-                                    ? Color(0xffB399D4)
-                                    : null,
-                                borderRadius: BorderRadius.circular(18)),
-                            child: Text(
-                              '${e.day}',
-                              style: TextStyle(
-                                  color: e.day == selectedDay.value.day
-                                      ? Colors.white
-                                      : Colors.black.withValues(
-                                          alpha: e.day == selectedDay.value.day
-                                              ? 1
-                                              : .3,
-                                        )),
-                            )),
-                      ],
-                    ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 2,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: e.day == selectedDay.value.day
+                              ? Color(0xffB399D4)
+                              : null,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Text(
+                          '${e.day}',
+                          style: TextStyle(
+                            color: e.day == selectedDay.value.day
+                                ? Colors.white
+                                : Colors.black.withValues(
+                                    alpha: e.day == selectedDay.value.day
+                                        ? 1
+                                        : .3,
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              );
-            },
-          ).toList(),
-        )
+              ),
+            );
+          }).toList(),
+        ),
       ],
     );
   }

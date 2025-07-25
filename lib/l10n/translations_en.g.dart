@@ -18,19 +18,20 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
   /// You can call this constructor and build your own translation instance of this locale.
   /// Constructing via the enum [AppLocale.build] is preferred.
-  Translations(
-      {Map<String, Node>? overrides,
-      PluralResolver? cardinalResolver,
-      PluralResolver? ordinalResolver,
-      TranslationMetadata<AppLocale, Translations>? meta})
-      : assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
-        $meta = meta ??
-            TranslationMetadata(
-              locale: AppLocale.en,
-              overrides: overrides ?? {},
-              cardinalResolver: cardinalResolver,
-              ordinalResolver: ordinalResolver,
-            );
+  Translations({
+    Map<String, Node>? overrides,
+    PluralResolver? cardinalResolver,
+    PluralResolver? ordinalResolver,
+    TranslationMetadata<AppLocale, Translations>? meta,
+  }) : assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
+       $meta =
+           meta ??
+           TranslationMetadata(
+             locale: AppLocale.en,
+             overrides: overrides ?? {},
+             cardinalResolver: cardinalResolver,
+             ordinalResolver: ordinalResolver,
+           );
 
   /// Metadata for the translations of <en>.
   @override
@@ -43,8 +44,8 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
   // Translations
   String get locale => 'en';
   late final TranslationsCoreEn core = TranslationsCoreEn.internal(_root);
-  String get homeScreenTitle => 'Next in your Schedule.. ⏭️';
-  String get emptyActionList => 'No tasks at the moment. Enjoy your time!';
+  late final TranslationsHomeScreenEn homeScreen = TranslationsHomeScreenEn.internal(_root);
+  String get noActionsToday => 'No actions today — your glow-up pause starts here or you can add a task!';
   String get loginSubtitle => 'Login to your account';
   String get userNameFieldHint => 'Username';
   String get passwordFieldHint => 'Password';
@@ -73,6 +74,20 @@ class TranslationsCoreEn {
   String get kContinue => 'Continue';
   String get cancel => 'Cancel';
   String get done => 'Done';
+}
+
+// Path: homeScreen
+class TranslationsHomeScreenEn {
+  TranslationsHomeScreenEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+  String get title => 'Next in your Schedule.. ⏭️';
+  String get emptyScheduleMessage => 'Nothing planned yet — your golden hour is yours to create ✨';
+  String get emptyScheduleTitle => 'You’re in control of your time';
+  String get emptyScheduleSubTitle => 'Plan something to glow up your life ✨';
+  String get createScheduleCta => 'Start Your Glow Up';
 }
 
 // Path: personalInfoStep
@@ -161,7 +176,7 @@ class TranslationsCalendarScreenEn {
 
   // Translations
   String get today => 'Today';
-  String get empty => 'No actions for this day';
+  String get empty => 'Your days are wide open! ready to change your life?';
 }
 
 // Path: userProfileSummary

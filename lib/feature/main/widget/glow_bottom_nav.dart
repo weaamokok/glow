@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 
+import '../../calendar/calendar_deps.dart' show CalendarDeps;
 import '../../calendar/calendar_screen.dart';
 import '../../home/home_screen.dart';
 import '../../profile/profile_screen.dart';
@@ -15,7 +16,7 @@ class GlowBottomNavBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final indexBottomNavbar = ref.watch(indexBottomNavbarProvider);
-
+    final schedule = ref.watch(CalendarDeps.scheduleProvider);
     return BottomBar(
       hideOnScroll: true,
       scrollOpposite: false,
@@ -34,7 +35,7 @@ class GlowBottomNavBar extends ConsumerWidget {
           if (indexBottomNavbar == 0) GlowProgressWidget(),
           Stack(
             children: [
-              if (indexBottomNavbar == 0)
+              if (indexBottomNavbar == 0 && schedule.value != null)
                 Container(
                   height: 30,
                   decoration: BoxDecoration(
@@ -45,7 +46,7 @@ class GlowBottomNavBar extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Color(0xffFBFAF6),
                   border: Border.all(color: const Color(0xff282828)),
                   borderRadius: BorderRadius.circular(50),
                 ),

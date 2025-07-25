@@ -5,8 +5,13 @@ core:
   continue: Continue
   cancel: Cancel
   done: Done
-homeScreenTitle: Next in your Schedule.. ⏭️
-emptyActionList: No tasks at the moment. Enjoy your time!
+homeScreen:
+  title: Next in your Schedule.. ⏭️
+  emptyScheduleMessage: Nothing planned yet — your golden hour is yours to create ✨
+  emptyScheduleTitle: You’re in control of your time
+  emptyScheduleSubTitle: Plan something to glow up your life ✨
+  createScheduleCta: Start Your Glow Up
+noActionsToday: No actions today — your glow-up pause starts here or you can add a task!
 loginSubtitle: Login to your account
 userNameFieldHint: Username
 passwordFieldHint: Password
@@ -58,7 +63,7 @@ editProfileScreen:
   updateError: Couldn't update
 calendarScreen:
   today: Today
-  empty: No actions for this day
+  empty: Your days are wide open! ready to change your life?
 
 userProfileSummary:
   title: Personal Details
