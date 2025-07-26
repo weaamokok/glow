@@ -5,6 +5,26 @@ core:
   continue: Continue
   cancel: Cancel
   done: Done
+  requestCancelled: Request was cancelled
+  connectionTimeout: Connection timeout
+  connectionError: Connection error
+  noInternetConnection: No internet connection
+  serverMaintenance: Server under maintenance
+  networkUnreachable: Network is unreachable
+  unexpectedError: An unexpected error occurred
+  unauthorizedRequest: Unauthorized request
+  badRequest: Bad request
+  notFound: Resource not found
+  requestTimeout: Request timed out
+  internalServerError: Internal server error
+  serviceUnavailable: Service unavailable
+  sslHandshakeFailed: SSL handshake failed
+  formatException: Response was not properly formatted
+  invalidJsonStructure: Invalid JSON structure
+  typeMismatch: Type mismatch during processing
+  unknownError: Unknown error occurred
+  badCertificate: Bad SSL certificate
+
 homeScreen:
   title: Next in your Schedule.. ⏭️
   emptyScheduleMessage: Nothing planned yet — your golden hour is yours to create ✨

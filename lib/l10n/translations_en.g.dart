@@ -74,6 +74,25 @@ class TranslationsCoreEn {
   String get kContinue => 'Continue';
   String get cancel => 'Cancel';
   String get done => 'Done';
+  String get requestCancelled => 'Request was cancelled';
+  String get connectionTimeout => 'Connection timeout';
+  String get connectionError => 'Connection error';
+  String get noInternetConnection => 'No internet connection';
+  String get serverMaintenance => 'Server under maintenance';
+  String get networkUnreachable => 'Network is unreachable';
+  String get unexpectedError => 'An unexpected error occurred';
+  String get unauthorizedRequest => 'Unauthorized request';
+  String get badRequest => 'Bad request';
+  String get notFound => 'Resource not found';
+  String get requestTimeout => 'Request timed out';
+  String get internalServerError => 'Internal server error';
+  String get serviceUnavailable => 'Service unavailable';
+  String get sslHandshakeFailed => 'SSL handshake failed';
+  String get formatException => 'Response was not properly formatted';
+  String get invalidJsonStructure => 'Invalid JSON structure';
+  String get typeMismatch => 'Type mismatch during processing';
+  String get unknownError => 'Unknown error occurred';
+  String get badCertificate => 'Bad SSL certificate';
 }
 
 // Path: homeScreen

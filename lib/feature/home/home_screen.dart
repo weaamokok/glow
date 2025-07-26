@@ -15,6 +15,7 @@ class HomeScreen extends HookConsumerWidget {
 
   final ScrollController? controller;
 void promptCreator(context){
+
   WidgetsBinding.instance.addPostFrameCallback((_) {
     showModalBottomSheet(
       context: context,
@@ -23,7 +24,7 @@ void promptCreator(context){
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) =>
-      const PromptCreatorStepperBody(isEdit: false),
+      const PromptCreatorStepperScreen(isEdit: false),
     );
   });
 }

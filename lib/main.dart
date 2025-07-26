@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:glow/core/app_exception_handler.dart';
 import 'package:glow/helper/locale_manager.dart';
+import 'package:glow/resources/resources.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:upgrader/upgrader.dart';
 import 'app/app_router.dart';
@@ -18,6 +20,34 @@ void main() async {
     orElse: () => AppLocale.en,
   );
   await LocaleSettings.setLocale(locale);
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    // Optional: Log or report the error
+    debugPrint('Flutter ErrorWidget: ${details.exceptionAsString()}');
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(Images.error),
+            SizedBox(height: 10),
+            Text(
+              'Oops! Something went wrong.',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 5),
+            Text(
+              AppExceptionHandler.getMessage(details.exceptionAsString()),
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  };
 
   runApp(ProviderScope(child: MyApp()));
 }

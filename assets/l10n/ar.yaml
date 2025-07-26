@@ -5,6 +5,26 @@ core:
   continue: استمرار
   cancel: إلغاءdart
   done: تم
+  requestCancelled: تم إلغاء الطلب
+  connectionTimeout: انتهت مهلة الاتصال
+  connectionError: خطأ في الاتصال
+  noInternetConnection: لا يوجد اتصال بالإنترنت
+  serverMaintenance: الخادم قيد الصيانة
+  networkUnreachable: الشبكة غير متاحة
+  unexpectedError: حدث خطأ غير متوقع
+  unauthorizedRequest: طلب غير مصرح به
+  badRequest: طلب غير صالح
+  notFound: لم يتم العثور على المورد
+  requestTimeout: انتهت مهلة الطلب
+  internalServerError: خطأ في الخادم الداخلي
+  serviceUnavailable: الخدمة غير متوفرة
+  sslHandshakeFailed: فشل في التحقق من شهادة SSL
+  formatException: تنسيق الاستجابة غير صحيح
+  invalidJsonStructure: هيكل JSON غير صالح
+  typeMismatch: عدم تطابق في النوع أثناء المعالجة
+  unknownError: خطأ غير معروف
+  badCertificate: شهادة SSL غير صالحة
+
 homeScreen:
   title: التالي في جدولك..⏭️
   emptyScheduleMessage: لا توجد خطط بعد — هذه فرصتك لصنع ساعتك الذهبية ✨

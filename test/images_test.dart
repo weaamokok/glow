@@ -8,6 +8,7 @@ void main() {
     expect(File(Images.emptyActions).existsSync(), isTrue);
     expect(File(Images.emptyCalender).existsSync(), isTrue);
     expect(File(Images.emptySchdule).existsSync(), isTrue);
+    expect(File(Images.error).existsSync(), isTrue);
     expect(File(Images.logo).existsSync(), isTrue);
   });
 }

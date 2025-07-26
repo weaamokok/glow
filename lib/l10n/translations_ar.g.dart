@@ -94,6 +94,44 @@ class _TranslationsCoreAr extends TranslationsCoreEn {
   String get cancel => 'إلغاءdart';
   @override
   String get done => 'تم';
+  @override
+  String get requestCancelled => 'تم إلغاء الطلب';
+  @override
+  String get connectionTimeout => 'انتهت مهلة الاتصال';
+  @override
+  String get connectionError => 'خطأ في الاتصال';
+  @override
+  String get noInternetConnection => 'لا يوجد اتصال بالإنترنت';
+  @override
+  String get serverMaintenance => 'الخادم قيد الصيانة';
+  @override
+  String get networkUnreachable => 'الشبكة غير متاحة';
+  @override
+  String get unexpectedError => 'حدث خطأ غير متوقع';
+  @override
+  String get unauthorizedRequest => 'طلب غير مصرح به';
+  @override
+  String get badRequest => 'طلب غير صالح';
+  @override
+  String get notFound => 'لم يتم العثور على المورد';
+  @override
+  String get requestTimeout => 'انتهت مهلة الطلب';
+  @override
+  String get internalServerError => 'خطأ في الخادم الداخلي';
+  @override
+  String get serviceUnavailable => 'الخدمة غير متوفرة';
+  @override
+  String get sslHandshakeFailed => 'فشل في التحقق من شهادة SSL';
+  @override
+  String get formatException => 'تنسيق الاستجابة غير صحيح';
+  @override
+  String get invalidJsonStructure => 'هيكل JSON غير صالح';
+  @override
+  String get typeMismatch => 'عدم تطابق في النوع أثناء المعالجة';
+  @override
+  String get unknownError => 'خطأ غير معروف';
+  @override
+  String get badCertificate => 'شهادة SSL غير صالحة';
 }
 
 // Path: homeScreen
