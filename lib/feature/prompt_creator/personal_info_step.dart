@@ -29,8 +29,9 @@ class PersonalInfoStep extends HookConsumerWidget {
       userInfoLoc.k3DayAWeekOrMore,
     ];
 
-    final promptPersonalInfo =
-        ref.read(PromptCreatorDeps.promptPersonalInfoProvider.notifier);
+    final promptPersonalInfo = ref.read(
+      PromptCreatorDeps.promptPersonalInfoProvider.notifier,
+    );
 
     final selectedOption = useValueNotifier<Gender>(Gender.male);
     final selectedActivity = useValueNotifier<String>(activityType.first);
@@ -43,8 +44,9 @@ class PersonalInfoStep extends HookConsumerWidget {
       if (isEdit) {
         Future.microtask(() async {
           try {
-            final saved =
-                await ref.read(PromptCreatorDeps.getPersonalInformation);
+            final saved = await ref.read(
+              PromptCreatorDeps.getPersonalInformation,
+            );
             personalInfo.value = saved;
           } catch (e) {
             debugPrint('Failed to load personal info: $e');
@@ -71,8 +73,11 @@ class PersonalInfoStep extends HookConsumerWidget {
     });
 
     // Set default selected values for UI state
-    selectedOption.value =
-        info?.gender == 'female' ? Gender.female : Gender.male;
+    if (info?.gender != null) {
+      selectedOption.value = info?.gender == 'female'
+          ? Gender.female
+          : Gender.male;
+    }
     if (activityType.contains(info?.activity)) {
       selectedActivity.value = info!.activity!;
     }
@@ -100,12 +105,11 @@ class PersonalInfoStep extends HookConsumerWidget {
               ReactiveTextField<String>(
                 formControlName: 'work',
                 decoration: InputDecoration(labelText: userInfoLoc.workLabel),
-                onChanged: (_) => promptPersonalInfo
-                    .updateJob(form.control('work').value ?? ''),
+                onChanged: (_) => promptPersonalInfo.updateJob(
+                  form.control('work').value ?? '',
+                ),
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               ReactiveTextField<String>(
                 formControlName: 'birthdate',
                 readOnly: true,
@@ -129,9 +133,7 @@ class PersonalInfoStep extends HookConsumerWidget {
                   }
                 },
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               ReactiveTextField<String>(
                 formControlName: 'gender',
                 readOnly: true,
@@ -141,76 +143,72 @@ class PersonalInfoStep extends HookConsumerWidget {
                     context: context,
                     builder: (context) => Dialog(
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15)),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
                       child: IntrinsicHeight(
                         child: Column(
-                          children: [
-                            ListTile(
-                              title: Text(userInfoLoc.male),
-                              leading: Radio<Gender>(
-                                value: Gender.male,
-                                groupValue: selectedOption.value,
-                                onChanged: (value) {
-                                  if (value == null) return;
-                                  selectedOption.value = value;
-                                  final val = 'male';
-                                  control.value = val;
-                                  promptPersonalInfo.updateGender(val);
-                                  Navigator.pop(context);
-                                },
+                          children: Gender.values.map((e) {
+                            onTap(Gender? value) {
+                              if (value == null) return;
+                              selectedOption.value = value;
+                              final val = value.name;
+                              control.value = val;
+                              promptPersonalInfo.updateGender(val);
+                              Navigator.pop(context);
+                            }
+
+                            return ListTile(
+                              onTap: () => onTap(e),
+                              title: Text(
+                                e == Gender.male
+                                    ? userInfoLoc.male
+                                    : userInfoLoc.female,
                               ),
-                            ),
-                            ListTile(
-                              title: Text(userInfoLoc.female),
                               leading: Radio<Gender>(
-                                value: Gender.female,
+                                value: e,
                                 groupValue: selectedOption.value,
-                                onChanged: (value) {
-                                  if (value == null) return;
-                                  selectedOption.value = value;
-                                  final val = 'female';
-                                  control.value = val;
-                                  promptPersonalInfo.updateGender(val);
-                                  Navigator.pop(context);
-                                },
+                                onChanged: (_) => onTap(e),
                               ),
-                            ),
-                          ],
+                            );
+                          }).toList(),
                         ),
                       ),
                     ),
                   );
                 },
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               ReactiveTextField<String>(
                 formControlName: 'activity',
                 readOnly: true,
-                decoration:
-                    InputDecoration(labelText: userInfoLoc.activityLabel),
+                decoration: InputDecoration(
+                  labelText: userInfoLoc.activityLabel,
+                ),
                 onTap: (control) {
+                  onTap(value) {
+                    if (value == null) return;
+                    selectedActivity.value = value;
+                    control.value = value;
+                    promptPersonalInfo.updateActivity(value);
+                    Navigator.pop(context);
+                  }
+
                   showAdaptiveDialog(
                     context: context,
                     builder: (context) => Dialog(
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15)),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
                       child: IntrinsicHeight(
                         child: Column(
                           children: activityType.map((e) {
                             return ListTile(
+                              onTap: () => onTap(e),
                               title: Text(e),
                               leading: Radio<String>(
                                 value: e,
                                 groupValue: selectedActivity.value,
-                                onChanged: (value) {
-                                  if (value == null) return;
-                                  selectedActivity.value = value;
-                                  control.value = value;
-                                  promptPersonalInfo.updateActivity(value);
-                                  Navigator.pop(context);
-                                },
+                                onChanged: onTap,
                               ),
                             );
                           }).toList(),
@@ -220,35 +218,37 @@ class PersonalInfoStep extends HookConsumerWidget {
                   );
                 },
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               ReactiveTextField<String>(
                 formControlName: 'workout',
                 readOnly: true,
                 decoration: InputDecoration(
-                    labelText: userInfoLoc.workoutScheduleLabel),
+                  labelText: userInfoLoc.workoutScheduleLabel,
+                ),
                 onTap: (control) {
+                  onTap(e) {
+                    selectedSchedule.value = e;
+                    control.value = e;
+                    promptPersonalInfo.updateWorkoutSchedule(e);
+                    Navigator.pop(context);
+                  }
+
                   showAdaptiveDialog(
                     context: context,
                     builder: (context) => Dialog(
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15)),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
                       child: IntrinsicHeight(
                         child: Column(
                           children: workOutSchedule.map((e) {
                             return ListTile(
-                              onTap: () {
-                                selectedSchedule.value = e;
-                                control.value = e;
-                                promptPersonalInfo.updateWorkoutSchedule(e);
-                                Navigator.pop(context);
-                              },
+                              onTap: () => onTap(e),
                               title: Text(e),
                               leading: Radio<String>(
                                 value: e,
                                 groupValue: selectedSchedule.value,
-                                onChanged: (value) {},
+                                onChanged: onTap,
                               ),
                             );
                           }).toList(),
@@ -258,13 +258,12 @@ class PersonalInfoStep extends HookConsumerWidget {
                   );
                 },
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               ReactiveTextField<String>(
                 formControlName: 'hobbies',
-                decoration:
-                    InputDecoration(labelText: userInfoLoc.hobbiesLabel),
+                decoration: InputDecoration(
+                  labelText: userInfoLoc.hobbiesLabel,
+                ),
                 onChanged: (control) =>
                     promptPersonalInfo.updateHobbies(control.value ?? ''),
               ),
