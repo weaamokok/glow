@@ -3,65 +3,15 @@ import 'dart:ui';
 import '../domain/glow.dart';
 import '../domain/user_info.dart';
 
-String scheduleCreationPrompt(
-    {required UserPersonalInfo userInfo, required Locale local}) {
+String scheduleCreationPrompt({
+  required UserPersonalInfo userInfo,
+  required Locale locale,
+}) {
   return '''
 Generate a personalized glow-up routine in JSON format optimized for calendar/schedule display. Follow these requirements:
 
 1. **Structure Requirements:**
-{
-  "daily_schedule": [
-    {
-      "time_slot": "Morning/Afternoon/Evening/Night",
-      "start_time": "HH:MM", // Estimated ideal time
-      "actions": [
-        {
-          "id": "unique-id",
-          "title": "Action name",
-          "duration": X, // Minutes
-          "category": "Physical|Skincare|Mental|etc.",
-          "startDate":"YYYY-MM-DD",
-          "endDate":"YYYY-MM-DD",
-          "frequency": ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], // Days
-          "recurring": true/false,
-          "priority": "High/Medium/Low",
-          "description": "Step-by-step instructions",
-          "prep_needed": true/false,
-          "location": "Home/Gym/Office/etc.",
-      
-        }
-      ]
-    }
-  ],
-  "weekly_goals": [
-    {
-      "id": "unique-id",
-      "title": "Goal name",
-      "type": "Social|Fitness|Skill|etc.",
-      "frequency": "Weekly/Bi-weekly",
-      "best_day": "Monday-Friday",
-      "duration": X, // Minutes
-      "time_of_day": "Morning/Afternoon/Evening"
-    }
-  ],
-  "preparation_list": [
-    {
-      "id": "unique-id",
-      "task": "Item to acquire/prepare",
-      "category": "Shopping/Research/Setup",
-      "deadline": "YYYY-MM-DD",
-      "urgency": "High/Medium/Low"
-    }
-  ],
-  "progress_milestones": [
-    {
-      "id": "unique-id",
-      "title": "Milestone name",
-      "target_date": "YYYY-MM-DD",
-      "success_metrics": ["metric1", "metric2"]
-    }
-  ]
-}
+$responseStructure
 
 2. **Key Personalization Factors:**
 - Age: ${userInfo.birthDate}
@@ -75,6 +25,7 @@ Generate a personalized glow-up routine in JSON format optimized for calendar/sc
 - Budget: {estimate_based_on_occupation}
 
 3. **Scheduling Rules:**
+- tha language of the tasks should be in ${locale.languageCode}
 - Never schedule more than 2 new habits per week
 - Minimum 30 minutes buffer between work-related and self-care activities
 - Morning routines max 45 minutes
@@ -104,7 +55,10 @@ Generate a personalized glow-up routine in JSON format optimized for calendar/sc
 Focus on creating a time-bound, executable schedule rather than general advice. The output should be ready for direct import into a digital calendar.''';
 }
 
-String actionUpdatePrompt({required ScheduleAction action}) {
+String actionUpdatePrompt({
+  required ScheduleAction action,
+  required Locale locale,
+}) {
   return '''
 Update the following action by filling missing fields based on existing schedule context.
 Return  the updated action and timeSlot in valid JSON format without any additional text or explanations.
@@ -123,6 +77,8 @@ Update rules:
 8. add slot that matches the action
 9. if action is not recurring create an action instance and set date property to ${DateTime.now()} it should look like {'id':'unique-id','date':'','status':'todo'}
 match the types in the original glow up response 
+- tha language of the tasks should be in ${locale.languageCode}
+
 the returned response should look like :
 {
 "action":${action.toJson()},//updated action
@@ -130,3 +86,58 @@ the returned response should look like :
 }
 ''';
 }
+
+final responseStructure = {
+  "daily_schedule": [
+    {
+      "time_slot": "Morning/Afternoon/Evening/Night",
+      "start_time": "HH:MM", // Estimated ideal time
+      "actions": [
+        {
+          "id": "unique-id",
+          "title": "Action name",
+          "duration": "X",
+          // Minutes
+          "category": "Physical|Skincare|Mental|etc.",
+          "startDate": "YYYY-MM-DD",
+          "endDate": "YYYY-MM-DD",
+          "frequency": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+          // Days
+          "recurring": " true/false",
+          "priority": "High/Medium/Low",
+          "description": "Step-by-step instructions",
+          "prep_needed": "true/false",
+          "location": "Home/Gym/Office/etc.",
+        },
+      ],
+    },
+  ],
+  "weekly_goals": [
+    {
+      "id": "unique-id",
+      "title": "Goal name",
+      "type": "Social|Fitness|Skill|etc.",
+      "frequency": "Weekly/Bi-weekly",
+      "best_day": "Monday-Friday",
+      "duration": "X", // Minutes
+      "time_of_day": "Morning/Afternoon/Evening",
+    },
+  ],
+  "preparation_list": [
+    {
+      "id": "unique-id",
+      "task": "Item to acquire/prepare",
+      "category": "Shopping/Research/Setup",
+      "deadline": "YYYY-MM-DD",
+      "urgency": "High/Medium/Low",
+    },
+  ],
+  "progress_milestones": [
+    {
+      "id": "unique-id",
+      "title": "Milestone name",
+      "target_date": "YYYY-MM-DD",
+      "success_metrics": ["metric1", "metric2"],
+    },
+  ],
+};

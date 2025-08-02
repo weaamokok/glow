@@ -54,6 +54,7 @@ dependencies:
   upgrader: ^11.4.0
   flutter_native_splash: ^2.4.6
   spider: ^4.2.2
+  url_launcher: ^6.3.2
 
 
 

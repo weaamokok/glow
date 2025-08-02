@@ -15,6 +15,17 @@ class MockValues {
     goals: 'to be prettier',
     notes: '..',
   );
+  static final mockUserInfoAr = UserPersonalInfo(
+    job: 'طبيبة',
+    gender: 'أنثى',
+    activity: 'الوقوف معظم الوقت',
+    workoutSchedule: '٣ أيام في الأسبوع أو أقل',
+    birthDate: '1998-01-01',
+    hobbies: 'لا شيء',
+    goals: 'أصبح أكثر جمالًا',
+    notes: '..',
+  );
+
   static final mockGlowSchedule = GlowSchedule(
     dailySchedule: [
       DailyTimeSlot(
@@ -132,5 +143,4 @@ class MockValues {
       ),
     ],
   );
-
 }

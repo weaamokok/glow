@@ -1,9 +1,27 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+
+import '../l10n/translations.g.dart';
+
+String greetingText(BuildContext context) {
+  var hour = DateTime.now().hour;
+  var random = Random();
+  int i = random.nextInt(50);
+  final homeLocale = context.t.homeScreen;
+  if (hour < 12) {
+    return homeLocale.morningGreetings[i];
+  }
+  if (hour < 17) {
+    return homeLocale.afternoonGreetings[i];
+  }
+  return homeLocale
+      .eveningGreetings[i]; //make a list and choose randomly//ask ai to generate greetings
+}
 
 String removeEmojis(String input) {
   // Regex pattern to match most emojis
@@ -18,7 +36,12 @@ DateTime getDateTimeWithTime(String timeString) {
     final parsedTime = DateFormat.Hm().parse(timeString);
 
     return DateTime(
-        now.year, now.month, now.day, parsedTime.hour, parsedTime.minute);
+      now.year,
+      now.month,
+      now.day,
+      parsedTime.hour,
+      parsedTime.minute,
+    );
   } catch (e) {
     // Fallback to current time
     return DateTime(now.year, now.month, now.day, now.hour, now.minute);
@@ -42,25 +65,26 @@ Future<List<File?>> uint8ListToFile(List<dynamic> imagesFromMemory) async {
   try {
     final tempDir = await getTemporaryDirectory();
 
-    final files =
-        await Future.wait(imagesFromMemory.asMap().entries.map((entry) async {
-      final index = entry.key;
-      final imageData = entry.value;
+    final files = await Future.wait(
+      imagesFromMemory.asMap().entries.map((entry) async {
+        final index = entry.key;
+        final imageData = entry.value;
 
-      Uint8List bytes;
-      if (imageData is Uint8List) {
-        bytes = imageData;
-      } else if (imageData is List<Object?>) {
-        bytes = Uint8List.fromList(imageData.cast<int>());
-      } else {
-        return null;
-      }
+        Uint8List bytes;
+        if (imageData is Uint8List) {
+          bytes = imageData;
+        } else if (imageData is List<Object?>) {
+          bytes = Uint8List.fromList(imageData.cast<int>());
+        } else {
+          return null;
+        }
 
-      final file = File('${tempDir.path}/user_image_$index.jpg');
-      await file.writeAsBytes(bytes);
-      debugPrint('file is $file');
-      return file;
-    }));
+        final file = File('${tempDir.path}/user_image_$index.jpg');
+        await file.writeAsBytes(bytes);
+        debugPrint('file is $file');
+        return file;
+      }),
+    );
 
     return files;
   } catch (e) {
@@ -90,28 +114,22 @@ extension LocaleMapExtension on Locale? {
 
   static Locale? fromMap(Map<String, dynamic>? map) {
     if (map == null || map['languageCode'] == null) return null;
-    return Locale(
-      map['languageCode'] as String,
-      map['countryCode'] as String?,
-    );
+    return Locale(map['languageCode'] as String, map['countryCode'] as String?);
   }
 }
 
 List<DateTime?> currentWeek() {
-  return List.generate(
-    7,
-    (index) {
-      if (index < 3) {
-        return DateTime.now().subtract(Duration(days: index + 1));
-      } else if (index == 3) {
-        return DateTime.now();
-      } else if (index > 3) {
-        return DateTime.now().add(Duration(days: 7 - index));
-      } else {
-        return null;
-      }
-    },
-  );
+  return List.generate(7, (index) {
+    if (index < 3) {
+      return DateTime.now().subtract(Duration(days: index + 1));
+    } else if (index == 3) {
+      return DateTime.now();
+    } else if (index > 3) {
+      return DateTime.now().add(Duration(days: 7 - index));
+    } else {
+      return null;
+    }
+  });
 }
 
 String getEmojiFromIconId(String? iconId) {

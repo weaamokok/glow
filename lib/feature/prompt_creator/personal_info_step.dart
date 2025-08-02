@@ -152,7 +152,9 @@ class PersonalInfoStep extends HookConsumerWidget {
                               if (value == null) return;
                               selectedOption.value = value;
                               final val = value.name;
-                              control.value = val;
+                              control.value = e == Gender.male
+                                  ? userInfoLoc.male
+                                  : userInfoLoc.female;
                               promptPersonalInfo.updateGender(val);
                               Navigator.pop(context);
                             }

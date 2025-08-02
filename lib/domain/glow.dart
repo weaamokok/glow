@@ -42,13 +42,15 @@ class GlowSchedule {
   }
 
   Slot getSlot({DateTime? time}) {
-    final currentTime =
-        getDateTimeWithTime(time != null ? time.toString() : '');
+    final currentTime = getDateTimeWithTime(
+      time != null ? time.toString() : '',
+    );
     for (int i = 0; i < dailySchedule.length; i++) {
       if (i + 1 < dailySchedule.length) {
         final slotStart = getDateTimeWithTime(dailySchedule[i].startTime ?? '');
-        final slotEnd =
-            getDateTimeWithTime(dailySchedule[i + 1].startTime ?? '');
+        final slotEnd = getDateTimeWithTime(
+          dailySchedule[i + 1].startTime ?? '',
+        );
         if (currentTime.compareTo(slotStart) == 1 &&
             currentTime.compareTo(slotEnd) == -1) {
           return dailySchedule[i].timeSlot ?? Slot.undefined;
@@ -147,7 +149,8 @@ class DailyTimeSlot {
     return DailyTimeSlot(
       timeSlot: map['time_slot'] != null
           ? TimeSlotExtension.fromJson(
-              removeEmojis(map['time_slot']).toString().toLowerCase())
+              removeEmojis(map['time_slot']).toString().toLowerCase(),
+            )
           : null,
       startTime: map['start_time'] as String,
       actions: map['actions'] != null
@@ -272,8 +275,9 @@ class ScheduleAction {
       endDate: DateTime.parse(map['endDate'] as String),
       startDate: DateTime.parse(map['startDate'] as String),
       frequency: map['frequency'] != null
-          ? List<String>.from(map['frequency']
-              as List<dynamic>) // Cast dynamic list to String list
+          ? List<String>.from(
+              map['frequency'] as List<dynamic>,
+            ) // Cast dynamic list to String list
           : null,
       recurring: map['recurring'] as bool,
       priority: map['priority'] as String,
@@ -293,14 +297,12 @@ class ScheduleAction {
   String toJson() => json.encode(toMap());
 
   ActionInstance? datedInstance({DateTime? date}) =>
-      instances?.firstWhereOrNull(
-        (element) {
-          return getDateTimeWithNoTime((date ?? DateTime.now()).toString())
-                  .difference(getDateTimeWithNoTime(element.date.toString()))
-                  .inDays ==
-              0;
-        },
-      );
+      instances?.firstWhereOrNull((element) {
+        return getDateTimeWithNoTime((date ?? DateTime.now()).toString())
+                .difference(getDateTimeWithNoTime(element.date.toString()))
+                .inDays ==
+            0;
+      });
 
   factory ScheduleAction.fromJson(String source) =>
       ScheduleAction.fromMap(json.decode(source) as Map<String, dynamic>);
@@ -352,10 +354,13 @@ class ScheduleAction {
 
     while (current.isBefore(endDate)) {
       if (frequency!.contains(_getWeekdayAbbreviation(current))) {
-        instances.add(ActionInstance(
+        instances.add(
+          ActionInstance(
             id: '${id}_${current.toString()}',
             date: current,
-            status: ActionStatus.todo));
+            status: ActionStatus.todo,
+          ),
+        );
       }
       current = current.add(const Duration(days: 1));
     }
@@ -371,7 +376,7 @@ class ScheduleAction {
       'Thu',
       'Fri',
       'Sat',
-      'Sun'
+      'Sun',
     ][date.weekday - 1];
   }
 }
@@ -517,7 +522,7 @@ class PreparationItem {
 
   factory PreparationItem.fromMap(Map<String, dynamic> map) {
     return PreparationItem(
-      id: map['id'] as String,
+      id: map['id'] != null ? map['id'] as String : null,
       task: map['task'] != null ? map['task'] as String : null,
       category: map['category'] != null ? map['category'] as String : null,
       deadline: map['deadline'] != null
@@ -601,11 +606,12 @@ class ProgressMilestone {
       targetDate: map['target_date'] != null
           ? DateTime.tryParse(map['target_date'] as String)
           : null,
-      // Parse ISO string
 
+      // Parse ISO string
       successMetrics: map['success_metrics'] != null
-          ? List<String>.from(map['success_metrics']
-              as List<dynamic>) // Cast dynamic list to String list
+          ? List<String>.from(
+              map['success_metrics'] as List<dynamic>,
+            ) // Cast dynamic list to String list
           : null,
     );
   }
@@ -639,20 +645,9 @@ class ProgressMilestone {
   }
 }
 
-enum Slot {
-  morning,
-  evening,
-  night,
-  afternoon,
-  undefined;
-}
+enum Slot { morning, evening, night, afternoon, undefined }
 
-enum ActionStatus {
-  todo,
-  inProgress,
-  completed,
-  undefined;
-}
+enum ActionStatus { todo, inProgress, completed, undefined }
 
 extension TimeSlotExtension on Slot {
   String toJson() {

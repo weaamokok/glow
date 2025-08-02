@@ -23,15 +23,17 @@ class ImagePickerStep extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final local = context.t;
     final imagePickerLocal = local.imagePickerStep;
-    final imagesNotifier =
-        ref.read(PromptCreatorDeps.promptImagesProvider.notifier);
-//to load the saved images from local storage to the screen
+    final imagesNotifier = ref.read(
+      PromptCreatorDeps.promptImagesProvider.notifier,
+    );
+    //to load the saved images from local storage to the screen
     useEffect(() {
       if (isEdit) {
         Future.microtask(() async {
           try {
-            final savedImages =
-                await ref.read(PromptCreatorDeps.getSavedImages);
+            final savedImages = await ref.read(
+              PromptCreatorDeps.getSavedImages,
+            );
             final files = await uint8ListToFile(savedImages);
 
             // Remove nulls in case of conversion failures
@@ -102,43 +104,37 @@ class ImagePickerStep extends HookConsumerWidget {
           child: Column(
             children: [
               Text(imagePickerLocal.description),
+              SizedBox(height: 12),
               SizedBox(
-                height: 12,
+                height: 300,
+                child: StaggeredGrid.count(
+                  crossAxisCount: UserImagesTypes.values.length,
+                  children: UserImagesTypes.values.map((e) {
+                    return StaggeredGridTile.count(
+                      crossAxisCellCount: e.index == 0 ? 2 : 1,
+                      mainAxisCellCount: e.index == 0 ? 2 : 1,
+                      child: ImagePickerContainer(
+                        onTap: () {
+                          onTapUploadImage(index: e.index);
+                        },
+                        width: double.infinity,
+                        height: e.index == 0 ? 300 : 120,
+                        image: promptImages[e.index],
+                        margin: EdgeInsets.all(5),
+                        text: switch (e) {
+                          UserImagesTypes.full => imagePickerLocal.photoFull,
+                          UserImagesTypes.head => imagePickerLocal.photoHead,
+                          UserImagesTypes.sideProfile =>
+                            imagePickerLocal.photoSide,
+                        },
+                        icon: Icon(EneftyIcons.camera_outline),
+                      ),
+                    );
+                  }).toList(),
+                ),
               ),
-              SizedBox(
-                  height: 300,
-                  child: StaggeredGrid.count(
-                    crossAxisCount: UserImagesTypes.values.length,
-                    children: UserImagesTypes.values.map(
-                      (e) {
-                        return StaggeredGridTile.count(
-                          crossAxisCellCount: e.index == 0 ? 2 : 1,
-                          mainAxisCellCount: e.index == 0 ? 2 : 1,
-                          child: ImagePickerContainer(
-                            onTap: () {
-                              onTapUploadImage(index: e.index);
-                            },
-                            width: double.infinity,
-                            height: e.index == 0 ? 300 : 120,
-                            image: promptImages[e.index],
-                            margin: EdgeInsets.all(5),
-                            text: switch (e) {
-                              UserImagesTypes.full =>
-                                imagePickerLocal.photoFull,
-                              UserImagesTypes.head =>
-                                imagePickerLocal.photoHead,
-                              UserImagesTypes.sideProfile =>
-                                imagePickerLocal.photoSide
-                            },
-                            icon: Icon(EneftyIcons.camera_outline),
-                          ),
-                        );
-                      },
-                    ).toList(),
-                  )),
-              SizedBox(
-                height: 10,
-              ),
+
+              SizedBox(height: 10),
             ],
           ),
         ),
@@ -150,15 +146,16 @@ class ImagePickerStep extends HookConsumerWidget {
 enum UserImagesTypes { head, sideProfile, full }
 
 class ImagePickerContainer extends StatelessWidget {
-  const ImagePickerContainer(
-      {super.key,
-      required this.width,
-      this.height,
-      this.image,
-      this.text,
-      required this.icon,
-      this.onTap,
-      this.margin});
+  const ImagePickerContainer({
+    super.key,
+    required this.width,
+    this.height,
+    this.image,
+    this.text,
+    required this.icon,
+    this.onTap,
+    this.margin,
+  });
 
   final double width;
   final double? height;
@@ -185,31 +182,31 @@ class ImagePickerContainer extends StatelessWidget {
             width: width,
             height: height,
             decoration: BoxDecoration(
-                color: Color(0xff3B6790).withValues(alpha: .2),
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.circular(15)),
+              color: Color(0xff3B6790).withValues(alpha: .2),
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(15),
+            ),
             child: image != null
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(15),
-                    child: Image.file(
-                      image!,
-                      fit: BoxFit.cover,
-                    ),
+                    child: Image.file(image!, fit: BoxFit.cover),
                   )
                 : Center(
                     child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      icon,
-                      Text(
-                        text ?? '',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        icon,
+                        Text(
+                          text ?? '',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
                             fontSize: 15,
-                            color: Color(0xff282828).withValues(alpha: .8)),
-                      ),
-                    ],
-                  )),
+                            color: Color(0xff282828).withValues(alpha: .8),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
           ),
         ),
       ),

@@ -8,6 +8,7 @@ import 'package:glow/feature/prompt_creator/personal_goals_step.dart';
 import 'package:glow/feature/prompt_creator/personal_info_step.dart';
 import 'package:glow/feature/prompt_creator/prompt_creator_deps.dart';
 import 'package:glow/l10n/translations.g.dart';
+import 'package:glow/ui/bottom_sheet_handle.dart';
 import 'package:glow/ui/close_button.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -21,7 +22,7 @@ class PromptCreatorStepperScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       body: PromptCreatorStepperBody(isEdit: isEdit),
     );
   }
@@ -75,131 +76,189 @@ class PromptCreatorStepperBody extends HookConsumerWidget {
               ),
               SizedBox(height: 10),
               steps[stepIndex.value.toInt()],
+
               Expanded(
                 child: Align(
                   alignment: Alignment.bottomCenter,
 
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Row(
-                      spacing: 10,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (stepIndex.value != 0)
-                          Expanded(
-                            child: Container(
-                              width: double.infinity,
-                              height: 44,
-                              margin: EdgeInsets.symmetric(vertical: 18),
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  stepIndex.value = stepIndex.value - 1;
-                                },
-                                style: ButtonStyle(
-                                  foregroundColor: WidgetStatePropertyAll(
-                                    Color(0xff282828),
+                        Wrap(
+                          spacing: 4,
+                          children: [
+                            Text(local.photoUseDisclaimer.disclaimerTitlePart1),
+                            InkWell(
+                              onTap: () => showModalBottomSheet(
+                                context: context,
+
+                                builder: (context) => Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0,
+                                    vertical: 15,
                                   ),
-                                  backgroundColor: WidgetStatePropertyAll(
-                                    Colors.transparent,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    spacing: 8,
+                                    children: [
+                                      Center(child: BottomSheetHandle()),
+                                      SizedBox(height: 20),
+                                      Text(
+                                        local
+                                            .photoUseDisclaimer
+                                            .disclaimerTitle,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                      Text(
+                                        local
+                                            .photoUseDisclaimer
+                                            .disclaimerDescription,
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                child: Text('back'),
                               ),
-                            ),
-                          ),
-                        Expanded(
-                          child: Container(
-                            height: 44,
-                            margin: EdgeInsets.symmetric(vertical: 18),
-
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                switch (stepIndex.value) {
-                                  case 0:
-                                    final canProceed = images.any(
-                                      (element) => element != null,
-                                    );
-                                    if (canProceed) {
-                                      ref.read(
-                                        PromptCreatorDeps.addPromptImagesProvider(
-                                          images,
-                                        ),
-                                      );
-                                      stepIndex.value = 1;
-                                    } else {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          behavior: SnackBarBehavior.floating,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                          content: Text(
-                                            local.imageUploadValidation,
-                                          ),
-                                        ),
-                                      );
-                                    }
-
-                                  case 1:
-                                    stepIndex.value = 2;
-                                  case 2:
-                                    promptCreationState.value =
-                                        AsyncValue.loading();
-                                    ref.read(
-                                      PromptCreatorDeps.addPromptPersonalInfoProvider(
-                                        personalInfo,
-                                      ),
-                                    );
-                                    final state = await promptCreator
-                                        .submitPrompt();
-                                    state.when(
-                                      loading: () =>
-                                          promptCreationState.value = state,
-                                      error: (error, stack) {
-                                        WidgetsBinding.instance
-                                            .addPostFrameCallback((_) {
-                                              promptCreationState.value = state;
-
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                SnackBar(
-                                                  behavior:
-                                                      SnackBarBehavior.floating,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          10,
-                                                        ),
-                                                  ),
-                                                  content: Text(' ${error} '),
-                                                ),
-                                              );
-                                            });
-                                      },
-                                      data: (data) {
-                                        if (data != null) {
-                                          ref.invalidate(
-                                            CalendarDeps.scheduleProvider,
-                                          );
-                                          context.router.popUntilRoot();
-                                        }
-                                      },
-                                    );
-                                }
-                              },
-
                               child: Text(
-                                stepIndex.value == 2
-                                    ? local.core.confirm
-                                    : local.core.kContinue,
-                                style: TextStyle(fontSize: 15),
+                                local.photoUseDisclaimer.disclaimerTitle,
+                                style: TextStyle(
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: Colors.blue,
+                                  color: Colors.blue,
+                                ),
                               ),
                             ),
-                          ),
+                            Text(local.photoUseDisclaimer.disclaimerTitlePart2),
+                          ],
+                        ),
+                        Row(
+                          spacing: 10,
+                          children: [
+                            if (stepIndex.value != 0)
+                              Expanded(
+                                child: Container(
+                                  width: double.infinity,
+                                  height: 44,
+                                  margin: EdgeInsets.symmetric(vertical: 18),
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      stepIndex.value = stepIndex.value - 1;
+                                    },
+                                    style: ButtonStyle(
+                                      foregroundColor: WidgetStatePropertyAll(
+                                        Color(0xff282828),
+                                      ),
+                                      backgroundColor: WidgetStatePropertyAll(
+                                        Colors.transparent,
+                                      ),
+                                    ),
+                                    child: Text(local.core.back),
+                                  ),
+                                ),
+                              ),
+                            Expanded(
+                              child: Container(
+                                height: 44,
+                                margin: EdgeInsets.symmetric(vertical: 18),
+
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    switch (stepIndex.value) {
+                                      case 0:
+                                        final canProceed = images.any(
+                                          (element) => element != null,
+                                        );
+                                        if (canProceed) {
+                                          ref.read(
+                                            PromptCreatorDeps.addPromptImagesProvider(
+                                              images,
+                                            ),
+                                          );
+                                          stepIndex.value = 1;
+                                        } else {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                              content: Text(
+                                                local.imageUploadValidation,
+                                              ),
+                                            ),
+                                          );
+                                        }
+
+                                      case 1:
+                                        stepIndex.value = 2;
+                                      case 2:
+                                        promptCreationState.value =
+                                            AsyncValue.loading();
+                                        ref.read(
+                                          PromptCreatorDeps.addPromptPersonalInfoProvider(
+                                            personalInfo,
+                                          ),
+                                        );
+                                        final state = await promptCreator
+                                            .submitPrompt();
+                                        state.when(
+                                          loading: () =>
+                                              promptCreationState.value = state,
+                                          error: (error, stack) {
+                                            WidgetsBinding.instance
+                                                .addPostFrameCallback((_) {
+                                                  promptCreationState.value =
+                                                      state;
+
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      behavior: SnackBarBehavior
+                                                          .floating,
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              10,
+                                                            ),
+                                                      ),
+                                                      content: Text(' $error '),
+                                                    ),
+                                                  );
+                                                });
+                                          },
+                                          data: (data) {
+                                            if (data != null) {
+                                              ref.invalidate(
+                                                CalendarDeps.scheduleProvider,
+                                              );
+                                              context.router.popUntilRoot();
+                                            }
+                                          },
+                                        );
+                                    }
+                                  },
+
+                                  child: Text(
+                                    stepIndex.value == 2
+                                        ? local.core.confirm
+                                        : local.core.kContinue,
+                                    style: TextStyle(fontSize: 15),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

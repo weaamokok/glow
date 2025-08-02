@@ -9,6 +9,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glow/app/db_keys.dart';
 import 'package:glow/domain/glow.dart';
+import 'package:glow/domain/mock_values.dart';
 import 'package:glow/helper/prompt_functions.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:sembast/sembast.dart';
@@ -169,7 +170,7 @@ class PromptCreatorDeps {
         final locale = ref.read(LocaleManager.localeProvider);
 
         final prompt = scheduleCreationPrompt(
-          local: locale,
+          locale: locale,
           userInfo: userInfo,
         );
 
@@ -310,8 +311,10 @@ class PromptNotifier extends StateNotifier {
           StackTrace.current,
         );
       }
-      final prompt = scheduleCreationPrompt(local: locale, userInfo: userInfo);
-
+      final prompt = scheduleCreationPrompt(
+        locale: locale,
+        userInfo: MockValues.mockUserInfoAr,
+      );
       final content = [
         Content.multi([TextPart(prompt), ...imageParts]),
       ];
@@ -363,7 +366,9 @@ class PromptNotifier extends StateNotifier {
           loading: (loading) => AsyncLoading(),
         );
       }
-      final prompt = actionUpdatePrompt(action: action);
+      final locale = ref.read(LocaleManager.localeProvider);
+
+      final prompt = actionUpdatePrompt(action: action, locale: locale);
 
       final response = await ref
           .read(PromptCreatorDeps.modelProvider)

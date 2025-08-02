@@ -8,6 +8,7 @@ import 'package:glow/feature/profile/profile_deps.dart';
 import 'package:glow/feature/profile/widget/language_selection_bottom_sheet.dart';
 import 'package:glow/feature/profile/widget/user_profile_widget.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../l10n/translations.g.dart';
 
@@ -26,26 +27,17 @@ class ProfileScreen extends ConsumerWidget {
       child: Column(
         spacing: 20,
         children: [
-          SizedBox(
-            height: 5,
-          ),
+          SizedBox(height: 5),
           user.when(
-            data: (data) => UserProfileWidget(
-              user: data,
-            ),
+            data: (data) => UserProfileWidget(user: data),
             error: (error, stackTrace) => SizedBox(),
-            loading: () => Skeletonizer(
-                child: UserProfileWidget(
-              user: MockValues.user,
-            )),
+            loading: () =>
+                Skeletonizer(child: UserProfileWidget(user: MockValues.user)),
           ),
           SizedBox(
             height: 3,
             width: double.infinity,
-            child: Divider(
-              height: 5,
-              color: Color(0xff282828).withAlpha(30),
-            ),
+            child: Divider(height: 5, color: Color(0xff282828).withAlpha(30)),
           ),
           SingleChildScrollView(
             controller: controller,
@@ -69,11 +61,24 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 SettingsTile(
                   text: local.privacyPolicy,
-                  onTap: () {},
-                )
+                  onTap: () async {
+                    final uri = Uri.parse(
+                      'https://sites.google.com/view/glowr-privacy-policy',
+                    );
+
+                    if (!await launchUrl(uri)) {
+                      // ignore: use_build_context_synchronously
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(local.privacyPolicyLaunchError),
+                        ),
+                      );
+                    }
+                  },
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -91,7 +96,11 @@ class SettingsTile extends StatelessWidget {
     return ListTile(
       title: Text(text),
       onTap: onTap,
-      trailing: Icon(EneftyIcons.arrow_right_3_outline),
+      trailing: Icon(
+        context.t.locale == 'ar'
+            ? EneftyIcons.arrow_left_3_outline
+            : EneftyIcons.arrow_right_3_outline,
+      ),
     );
   }
 }

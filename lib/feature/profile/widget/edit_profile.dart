@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glow/feature/profile/profile_deps.dart';
+import 'package:glow/ui/bottom_sheet_handle.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 
 import '../../../domain/user.dart';
@@ -39,61 +40,66 @@ class EditProfile extends StatelessWidget {
               children: [
                 TextButton(
                   onPressed: () => context.maybePop(),
-                  child:
-                      Text(locale.core.cancel, style: TextStyle(fontSize: 16)),
-                ),
-                Container(
-                  height: 3,
-                  width: 20,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    color: const Color(0xff282828).withAlpha(50),
+                  child: Text(
+                    locale.core.cancel,
+                    style: TextStyle(fontSize: 16),
                   ),
                 ),
-                ReactiveFormConsumer(builder: (context, form, child) {
-                  return Consumer(builder: (context, ref, widget) {
-                    return TextButton(
-                      onPressed: form.touched
-                          ? () async {
-                              form.markAllAsTouched();
-                              if (form.valid) {
-                                final updatedProfile = await ref.read(
-                                  ProfileDeps.updateProfile(
-                                    User(
-                                      name: form.control('name').value,
-                                      bio: form.control('bio').value,
-                                    ),
-                                  ),
-                                );
+                BottomSheetHandle(),
+                ReactiveFormConsumer(
+                  builder: (context, form, child) {
+                    return Consumer(
+                      builder: (context, ref, widget) {
+                        return TextButton(
+                          onPressed: form.touched
+                              ? () async {
+                                  form.markAllAsTouched();
+                                  if (form.valid) {
+                                    final updatedProfile = await ref.read(
+                                      ProfileDeps.updateProfile(
+                                        User(
+                                          name: form.control('name').value,
+                                          bio: form.control('bio').value,
+                                        ),
+                                      ),
+                                    );
 
-                                updatedProfile.maybeMap(
-                                  orElse: () {
-                                    if (updatedProfile.hasError) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                            content: Text(locale
-                                                .editProfileScreen
-                                                .updateError)),
-                                      );
-                                    }
-                                  },
-                                  data: (data) async {
-                                    ref.invalidate(ProfileDeps.userProfile);
-                                    context.maybePop();
-                                  },
-                                );
-                              }
-                            }
-                          : null,
-                      child: Text(
-                        locale.core.done,
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
+                                    updatedProfile.maybeMap(
+                                      orElse: () {
+                                        if (updatedProfile.hasError) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                locale
+                                                    .editProfileScreen
+                                                    .updateError,
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      data: (data) async {
+                                        ref.invalidate(ProfileDeps.userProfile);
+                                        context.maybePop();
+                                      },
+                                    );
+                                  }
+                                }
+                              : null,
+                          child: Text(
+                            locale.core.done,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        );
+                      },
                     );
-                  });
-                }),
+                  },
+                ),
               ],
             ),
 
@@ -114,7 +120,8 @@ class EditProfile extends StatelessWidget {
                 form.control('name').value = newValue;
               },
               decoration: InputDecoration(
-                  labelText: locale.editProfileScreen.nameLabel),
+                labelText: locale.editProfileScreen.nameLabel,
+              ),
               textCapitalization: TextCapitalization.words,
               style: const TextStyle(backgroundColor: Colors.white),
             ),
@@ -131,14 +138,13 @@ class EditProfile extends StatelessWidget {
                 }
                 form.control('bio').value = newValue;
               },
-              decoration:
-                  InputDecoration(labelText: locale.editProfileScreen.bioLabel),
+              decoration: InputDecoration(
+                labelText: locale.editProfileScreen.bioLabel,
+              ),
               textCapitalization: TextCapitalization.sentences,
               style: const TextStyle(backgroundColor: Colors.white),
             ),
-            SizedBox(
-              height: 38,
-            )
+            SizedBox(height: 38),
           ],
         ),
       ),
